@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renekris.dev</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: #00d4ff;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        
+        .status-overview {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid #333;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .status-item {
+            text-align: center;
+            padding: 1rem;
+            background: #333;
+            border-radius: 8px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff88;
+            display: inline-block;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .service-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid #333;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-4px);
+            border-color: #00d4ff;
+        }
+        
+        .service-card h3 {
+            color: #00d4ff;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .service-status {
+            display: inline-block;
+            background: #1a4a3a;
+            color: #00ff88;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .connection-box {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 3px solid #00d4ff;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .connection-box .label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .connection-box .value {
+            color: #00d4ff;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .service-details {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        .service-details strong {
+            color: #fff;
+        }
+        
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            color: #666;
+        }
+        
+        .tech-info {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .status-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .status-link a {
+            color: #00d4ff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid #00d4ff;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .status-link a:hover {
+            background: #00d4ff;
+            color: #1a1a1a;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .services {
+                grid-template-columns: 1fr;
+            }
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>renekris.dev</h1>
+            <p class="tagline">Full-Stack Developer & Infrastructure Engineer</p>
+        </header>
+        
+        <div class="status-overview">
+            <h2 style="color: #00d4ff; text-align: center; margin-bottom: 1rem;">System Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div><span class="status-dot"></span>Website</div>
+                    <div style="font-size: 0.9rem; color: #888;">Online</div>
+                </div>
+                <div class="status-item">
+                    <div><span class="status-dot"></span>Minecraft</div>
+                    <div style="font-size: 0.9rem; color: #888;">Online</div>
+                </div>
+                <div class="status-item">
+                    <div><span class="status-dot"></span>Tarkov SPT</div>
+                    <div style="font-size: 0.9rem; color: #888;">Online</div>
+                </div>
+                <div class="status-item">
+                    <div><span class="status-dot"></span>Monitoring</div>
+                    <div style="font-size: 0.9rem; color: #888;">Online</div>
+                </div>
+            </div>
+            <div class="status-link">
+                <a href="https://status.renekris.dev/status/services" target="_blank">View Detailed Status</a>
+            </div>
+        </div>
+        
+        <div class="services">
+            <div class="service-card">
+                <h3>🌐 Portfolio Website</h3>
+                <div class="service-status">Coming Soon</div>
+                <p>Professional portfolio showcasing development projects and technical expertise.</p>
+            </div>
+            
+            <div class="service-card">
+                <h3>📊 System Monitoring</h3>
+                <div class="service-status">✅ Active</div>
+                <div class="connection-box">
+                    <div class="label">Public Dashboard:</div>
+                    <div class="value">status.renekris.dev</div>
+                </div>
+                <p class="service-details">Real-time uptime monitoring and service health tracking.</p>
+            </div>
+            
+            <div class="service-card">
+                <h3>⛏️ Minecraft Server</h3>
+                <div class="service-status">✅ Online</div>
+                <div class="connection-box">
+                    <div class="label">Server Address:</div>
+                    <div class="value">renekris.dev</div>
+                </div>
+                <div class="service-details">
+                    <strong>Modpack:</strong> Life in the Village 3<br>
+                    <strong>Version:</strong> 1.19.2 + Forge<br>
+                    <strong>Features:</strong> Create mod, magic, exploration
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <h3>🎯 Tarkov SPT</h3>
+                <div class="service-status">✅ Online</div>
+                <div class="connection-box">
+                    <div class="label">Server URL:</div>
+                    <div class="value">https://tarkov.renekris.dev</div>
+                </div>
+                <div class="service-details">
+                    <strong>Mode:</strong> Single Player Tarkov<br>
+                    <strong>Features:</strong> Offline gameplay with mods
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <h3>🛠️ Management</h3>
+                <div class="service-status">🔒 Private</div>
+                <div class="connection-box">
+                    <div class="label">Crafty Controller:</div>
+                    <div class="value">crafty.renekris.dev</div>
+                </div>
+                <p class="service-details">Web-based server management and administration.</p>
+            </div>
+            
+            <div class="service-card">
+                <h3>📈 Infrastructure</h3>
+                <div class="service-status">⚡ Optimized</div>
+                <div class="service-details">
+                    <strong>Platform:</strong> Proxmox VMs<br>
+                    <strong>Containers:</strong> Docker + Caddy<br>
+                    <strong>Security:</strong> UFW + Fail2ban<br>
+                    <strong>SSL:</strong> Automatic HTTPS
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025 Renekris. Professional Infrastructure & Development.</p>
+            <div class="tech-info">
+                <strong>Tech Stack:</strong> Docker • Caddy • Cloudflare • Proxmox • Ubuntu Server
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // Simple status check animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const dots = document.querySelectorAll('.status-dot');
+            dots.forEach((dot, index) => {
+                dot.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>
