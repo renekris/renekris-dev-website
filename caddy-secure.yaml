@@ -1,0 +1,38 @@
+apps:
+  http:
+    servers:
+      main:
+        listen: [":80", ":443"]
+        routes:
+          # Main website - serve simple HTML
+          - match:
+            - host: ["renekris.dev"]
+            handle:
+            - handler: file_server
+              root: "/srv"
+              index_names: ["simple-site.html"]
+          # Development subdomain removed - access via internal IP only
+          # Status/monitoring subdomain
+          - match:
+            - host: ["status.renekris.dev"]
+            handle:
+            - handler: reverse_proxy
+              upstreams:
+              - dial: "uptime-kuma:3001"
+          # Crafty Controller removed - access via internal IP only
+  layer4:
+    servers:
+      minecraft:
+        listen: [":25565"]
+        routes:
+        - handle:
+          - handler: proxy
+            upstreams:
+            - dial: ["192.168.1.232:25565"]
+      tarkov:
+        listen: [":6969"]
+        routes:
+        - handle:
+          - handler: proxy
+            upstreams:
+            - dial: ["192.168.1.234:6969"]
