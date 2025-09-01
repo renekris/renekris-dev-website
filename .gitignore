@@ -1,0 +1,30 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# SSL certificates and private keys
+caddy/data/
+caddy/config/
+
+# Database and monitoring data
+uptime-kuma-data/
+
+# Dependencies
+node_modules/
+
+# Test results and reports
+test-results/
+playwright-report/
+
+# Backup files
+*.backup
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
