@@ -1,0 +1,28 @@
+{
+  "name": "renekris-dev-testing",
+  "version": "1.0.0",
+  "description": "Integrated testing suite for renekris.dev website",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:visual": "playwright test --update-snapshots",
+    "test:mobile": "playwright test --grep mobile",
+    "test:performance": "playwright test --grep performance",
+    "test:accessibility": "playwright test --grep accessibility",
+    "install-browsers": "playwright install",
+    "ci": "playwright test --reporter=github"
+  },
+  "keywords": ["testing", "playwright", "e2e", "visual-regression"],
+  "author": "Renekris",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@axe-core/playwright": "^4.8.2",
+    "playwright": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
