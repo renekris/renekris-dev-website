@@ -1,10 +1,78 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = 8080;
 
-const server = http.createServer((req, res) => {
+// Function to make HTTP request using Node.js built-in http module
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }).on('error', reject);
+    });
+}
+
+// Function to fetch status from Uptime Kuma
+async function fetchUptimeKumaStatus() {
+    try {
+        console.log('Server-side: Fetching status from Uptime Kuma...');
+        
+        // Use internal HTTP since we're server-side (no mixed content issues)
+        const config = await httpGet('http://192.168.1.235:3001/api/status-page/services');
+        const heartbeatData = await httpGet('http://192.168.1.235:3001/api/status-page/heartbeat/services');
+        
+        console.log('Server-side: Successfully fetched Uptime Kuma data');
+        
+        return {
+            monitors: config.publicGroupList[0].monitorList,
+            heartbeats: heartbeatData.heartbeatList,
+            uptimes: heartbeatData.uptimeList
+        };
+    } catch (error) {
+        console.error('Server-side: Failed to fetch Uptime Kuma status:', error);
+        return null;
+    }
+}
+
+const server = http.createServer(async (req, res) => {
+    // Health check endpoint for blue-green deployment
+    if (req.url === '/health') {
+        const deploymentSlot = process.env.DEPLOYMENT_SLOT || 'unknown';
+        res.writeHead(200, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify({ 
+            status: 'healthy', 
+            slot: deploymentSlot,
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime()
+        }));
+        return;
+    }
+
+    // Handle API endpoint for status
+    if (req.url === '/api/status') {
+        const statusData = await fetchUptimeKumaStatus();
+        res.writeHead(200, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'no-cache'
+        });
+        res.end(JSON.stringify(statusData || { error: 'Unable to fetch status' }));
+        return;
+    }
+
     // Handle root path
     if (req.url === '/' || req.url === '/index.html') {
         req.url = '/simple-site.html';
