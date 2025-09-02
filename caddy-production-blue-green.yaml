@@ -10,8 +10,8 @@ apps:
             handle:
             - handler: reverse_proxy
               upstreams:
-              - dial: "renekris-web-blue:8080"
-              - dial: "renekris-web-green:8080"
+              - dial: "172.19.0.2:8080"
+              - dial: "172.19.0.4:8080"
               health_checks:
                 active:
                   uri: "/health"
