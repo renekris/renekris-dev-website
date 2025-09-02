@@ -303,12 +303,135 @@
     </div>
     
     <script>
-        // Simple status check animation
+        // Status checking functions
+        function updateStatusIndicator(element, isOnline, serviceName = '', uptimePercent = null) {
+            const dot = element.querySelector('.status-dot');
+            const statusText = element.querySelector('div:last-child');
+            
+            if (isOnline) {
+                dot.style.background = '#00ff88';
+                dot.style.animation = 'pulse 2s infinite';
+                statusText.textContent = 'Online';
+                statusText.style.color = '#888';
+            } else {
+                dot.style.background = '#ff4444';
+                dot.style.animation = 'none';
+                statusText.textContent = 'Offline';  
+                statusText.style.color = '#ff4444';
+            }
+            
+            // Add uptime percentage if available
+            if (uptimePercent !== null) {
+                const uptimeDisplay = uptimePercent >= 99.5 ? 'Excellent' : 
+                                    uptimePercent >= 95 ? 'Good' : 'Fair';
+                console.log(`${serviceName}: ${isOnline ? 'Online' : 'Offline'} (${uptimePercent.toFixed(1)}% uptime - ${uptimeDisplay})`);
+            } else {
+                console.log(`${serviceName}: ${isOnline ? 'Online' : 'Offline'}`);
+            }
+        }
+
+        // Fetch status from Uptime Kuma
+        async function fetchUptimeKumaStatus() {
+            try {
+                console.log('Fetching status from Uptime Kuma...');
+                
+                // First get the config and monitor list
+                const configResponse = await fetch('http://192.168.1.235:3001/api/status-page/services', {
+                    timeout: 5000
+                });
+                const config = await configResponse.json();
+                
+                // Then get the heartbeat data
+                const heartbeatResponse = await fetch('http://192.168.1.235:3001/api/status-page/heartbeat/services', {
+                    timeout: 5000
+                });
+                const heartbeatData = await heartbeatResponse.json();
+                
+                console.log('Uptime Kuma data received:', heartbeatData);
+                
+                return {
+                    monitors: config.publicGroupList[0].monitorList,
+                    heartbeats: heartbeatData.heartbeatList,
+                    uptimes: heartbeatData.uptimeList
+                };
+            } catch (error) {
+                console.error('Failed to fetch Uptime Kuma status:', error);
+                return null;
+            }
+        }
+
+        async function checkServices() {
+            const statusItems = document.querySelectorAll('.status-item');
+            
+            // Try to get data from Uptime Kuma first
+            const uptimeData = await fetchUptimeKumaStatus();
+            
+            if (uptimeData) {
+                console.log('Using Uptime Kuma data for status checks');
+                
+                // Map monitor IDs to our status items
+                // Based on API data: 1=Website, 2=Tarkov, 3=Minecraft, 4=Crafty
+                const monitorMapping = {
+                    1: { index: 0, name: 'Website' },         // Main Website
+                    3: { index: 1, name: 'Minecraft' },      // Minecraft Server  
+                    2: { index: 2, name: 'Tarkov SPT' },     // Tarkov SPT Server
+                    4: { index: 3, name: 'Monitoring' }      // Crafty Controller (representing management/monitoring)
+                };
+                
+                // Update status for each monitor
+                Object.entries(monitorMapping).forEach(([monitorId, config]) => {
+                    const heartbeats = uptimeData.heartbeats[monitorId];
+                    const uptime24h = uptimeData.uptimes[`${monitorId}_24`];
+                    
+                    if (heartbeats && heartbeats.length > 0) {
+                        // Get the most recent status (status: 1 = UP, 0 = DOWN)
+                        const isOnline = heartbeats[0].status === 1;
+                        const uptimePercent = uptime24h ? uptime24h * 100 : null;
+                        
+                        updateStatusIndicator(
+                            statusItems[config.index], 
+                            isOnline, 
+                            config.name,
+                            uptimePercent
+                        );
+                    } else {
+                        // No data available - mark as unknown
+                        updateStatusIndicator(statusItems[config.index], false, config.name + ' (No Data)');
+                    }
+                });
+                
+            } else {
+                console.log('Uptime Kuma data unavailable, falling back to direct checks');
+                // Fallback to previous method if Uptime Kuma is unavailable
+                
+                // Website - always online if this page loads
+                updateStatusIndicator(statusItems[0], true, 'Website');
+                
+                // For other services, mark as unknown when Uptime Kuma is down
+                updateStatusIndicator(statusItems[1], false, 'Minecraft (Monitoring Unavailable)');
+                updateStatusIndicator(statusItems[2], false, 'Tarkov SPT (Monitoring Unavailable)');
+                updateStatusIndicator(statusItems[3], false, 'Monitoring (Service Unavailable)');
+            }
+        }
+
+        // Initialize status checking
         document.addEventListener('DOMContentLoaded', function() {
             const dots = document.querySelectorAll('.status-dot');
             dots.forEach((dot, index) => {
                 dot.style.animationDelay = `${index * 0.2}s`;
             });
+
+            console.log('Starting status checks...');
+            
+            // Initial status check after a short delay
+            setTimeout(checkServices, 2000);
+            
+            // Refresh status every 30 seconds  
+            setInterval(checkServices, 30000);
+            
+            // Manual refresh button (for testing)
+            console.log('Run checkServices() in console to manually refresh status');
+            window.checkServices = checkServices;
         });
     </script>
 </body>
