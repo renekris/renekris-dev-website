@@ -1,0 +1,73 @@
+# Blue-Green Deployment Caddy Configuration
+{
+    email renekris@renekris.dev
+    auto_https on
+}
+
+# Main website with blue-green load balancing
+renekris.dev {
+    # Health check endpoint - both containers
+    handle /health* {
+        reverse_proxy {
+            to http://web-blue:8080 http://web-green:8080
+            health_uri /health
+            health_interval 10s
+            health_timeout 5s
+            fail_duration 30s
+        }
+    }
+    
+    # Main traffic - automatic failover between blue/green
+    reverse_proxy {
+        to http://web-blue:8080 http://web-green:8080
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+        fail_duration 30s
+        lb_policy round_robin
+    }
+    
+    # Security headers
+    header {
+        X-Frame-Options DENY
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-XSS-Protection "1; mode=block"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+    
+    # Enable compression
+    encode gzip zstd
+    
+    # Access logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100MiB
+            roll_keep 5
+        }
+        format json
+    }
+}
+
+# Status monitoring subdomain
+status.renekris.dev {
+    reverse_proxy http://uptime-kuma:3001
+    
+    # Security headers
+    header {
+        X-Frame-Options SAMEORIGIN
+        X-Content-Type-Options nosniff
+    }
+    
+    encode gzip
+}
+
+# Minecraft server (port forwarding)
+renekris.dev:25565 {
+    reverse_proxy 192.168.1.232:25565
+}
+
+# Tarkov server (port forwarding) 
+renekris.dev:6969 {
+    reverse_proxy 192.168.1.234:6969
+}
