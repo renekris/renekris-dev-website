@@ -11,7 +11,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - web
+      - blue-green
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
@@ -27,7 +27,7 @@ services:
       - DEPLOYMENT_SLOT=blue
       - PORT=8080
     networks:
-      - web
+      - blue-green
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
@@ -46,7 +46,7 @@ services:
       - DEPLOYMENT_SLOT=green  
       - PORT=8080
     networks:
-      - web
+      - blue-green
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
@@ -59,13 +59,13 @@ services:
 
   uptime-kuma:
     image: louislam/uptime-kuma:1
-    container_name: uptime-kuma
+    container_name: uptime-kuma-bg
     volumes:
       - uptime-kuma:/app/data
     ports:
-      - "3001:3001"
+      - "3002:3001"
     networks:
-      - web
+      - blue-green
     restart: unless-stopped
 
 volumes:
@@ -74,5 +74,5 @@ volumes:
   uptime-kuma:
 
 networks:
-  web:
+  blue-green:
     driver: bridge
