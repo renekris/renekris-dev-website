@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2.7-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy-blue-green.yaml:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  web-blue:
+    build: .
+    container_name: renekris-web-blue
+    environment:
+      - NODE_ENV=production
+      - DEPLOYMENT_SLOT=blue
+      - PORT=8080
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - deployment.slot=blue
+
+  web-green:
+    build: .
+    container_name: renekris-web-green
+    environment:
+      - NODE_ENV=production
+      - DEPLOYMENT_SLOT=green  
+      - PORT=8080
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - deployment.slot=green
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    volumes:
+      - uptime-kuma:/app/data
+    ports:
+      - "3001:3001"
+    networks:
+      - web
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+  uptime-kuma:
+
+networks:
+  web:
+    driver: bridge
