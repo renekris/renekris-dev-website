@@ -28,3 +28,15 @@ playwright-report/
 # Logs
 *.log
 logs/
+
+# Legacy configurations (moved to archive)
+caddy-secure.yaml
+docker-compose-secure.yml
+*-legacy.*
+*-old.*
+
+# Development and testing
+test-*.js
+*-test.sh
+deploy-with-tests.sh
+run-tests.sh

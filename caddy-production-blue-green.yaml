@@ -19,7 +19,7 @@ apps:
                   timeout: "5s"
               load_balancing:
                 selection_policy:
-                  name: "first"
+                  policy: "first"
           # Status/monitoring subdomain
           - match:
             - host: ["status.renekris.dev"]
