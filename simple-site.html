@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Renekris.dev</title>
+    <title>Renekris.dev - Blue-Green Deployment Test</title>
     <style>
         * {
             margin: 0;
@@ -380,21 +380,35 @@
         // Fetch status from Uptime Kuma
         async function fetchUptimeKumaStatus() {
             try {
-                console.log('Fetching status from Uptime Kuma...');
+                console.log('Fetching status from server API...');
                 
-                // First get the config and monitor list
-                const configResponse = await fetch('http://192.168.1.235:3001/api/status-page/services', {
+                // Try Node.js server-side API first (no mixed content issues)
+                const response = await fetch('/api/status', {
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && !data.error) {
+                        console.log('Status data received from server API');
+                        return data;
+                    }
+                }
+                
+                // Fallback to direct HTTPS API calls
+                console.log('Fallback: Fetching directly from Uptime Kuma HTTPS API...');
+                
+                const configResponse = await fetch('https://status.renekris.dev/api/status-page/services', {
                     timeout: 5000
                 });
                 const config = await configResponse.json();
                 
-                // Then get the heartbeat data
-                const heartbeatResponse = await fetch('http://192.168.1.235:3001/api/status-page/heartbeat/services', {
+                const heartbeatResponse = await fetch('https://status.renekris.dev/api/status-page/heartbeat/services', {
                     timeout: 5000
                 });
                 const heartbeatData = await heartbeatResponse.json();
                 
-                console.log('Uptime Kuma data received:', heartbeatData);
+                console.log('Status data received from direct HTTPS API');
                 
                 return {
                     monitors: config.publicGroupList[0].monitorList,
@@ -402,7 +416,7 @@
                     uptimes: heartbeatData.uptimeList
                 };
             } catch (error) {
-                console.error('Failed to fetch Uptime Kuma status:', error);
+                console.error('Failed to fetch status from all sources:', error);
                 return null;
             }
         }
@@ -417,7 +431,7 @@
                 console.log('Using Uptime Kuma data for status checks');
                 
                 // Map monitor IDs to our status items
-                // Based on API data: 1=Website, 2=Tarkov, 3=Minecraft, 4=Crafty
+                // Based on restored original setup: 1=Website, 3=Minecraft, 2=Tarkov SPT, 4=Crafty Controller
                 const monitorMapping = {
                     1: { index: 0, name: 'Website' },         // Main Website
                     3: { index: 1, name: 'Minecraft' },      // Minecraft Server  
