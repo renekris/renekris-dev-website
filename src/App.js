@@ -8,7 +8,7 @@ function App() {
     <div className="container">
       <header>
         <h1>renekris.dev</h1>
-        <p className="tagline">Full-Stack Developer & Infrastructure Engineer | GitHub Actions Runner Active</p>
+        <p className="tagline">Full-Stack Developer & Infrastructure Engineer | Zero-Downtime Deployment ✅</p>
       </header>
       
       <StatusOverview />
