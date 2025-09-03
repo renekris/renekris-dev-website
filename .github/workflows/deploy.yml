@@ -28,7 +28,7 @@ jobs:
     - name: Build React app
       run: npm run build
 
-    - name: Deploy to server with zero downtime
+    - name: Test SSH connection
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.DEPLOY_HOST }}
@@ -36,16 +36,8 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY }}
         debug: true
         script: |
-          set -e
+          echo "✅ SSH connection successful"
           echo "🔍 Current directory: $(pwd)"
           echo "🔍 User: $(whoami)"
-          echo "🔍 Git status:"
-          cd /opt/renekris-dev || { echo "❌ Cannot access /opt/renekris-dev"; exit 1; }
-          pwd
-          ls -la
-          git status
-          echo "🔄 Pulling latest changes:"
-          git pull
-          echo "🔧 Running blue-green deployment:"
-          chmod +x deploy-blue-green.sh
-          ./deploy-blue-green.sh
+          echo "🔍 Hostname: $(hostname)"
+          echo "🔍 IP: $(ip addr show | grep inet)"
