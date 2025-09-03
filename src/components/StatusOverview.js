@@ -11,35 +11,29 @@ const StatusOverview = () => {
   // Fetch status from Uptime Kuma
   const fetchUptimeKumaStatus = async () => {
     try {
-      console.log('Fetching status from server API...');
+      console.log('Fetching status from Uptime Kuma API...');
       
-      // Try server-side API first
-      const response = await fetch('/api/status', {
+      const configResponse = await fetch('https://status.renekris.dev/api/status-page/services', {
         cache: 'no-cache'
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data && !data.error) {
-          console.log('Status data received from server API');
-          return data;
-        }
+      if (!configResponse.ok) {
+        throw new Error(`Config API failed: ${configResponse.status}`);
       }
       
-      // Fallback to direct HTTPS API calls
-      console.log('Fallback: Fetching directly from Uptime Kuma HTTPS API...');
-      
-      const configResponse = await fetch('https://status.renekris.dev/api/status-page/services', {
-        timeout: 5000
-      });
       const config = await configResponse.json();
       
       const heartbeatResponse = await fetch('https://status.renekris.dev/api/status-page/heartbeat/services', {
-        timeout: 5000
+        cache: 'no-cache'
       });
+      
+      if (!heartbeatResponse.ok) {
+        throw new Error(`Heartbeat API failed: ${heartbeatResponse.status}`);
+      }
+      
       const heartbeatData = await heartbeatResponse.json();
       
-      console.log('Status data received from direct HTTPS API');
+      console.log('Status data received from Uptime Kuma API');
       
       return {
         monitors: config.publicGroupList[0].monitorList,
@@ -47,7 +41,7 @@ const StatusOverview = () => {
         uptimes: heartbeatData.uptimeList
       };
     } catch (error) {
-      console.error('Failed to fetch status from all sources:', error);
+      console.error('Failed to fetch status from Uptime Kuma:', error);
       return null;
     }
   };
