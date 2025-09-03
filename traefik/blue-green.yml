@@ -19,9 +19,9 @@ http:
     web-app:
       weighted:
         services:
-          - name: "web-blue"
+          - name: "web-blue@docker"
             weight: 100
-          - name: "web-green"
+          - name: "web-green@docker"
             weight: 0
             
   middlewares:
