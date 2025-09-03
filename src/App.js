@@ -8,7 +8,7 @@ function App() {
     <div className="container">
       <header>
         <h1>renekris.dev</h1>
-        <p className="tagline">🚀 LIVE DEPLOYMENT TESTING 🚀 GitHub Actions + Blue-Green Working!</p>
+        <p className="tagline">✨ DOCKER SWARM ROLLING UPDATES ✨ Zero-Downtime Deployment Success!</p>
       </header>
       
       <StatusOverview />

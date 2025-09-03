@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --providers.swarm=true
+      - --providers.swarm.exposedbydefault=false
+      - --providers.swarm.network=traefik-public
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.minecraft.address=:25565
+      - --entrypoints.tarkov.address=:6969
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=admin@renekris.dev
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --api.dashboard=true
+      - --api.insecure=true
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
+      - target: 25565
+        published: 25565
+        mode: host
+      - target: 6969
+        published: 6969
+        mode: host
+      - target: 8080
+        published: 8080
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/letsencrypt
+    networks:
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public.traefik-public-certificates == true
+      restart_policy:
+        condition: on-failure
+
+  web:
+    image: renekris-web:latest
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.web.loadbalancer.server.port=80
+        
+        # Main website routing
+        - traefik.http.routers.web.rule=Host(`renekris.dev`)
+        - traefik.http.routers.web.entrypoints=websecure
+        - traefik.http.routers.web.tls.certresolver=letsencrypt
+        
+        # HTTP to HTTPS redirect
+        - traefik.http.routers.web-http.rule=Host(`renekris.dev`)
+        - traefik.http.routers.web-http.entrypoints=web
+        - traefik.http.routers.web-http.middlewares=web-redirect
+        - traefik.http.middlewares.web-redirect.redirectscheme.scheme=https
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    networks:
+      - traefik-public
+    volumes:
+      - uptime-kuma-data:/app/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.uptime-kuma.loadbalancer.server.port=3001
+        
+        # Status subdomain
+        - traefik.http.routers.status.rule=Host(`status.renekris.dev`)
+        - traefik.http.routers.status.entrypoints=websecure
+        - traefik.http.routers.status.tls.certresolver=letsencrypt
+        
+        # HTTP to HTTPS redirect for status
+        - traefik.http.routers.status-http.rule=Host(`status.renekris.dev`)
+        - traefik.http.routers.status-http.entrypoints=web
+        - traefik.http.routers.status-http.middlewares=status-redirect
+        - traefik.http.middlewares.status-redirect.redirectscheme.scheme=https
+
+volumes:
+  traefik-certificates:
+  uptime-kuma-data:
+
+networks:
+  traefik-public:
+    external: true
