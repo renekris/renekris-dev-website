@@ -44,22 +44,23 @@ wait_for_healthy() {
     return 1
 }
 
-# Function to switch traffic to a service
+# Function to switch traffic to a service using Traefik weighted routing
 switch_traffic() {
     local target_service=$1
     local other_service=$2
     
-    echo "🔄 Switching traffic to $target_service..."
+    echo "🔄 Switching traffic to $target_service using Traefik weighted routing..."
     
-    # Ensure target service is running and healthy before switching
-    echo "🔍 Ensuring $target_service is running and healthy..."
-    docker start renekris-web-$target_service 2>/dev/null || true
+    # Ensure both services are running
+    echo "🔍 Ensuring both services are running..."
+    docker start renekris-web-blue 2>/dev/null || true
+    docker start renekris-web-green 2>/dev/null || true
     
-    # Wait for target service to be healthy before stopping the other
+    # Wait for target service to be healthy
     local attempts=0
     while [ $attempts -lt 10 ]; do
         if [ "$(docker inspect renekris-web-$target_service --format '{{.State.Health.Status}}' 2>/dev/null)" = "healthy" ]; then
-            echo "✅ $target_service is healthy, safe to switch traffic"
+            echo "✅ $target_service is healthy, ready for traffic switch"
             break
         fi
         echo "⏳ Waiting for $target_service to become healthy... (attempt $((attempts+1))/10)"
@@ -72,12 +73,46 @@ switch_traffic() {
         return 1
     fi
     
-    # Now safely stop the other service
-    echo "🔄 Stopping $other_service container to force traffic to $target_service..."
-    docker stop renekris-web-$other_service 2>/dev/null || true
-    sleep 3  # Brief pause for Traefik to update routing
-    echo "✅ Traffic now routed to $target_service ($other_service stopped)"
+    # Create Traefik dynamic configuration for weighted routing
+    echo "🔧 Creating Traefik dynamic configuration for $target_service..."
     
+    cat > /tmp/blue-green-weights.yml << EOF
+http:
+  services:
+    web-app:
+      weighted:
+        services:
+EOF
+    
+    if [ "$target_service" = "green" ]; then
+        cat >> /tmp/blue-green-weights.yml << EOF
+          - name: "web-green"
+            weight: 100
+          - name: "web-blue" 
+            weight: 0
+EOF
+    else
+        cat >> /tmp/blue-green-weights.yml << EOF
+          - name: "web-blue"
+            weight: 100
+          - name: "web-green"
+            weight: 0
+EOF
+    fi
+    
+    # Deploy the dynamic configuration
+    echo "📁 Deploying Traefik dynamic configuration..."
+    docker cp /tmp/blue-green-weights.yml renekris-dev-traefik-1:/etc/traefik/dynamic/blue-green.yml 2>/dev/null || {
+        # Fallback: use docker-compose approach with service recreation
+        echo "⚠️ Dynamic config failed, using compose service recreation..."
+        if [ "$target_service" = "green" ]; then
+            GREEN_PRIORITY=100 BLUE_PRIORITY=50 docker compose -f $COMPOSE_FILE up -d --no-deps --force-recreate web-green
+        else
+            BLUE_PRIORITY=100 GREEN_PRIORITY=50 docker compose -f $COMPOSE_FILE up -d --no-deps --force-recreate web-blue
+        fi
+    }
+    
+    sleep 5  # Allow Traefik to reload configuration
     echo "✅ Traffic switched to $target_service"
 }
 

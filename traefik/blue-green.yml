@@ -1,0 +1,30 @@
+http:
+  routers:
+    web:
+      rule: "Host(`renekris.dev`)"
+      entrypoints:
+        - websecure
+      service: web-app
+      tls:
+        certResolver: letsencrypt
+    web-http:
+      rule: "Host(`renekris.dev`)"
+      entrypoints:
+        - web
+      service: web-app
+      middlewares:
+        - web-redirect
+        
+  services:
+    web-app:
+      weighted:
+        services:
+          - name: "web-blue"
+            weight: 100
+          - name: "web-green"
+            weight: 0
+            
+  middlewares:
+    web-redirect:
+      redirectScheme:
+        scheme: https

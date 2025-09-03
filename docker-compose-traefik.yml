@@ -38,11 +38,6 @@ services:
       - DEPLOYMENT_SLOT=blue
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web-blue.rule=Host(`renekris.dev`)"
-      - "traefik.http.routers.web-blue.entrypoints=websecure"
-      - "traefik.http.routers.web-blue.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.web-blue.service=web-blue"
-      - "traefik.http.routers.web-blue.priority=100"
       - "traefik.http.services.web-blue.loadbalancer.server.port=80"
       # Proxy for status API to avoid CORS
       - "traefik.http.routers.status-api-blue.rule=Host(`renekris.dev`) && PathPrefix(`/api/status`)"
@@ -73,11 +68,6 @@ services:
       - DEPLOYMENT_SLOT=green
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web-green.rule=Host(`renekris.dev`)"
-      - "traefik.http.routers.web-green.entrypoints=websecure"
-      - "traefik.http.routers.web-green.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.web-green.service=web-green"
-      - "traefik.http.routers.web-green.priority=50"
       - "traefik.http.services.web-green.loadbalancer.server.port=80"
       # Proxy for status API to avoid CORS
       - "traefik.http.routers.status-api-green.rule=Host(`renekris.dev`) && PathPrefix(`/api/status`)"
