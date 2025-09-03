@@ -13,7 +13,7 @@ const StatusOverview = () => {
     try {
       console.log('Fetching status from Uptime Kuma API...');
       
-      const configResponse = await fetch('https://status.renekris.dev/api/status-page/services', {
+      const configResponse = await fetch('/api/status-page/services', {
         cache: 'no-cache'
       });
       
@@ -23,7 +23,7 @@ const StatusOverview = () => {
       
       const config = await configResponse.json();
       
-      const heartbeatResponse = await fetch('https://status.renekris.dev/api/status-page/heartbeat/services', {
+      const heartbeatResponse = await fetch('/api/status-page/heartbeat/services', {
         cache: 'no-cache'
       });
       

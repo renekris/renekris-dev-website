@@ -24,14 +24,14 @@ jobs:
     - name: Build React app
       run: npm run build
 
-    - name: Deploy to server
+    - name: Deploy to server with zero downtime
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.DEPLOY_HOST }}
         username: ${{ secrets.DEPLOY_USER }}
         key: ${{ secrets.DEPLOY_KEY }}
         script: |
-          cd ~/website
+          cd /opt/renekris-dev
           git pull
-          docker compose down
-          docker compose up -d --build
+          chmod +x deploy-blue-green.sh
+          ./deploy-blue-green.sh
