@@ -73,6 +73,15 @@ services:
     networks:
       - traefik
 
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: unless-stopped
+    environment:
+      - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - DOMAINS=${CLOUDFLARE_DOMAINS}
+      - PROXIED=${CLOUDFLARE_PROXIED}
+
 networks:
   traefik:
     external: false
