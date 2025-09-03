@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
@@ -29,18 +29,13 @@ jobs:
       run: npm run build
 
     - name: Deploy with zero downtime
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        debug: true
-        script: |
-          set -e
-          echo "✅ SSH connection successful"
-          echo "🔍 Current directory: $(pwd)"
-          echo "🔍 User: $(whoami)"
-          cd /opt/renekris-dev
-          git pull
-          chmod +x deploy-blue-green.sh
-          ./deploy-blue-green.sh
+      run: |
+        set -e
+        echo "🚀 Starting secure deployment on self-hosted runner"
+        echo "🔍 Current directory: $(pwd)"
+        echo "🔍 User: $(whoami)"
+        echo "🔍 Runner location: $(hostname)"
+        cd /opt/renekris-dev
+        git pull
+        chmod +x deploy-blue-green.sh
+        ./deploy-blue-green.sh
