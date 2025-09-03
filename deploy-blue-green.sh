@@ -51,46 +51,19 @@ switch_traffic() {
     
     echo "🔄 Switching traffic to $target_service..."
     
-    if [ "$target_service" = "blue" ]; then
-        # Set blue to high priority (active)
-        docker service update --label-add "traefik.http.routers.web-blue.priority=100" renekris-web-blue 2>/dev/null || \
-        docker container update --label-add "traefik.http.routers.web-blue.priority=100" renekris-web-blue || {
-            echo "⚠️ Using docker-compose to update priorities..."
-            # Fallback: recreate containers with updated priorities
-            BLUE_PRIORITY=100 GREEN_PRIORITY=50 docker compose -f $COMPOSE_FILE up -d --no-deps web-blue web-green
-        }
-        
-        # Set green to low priority (standby)  
-        docker service update --label-add "traefik.http.routers.web-green.priority=50" renekris-web-green 2>/dev/null || \
-        docker container update --label-add "traefik.http.routers.web-green.priority=50" renekris-web-green || true
-        
-        # Update API proxy priorities too
-        docker container update --label-add "traefik.http.routers.status-api-blue.priority=100" renekris-web-blue 2>/dev/null || true
-        docker container update --label-add "traefik.http.routers.status-api-green.priority=50" renekris-web-green 2>/dev/null || true
-        docker container update --label-add "traefik.http.routers.web-blue-http.priority=100" renekris-web-blue 2>/dev/null || true
-        docker container update --label-add "traefik.http.routers.web-green-http.priority=50" renekris-web-green 2>/dev/null || true
-        
+    # Simple approach: Stop the non-target service temporarily
+    # This forces all traffic to the target service
+    if [ "$target_service" = "green" ]; then
+        echo "🔄 Stopping blue container to force traffic to green..."
+        docker stop renekris-web-blue 2>/dev/null || true
+        sleep 5  # Give Traefik time to detect the change
+        echo "✅ Traffic now routed to green (blue stopped)"
     else
-        # Set green to high priority (active)
-        docker service update --label-add "traefik.http.routers.web-green.priority=100" renekris-web-green 2>/dev/null || \
-        docker container update --label-add "traefik.http.routers.web-green.priority=100" renekris-web-green || {
-            echo "⚠️ Using docker-compose to update priorities..."
-            BLUE_PRIORITY=50 GREEN_PRIORITY=100 docker compose -f $COMPOSE_FILE up -d --no-deps web-blue web-green
-        }
-        
-        # Set blue to low priority (standby)
-        docker service update --label-add "traefik.http.routers.web-blue.priority=50" renekris-web-blue 2>/dev/null || \
-        docker container update --label-add "traefik.http.routers.web-blue.priority=50" renekris-web-blue || true
-        
-        # Update API proxy priorities too
-        docker container update --label-add "traefik.http.routers.status-api-green.priority=100" renekris-web-green 2>/dev/null || true
-        docker container update --label-add "traefik.http.routers.status-api-blue.priority=50" renekris-web-blue 2>/dev/null || true
-        docker container update --label-add "traefik.http.routers.web-green-http.priority=100" renekris-web-green 2>/dev/null || true
-        docker container update --label-add "traefik.http.routers.web-blue-http.priority=50" renekris-web-blue 2>/dev/null || true
+        echo "🔄 Stopping green container to force traffic to blue..."  
+        docker stop renekris-web-green 2>/dev/null || true
+        sleep 5  # Give Traefik time to detect the change
+        echo "✅ Traffic now routed to blue (green stopped)"
     fi
-    
-    # Give Traefik time to update routing
-    sleep 5
     
     echo "✅ Traffic switched to $target_service"
 }
@@ -169,11 +142,20 @@ main() {
         echo "🎉 Traffic switched from $old_service to $target_service"
         echo "🌐 Site: https://renekris.dev"
         echo "📊 Status: https://status.renekris.dev"
+        
+        # Start both containers for future deployments
+        echo "🔄 Starting standby container for next deployment..."
+        docker start renekris-web-$old_service 2>/dev/null || true
+        echo "✅ Both containers now running (active: $target_service, standby: $old_service)"
     else
         echo "❌ Deployment verification failed"
         echo "🔄 Rolling back to $old_service..."
         switch_traffic $old_service $target_service
         echo "⚠️ Rollback completed"
+        
+        # Ensure both containers are available for next deployment
+        echo "🔄 Starting standby container for next deployment..."  
+        docker start renekris-web-$target_service 2>/dev/null || true
         exit 1
     fi
 }
