@@ -51,19 +51,32 @@ switch_traffic() {
     
     echo "🔄 Switching traffic to $target_service..."
     
-    # Simple approach: Stop the non-target service temporarily
-    # This forces all traffic to the target service
-    if [ "$target_service" = "green" ]; then
-        echo "🔄 Stopping blue container to force traffic to green..."
-        docker stop renekris-web-blue 2>/dev/null || true
-        sleep 5  # Give Traefik time to detect the change
-        echo "✅ Traffic now routed to green (blue stopped)"
-    else
-        echo "🔄 Stopping green container to force traffic to blue..."  
-        docker stop renekris-web-green 2>/dev/null || true
-        sleep 5  # Give Traefik time to detect the change
-        echo "✅ Traffic now routed to blue (green stopped)"
+    # Ensure target service is running and healthy before switching
+    echo "🔍 Ensuring $target_service is running and healthy..."
+    docker start renekris-web-$target_service 2>/dev/null || true
+    
+    # Wait for target service to be healthy before stopping the other
+    local attempts=0
+    while [ $attempts -lt 10 ]; do
+        if [ "$(docker inspect renekris-web-$target_service --format '{{.State.Health.Status}}' 2>/dev/null)" = "healthy" ]; then
+            echo "✅ $target_service is healthy, safe to switch traffic"
+            break
+        fi
+        echo "⏳ Waiting for $target_service to become healthy... (attempt $((attempts+1))/10)"
+        sleep 3
+        ((attempts++))
+    done
+    
+    if [ $attempts -eq 10 ]; then
+        echo "❌ $target_service failed to become healthy, cannot switch traffic safely"
+        return 1
     fi
+    
+    # Now safely stop the other service
+    echo "🔄 Stopping $other_service container to force traffic to $target_service..."
+    docker stop renekris-web-$other_service 2>/dev/null || true
+    sleep 3  # Brief pause for Traefik to update routing
+    echo "✅ Traffic now routed to $target_service ($other_service stopped)"
     
     echo "✅ Traffic switched to $target_service"
 }
