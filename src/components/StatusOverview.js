@@ -61,9 +61,9 @@ const StatusOverview = () => {
       // Dynamic monitor mapping by name instead of hardcoded IDs
       const monitorNameMapping = {
         'Website': 'website',
-        'Minecraft': 'minecraft', 
-        'Tarkov SPT': 'tarkov',
-        'Monitoring': 'monitoring'
+        'Minecraft Server': 'minecraft', 
+        'Tarkov SPT Server': 'tarkov',
+        'Crafty Controller': 'monitoring'
       };
       
       const newStatusData = { ...statusData };
