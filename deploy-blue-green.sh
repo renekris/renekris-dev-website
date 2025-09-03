@@ -138,6 +138,12 @@ main() {
     # Build and start target service with latest code
     echo "🔧 Building and updating $target_service service..."
     docker compose -f $COMPOSE_FILE build web-$target_service
+    
+    # Stop and remove existing target container if it exists
+    docker stop renekris-web-$target_service 2>/dev/null || true
+    docker rm renekris-web-$target_service 2>/dev/null || true
+    
+    # Start the updated target service
     docker compose -f $COMPOSE_FILE up -d web-$target_service
     
     # Wait for target service to be healthy
