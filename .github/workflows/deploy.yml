@@ -35,7 +35,6 @@ jobs:
         echo "🔍 Current directory: $(pwd)"
         echo "🔍 User: $(whoami)"
         echo "🔍 Runner location: $(hostname)"
-        cd /opt/renekris-dev
-        git pull
+        echo "🔍 Contents: $(ls -la)"
         chmod +x deploy-blue-green.sh
         ./deploy-blue-green.sh
