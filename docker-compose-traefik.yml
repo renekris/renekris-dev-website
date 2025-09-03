@@ -1,0 +1,76 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.minecraft.address=:25565"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@renekris.dev"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+    ports:
+      - "80:80"
+      - "443:443" 
+      - "25565:25565"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    restart: unless-stopped
+    networks:
+      - traefik
+
+  web:
+    build: .
+    container_name: renekris-web
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`renekris.dev`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.web.loadbalancer.server.port=80"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.web-http.rule=Host(`renekris.dev`)"
+      - "traefik.http.routers.web-http.entrypoints=web"
+      - "traefik.http.routers.web-http.middlewares=web-redirect"
+      - "traefik.http.middlewares.web-redirect.redirectscheme.scheme=https"
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma-data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.status.rule=Host(`status.renekris.dev`)"
+      - "traefik.http.routers.status.entrypoints=websecure"
+      - "traefik.http.routers.status.tls.certresolver=letsencrypt"
+      - "traefik.http.services.status.loadbalancer.server.port=3001"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.status-http.rule=Host(`status.renekris.dev`)"
+      - "traefik.http.routers.status-http.entrypoints=web"
+      - "traefik.http.routers.status-http.middlewares=status-redirect"
+      - "traefik.http.middlewares.status-redirect.redirectscheme.scheme=https"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: false
+
+volumes:
+  uptime-kuma-data:
