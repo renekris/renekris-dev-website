@@ -57,7 +57,7 @@ switch_traffic() {
         docker container update --label-add "traefik.http.routers.web-blue.priority=100" renekris-web-blue || {
             echo "⚠️ Using docker-compose to update priorities..."
             # Fallback: recreate containers with updated priorities
-            BLUE_PRIORITY=100 GREEN_PRIORITY=50 docker-compose -f $COMPOSE_FILE up -d --no-deps web-blue web-green
+            BLUE_PRIORITY=100 GREEN_PRIORITY=50 docker compose -f $COMPOSE_FILE up -d --no-deps web-blue web-green
         }
         
         # Set green to low priority (standby)  
@@ -75,7 +75,7 @@ switch_traffic() {
         docker service update --label-add "traefik.http.routers.web-green.priority=100" renekris-web-green 2>/dev/null || \
         docker container update --label-add "traefik.http.routers.web-green.priority=100" renekris-web-green || {
             echo "⚠️ Using docker-compose to update priorities..."
-            BLUE_PRIORITY=50 GREEN_PRIORITY=100 docker-compose -f $COMPOSE_FILE up -d --no-deps web-blue web-green
+            BLUE_PRIORITY=50 GREEN_PRIORITY=100 docker compose -f $COMPOSE_FILE up -d --no-deps web-blue web-green
         }
         
         # Set blue to low priority (standby)
@@ -137,8 +137,8 @@ main() {
     
     # Build and start target service with latest code
     echo "🔧 Building and updating $target_service service..."
-    docker-compose -f $COMPOSE_FILE build web-$target_service
-    docker-compose -f $COMPOSE_FILE up -d web-$target_service
+    docker compose -f $COMPOSE_FILE build web-$target_service
+    docker compose -f $COMPOSE_FILE up -d web-$target_service
     
     # Wait for target service to be healthy
     if ! wait_for_healthy "renekris-web-$target_service"; then
