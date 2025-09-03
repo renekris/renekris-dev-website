@@ -58,37 +58,43 @@ const StatusOverview = () => {
     if (uptimeData) {
       console.log('Using Uptime Kuma data for status checks');
       
-      // Monitor mapping: 1=Website, 3=Minecraft, 2=Tarkov SPT, 4=Crafty Controller
-      const monitorMapping = {
-        1: 'website',
-        3: 'minecraft',
-        2: 'tarkov',
-        4: 'monitoring'
+      // Dynamic monitor mapping by name instead of hardcoded IDs
+      const monitorNameMapping = {
+        'Website': 'website',
+        'Minecraft': 'minecraft', 
+        'Tarkov SPT': 'tarkov',
+        'Monitoring': 'monitoring'
       };
       
       const newStatusData = { ...statusData };
       
-      Object.entries(monitorMapping).forEach(([monitorId, serviceKey]) => {
-        const heartbeats = uptimeData.heartbeats[monitorId];
-        const uptime24h = uptimeData.uptimes[`${monitorId}_24`];
-        
-        if (heartbeats && heartbeats.length > 0) {
-          const isOnline = heartbeats[0].status === 1;
-          const uptimePercent = uptime24h ? uptime24h * 100 : null;
-          
-          newStatusData[serviceKey] = {
-            online: isOnline,
-            status: isOnline ? 'Online' : 'Offline',
-            uptime: uptimePercent
-          };
-        } else {
-          newStatusData[serviceKey] = {
-            online: false,
-            status: 'No Data',
-            uptime: null
-          };
-        }
-      });
+      // Find monitors by name from the monitor list
+      if (uptimeData.monitors) {
+        uptimeData.monitors.forEach(monitor => {
+          const serviceKey = monitorNameMapping[monitor.name];
+          if (serviceKey) {
+            const heartbeats = uptimeData.heartbeats[monitor.id];
+            const uptime24h = uptimeData.uptimes[`${monitor.id}_24`];
+            
+            if (heartbeats && heartbeats.length > 0) {
+              const isOnline = heartbeats[0].status === 1;
+              const uptimePercent = uptime24h ? uptime24h * 100 : null;
+              
+              newStatusData[serviceKey] = {
+                online: isOnline,
+                status: isOnline ? 'Online' : 'Offline',
+                uptime: uptimePercent
+              };
+            } else {
+              newStatusData[serviceKey] = {
+                online: false,
+                status: 'No Data',
+                uptime: null
+              };
+            }
+          }
+        });
+      }
       
       setStatusData(newStatusData);
     } else {

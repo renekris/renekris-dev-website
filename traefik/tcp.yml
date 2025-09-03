@@ -5,9 +5,18 @@ tcp:
       service: minecraft-service
       entryPoints:
         - minecraft
+    tarkov:
+      rule: "HostSNI(`*`)" 
+      service: tarkov-service
+      entryPoints:
+        - tarkov
 
   services:
     minecraft-service:
       loadBalancer:
         servers:
           - address: "192.168.1.232:25565"
+    tarkov-service:
+      loadBalancer:
+        servers:
+          - address: "192.168.1.234:6969"
