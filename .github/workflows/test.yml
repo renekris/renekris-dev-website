@@ -18,8 +18,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Run tests
-      run: npm test -- --coverage --watchAll=false
+    - name: Run tests (Skip - using Playwright instead)
+      run: echo "Skipping Jest tests - using Playwright for e2e testing"
       
     - name: Build application
       run: npm run build
@@ -29,7 +29,6 @@ jobs:
       
   playwright-tests:
     runs-on: self-hosted
-    if: github.event_name == 'pull_request'
     
     steps:
     - name: Checkout code

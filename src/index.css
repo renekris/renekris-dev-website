@@ -234,4 +234,93 @@ footer {
   .status-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .minecraft-status-card {
+    min-width: unset;
+    margin: 0 0.5rem;
+  }
+  
+  .connection-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.25rem;
+  }
+}
+
+/* Minecraft Status Card Styles */
+.minecraft-status-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.minecraft-status-card {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid #333;
+  min-width: 350px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.status-header h3 {
+  color: #00d4ff;
+  font-size: 1.5rem;
+  margin-left: 0.75rem;
+  font-weight: 400;
+}
+
+.status-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.status-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.uptime-text {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.connection-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.connection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #333;
+  border-radius: 6px;
+}
+
+.connection-label {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.connection-value {
+  color: #00d4ff;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
 }

@@ -2,11 +2,42 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 const StatusOverview = () => {
   const [statusData, setStatusData] = useState({
-    website: { online: true, status: 'Online' },
-    minecraft: { online: true, status: 'Online' },
-    tarkov: { online: true, status: 'Online' },
-    monitoring: { online: true, status: 'Online' }
+    minecraft: { 
+      online: true, 
+      status: 'Online',
+      playerCount: null,
+      uptime: null
+    }
   });
+
+  // Fetch Minecraft server details
+  const fetchMinecraftStatus = async () => {
+    try {
+      console.log('Fetching Minecraft server status...');
+      
+      // Use mcsrvstat.us API to get Minecraft server info
+      const response = await fetch('https://api.mcsrvstat.us/3/renekris.dev:25565', {
+        cache: 'no-cache'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Minecraft API failed: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Minecraft server data received:', data);
+      
+      return {
+        online: data.online || false,
+        players: data.players || { online: 0, max: 20 },
+        motd: data.motd?.clean?.[0] || 'Minecraft Server',
+        version: data.version || 'Unknown'
+      };
+    } catch (error) {
+      console.error('Failed to fetch Minecraft status:', error);
+      return null;
+    }
+  };
 
   // Fetch status from Uptime Kuma
   const fetchUptimeKumaStatus = async () => {
@@ -48,19 +79,18 @@ const StatusOverview = () => {
 
   const updateStatus = useCallback(async () => {
     const uptimeData = await fetchUptimeKumaStatus();
+    const minecraftData = await fetchMinecraftStatus();
     
+    let newStatusData = { ...statusData };
+    
+    // Start with Uptime Kuma monitoring data
     if (uptimeData) {
-      console.log('Using Uptime Kuma data for status checks');
+      console.log('Using Uptime Kuma data for uptime monitoring');
       
-      // Dynamic monitor mapping by name instead of hardcoded IDs
+      // Only monitor Minecraft Server
       const monitorNameMapping = {
-        'Website': 'website',
-        'Minecraft Server': 'minecraft', 
-        'Tarkov SPT Server': 'tarkov',
-        'Crafty Controller': 'monitoring'
+        'Minecraft Server': 'minecraft'
       };
-      
-      const newStatusData = { ...statusData };
       
       // Find monitors by name from the monitor list
       if (uptimeData.monitors) {
@@ -77,30 +107,43 @@ const StatusOverview = () => {
               newStatusData[serviceKey] = {
                 online: isOnline,
                 status: isOnline ? 'Online' : 'Offline',
-                uptime: uptimePercent
-              };
-            } else {
-              newStatusData[serviceKey] = {
-                online: false,
-                status: 'No Data',
-                uptime: null
+                uptime: uptimePercent,
+                playerCount: null
               };
             }
           }
         });
       }
-      
-      setStatusData(newStatusData);
-    } else {
-      console.log('Uptime Kuma data unavailable, using fallback status');
-      // Website is always online if React app loads
-      setStatusData({
-        website: { online: true, status: 'Online' },
-        minecraft: { online: false, status: 'Monitoring Unavailable' },
-        tarkov: { online: false, status: 'Monitoring Unavailable' },
-        monitoring: { online: false, status: 'Service Unavailable' }
-      });
     }
+    
+    // Enhance with Minecraft-specific data
+    if (minecraftData) {
+      console.log('Enhancing with Minecraft server data');
+      newStatusData.minecraft = {
+        ...newStatusData.minecraft,
+        online: minecraftData.online,
+        status: minecraftData.online ? 'Online' : 'Offline',
+        playerCount: minecraftData.players.online,
+        maxPlayers: minecraftData.players.max,
+        version: minecraftData.version,
+        motd: minecraftData.motd
+      };
+    }
+    
+    // Fallback if both sources fail
+    if (!uptimeData && !minecraftData) {
+      console.log('All monitoring unavailable, using fallback status');
+      newStatusData = {
+        minecraft: { 
+          online: false, 
+          status: 'Monitoring Unavailable',
+          uptime: null,
+          playerCount: null
+        }
+      };
+    }
+    
+    setStatusData(newStatusData);
   }, [statusData]);
 
   useEffect(() => {
@@ -113,42 +156,66 @@ const StatusOverview = () => {
     return () => clearInterval(interval);
   }, [updateStatus]);
 
-  const StatusItem = ({ service, label, index }) => (
-    <div className="status-item">
-      <div>
+  const MinecraftStatusCard = ({ service }) => (
+    <div className="minecraft-status-card">
+      <div className="status-header">
         <span 
           className="status-dot" 
           style={{ 
             background: service.online ? '#00ff88' : '#ff4444',
-            animation: service.online ? 'pulse 2s infinite' : 'none',
-            animationDelay: `${index * 0.2}s`
+            animation: service.online ? 'pulse 2s infinite' : 'none'
           }}
         ></span>
-        {label}
+        <h3>Minecraft Server</h3>
       </div>
-      <div style={{ 
-        fontSize: '0.9rem', 
-        color: service.online ? '#888' : '#ff4444' 
-      }}>
-        {service.status}
+      
+      <div className="status-details">
+        <div className="status-main">
+          <span className="status-text" style={{ 
+            color: service.online ? '#00ff88' : '#ff4444' 
+          }}>
+            {service.status}
+          </span>
+          {service.uptime && (
+            <span className="uptime-text">
+              {service.uptime.toFixed(1)}% uptime (24h)
+            </span>
+          )}
+        </div>
+        
+        <div className="connection-info">
+          <div className="connection-item">
+            <span className="connection-label">Server Address:</span>
+            <span className="connection-value">renekris.dev:25565</span>
+          </div>
+          {service.playerCount !== null && (
+            <div className="connection-item">
+              <span className="connection-label">Players Online:</span>
+              <span className="connection-value">{service.playerCount}/{service.maxPlayers || 20}</span>
+            </div>
+          )}
+          {service.version && (
+            <div className="connection-item">
+              <span className="connection-label">Version:</span>
+              <span className="connection-value">{service.version}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 
   return (
     <div className="status-overview">
-      <h2 style={{ color: '#00d4ff', textAlign: 'center', marginBottom: '1rem' }}>
-        System Status
+      <h2 style={{ color: '#00d4ff', textAlign: 'center', marginBottom: '1.5rem' }}>
+        Server Status
       </h2>
-      <div className="status-grid">
-        <StatusItem service={statusData.website} label="Website" index={0} />
-        <StatusItem service={statusData.minecraft} label="Minecraft" index={1} />
-        <StatusItem service={statusData.tarkov} label="Tarkov SPT" index={2} />
-        <StatusItem service={statusData.monitoring} label="Monitoring" index={3} />
+      <div className="minecraft-status-container">
+        <MinecraftStatusCard service={statusData.minecraft} />
       </div>
       <div className="status-link">
         <a href="https://status.renekris.dev/status/services" target="_blank" rel="noopener noreferrer">
-          View Detailed Status
+          View Detailed Monitoring
         </a>
       </div>
     </div>
