@@ -16,7 +16,7 @@ const StatusOverview = () => {
       console.log('Fetching Minecraft server status...');
       
       // Use mcsrvstat.us API to get Minecraft server info
-      const response = await fetch('https://api.mcsrvstat.us/3/renekris.dev:25565', {
+      const response = await fetch('https://api.mcsrvstat.us/3/mc.renekris.dev:25565', {
         cache: 'no-cache'
       });
       
