@@ -1,42 +1,44 @@
-# Environment variables and secrets
-.env
-.env.*
-!.env.example
-
-# SSL certificates and private keys
-caddy/data/
-caddy/config/
-
-# Database and monitoring data
-uptime-kuma-data/
+# React app build output
+/build
+/dist
 
 # Dependencies
 node_modules/
 
+# Environment files (if any are added later)
+.env
+.env.*
+!.env.example
+
 # Test results and reports
 test-results/
 playwright-report/
-
-# Backup files
-*.backup
-*.bak
-
-# Temporary files
-*.tmp
-*.temp
+coverage/
 
 # Logs
 *.log
 logs/
 
-# Legacy configurations (moved to archive)
-caddy-secure.yaml
-docker-compose-secure.yml
-*-legacy.*
-*-old.*
+# Temporary files
+*.tmp
+*.temp
 
-# Development and testing
-test-*.js
-*-test.sh
-deploy-with-tests.sh
-run-tests.sh
+# Development files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Backup files
+*.backup
+*.bak
