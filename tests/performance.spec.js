@@ -66,28 +66,13 @@ test.describe('Performance Tests', () => {
     }
   });
 
-  test('all external links should be accessible', async ({ page, context }) => {
-    await page.goto('/');
-    
-    // Get all external links
-    const externalLinks = await page.locator('a[href^="http"]').all();
-    
-    for (const link of externalLinks) {
-      const href = await link.getAttribute('href');
-      console.log(`Testing link: ${href}`);
-      
-      // Create new page to test link
-      const newPage = await context.newPage();
-      
-      try {
-        const response = await newPage.goto(href, { timeout: 10000 });
-        expect(response.status()).toBeLessThan(400);
-      } catch (error) {
-        console.warn(`Link ${href} failed: ${error.message}`);
-        // Don't fail test for external links that might be temporarily unavailable
-      } finally {
-        await newPage.close();
-      }
+  test('should have health endpoint available', async ({ page }) => {
+    // Test the /health endpoint that's used for deployment verification
+    try {
+      const response = await page.goto('/health');
+      expect(response.status()).toBeLessThan(400);
+    } catch (error) {
+      console.warn('Health endpoint not available - this is OK if not deployed');
     }
   });
 

@@ -10,7 +10,7 @@ function App() {
     <div className="container">
       <header>
         <h1>renekris.dev</h1>
-        <p className="tagline">✨ DOCKER SWARM ROLLING UPDATES ✨ Zero-Downtime Deployment Success!</p>
+        <p className="tagline">Full-Stack Developer & Infrastructure Engineer</p>
       </header>
       
       <StatusOverview />
