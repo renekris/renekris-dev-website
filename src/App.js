@@ -3,6 +3,8 @@ import StatusOverview from './components/StatusOverview';
 import Services from './components/Services';
 import Footer from './components/Footer';
 
+// Test GitHub Actions deployment trigger
+
 function App() {
   return (
     <div className="container">
