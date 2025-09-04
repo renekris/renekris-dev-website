@@ -1,66 +1,148 @@
-# renekris.dev Website
+# Renekris Development Website
 
-Professional website and infrastructure status dashboard showcasing full-stack development and DevOps capabilities.
+A modern React-based landing page with integrated status monitoring and health endpoints. This repository contains only the website source code - infrastructure and deployment configurations are managed separately in a private repository.
 
 **Live Site:** [https://renekris.dev](https://renekris.dev)
 
 ## Features
 
-- **Real-time Status Monitoring**: Integrated with Uptime Kuma API for live service status updates
-- **Infrastructure Dashboard**: Shows real-time status of game servers, web services, and monitoring systems
-- **Responsive Design**: Mobile-first approach with modern CSS grid and flexbox layouts
-- **Professional Portfolio**: Clean, developer-focused presentation of technical services
+- **Modern React Application**: Built with React 18 and modern JavaScript
+- **Real-time Status Monitoring**: Integrated API endpoints for service status
+- **Health Endpoints**: Built-in health checks for deployment verification
+- **Responsive Design**: Mobile-first approach with modern CSS
+- **Professional Portfolio**: Clean, developer-focused presentation
 
 ## Tech Stack
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Monitoring**: Uptime Kuma API integration
-- **Testing**: Playwright for end-to-end testing
-- **Infrastructure**: Docker, Caddy reverse proxy, Proxmox VE
-- **Security**: UFW firewall, Fail2ban, automatic HTTPS
+- **Frontend**: React 18, JavaScript (ES6+), CSS3
+- **Build**: Create React App, npm
+- **Testing**: Jest (unit tests), Playwright (E2E tests)
+- **Container**: Docker with multi-stage builds
+- **CI/CD**: GitHub Actions for automated deployment
 
 ## Development
 
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- Docker (for containerized development)
+
 ### Local Setup
 ```bash
+# Install dependencies
 npm install
+
+# Start development server
 npm start
 ```
-Visit http://localhost:8080 to view locally.
+Visit http://localhost:3000 to view the application.
+
+### Available Scripts
+
+```bash
+npm start       # Start development server
+npm test        # Run unit tests
+npm run build   # Build for production
+npm run test:e2e # Run Playwright E2E tests
+```
 
 ### Testing
 ```bash
+# Unit tests with Jest
 npm test
+
+# E2E tests with Playwright
+npm run test:e2e
+
+# Run tests with coverage
+npm test -- --coverage
 ```
 
-### Deployment
-The site deploys automatically to production infrastructure via custom deployment scripts.
+## Docker Development
 
-## Architecture
+```bash
+# Build Docker image
+docker build -t renekris-web .
 
-The website integrates with a comprehensive monitoring system that tracks:
-- Website uptime and response times
-- Minecraft game server status
-- Tarkov SPT server availability  
-- Management interface health
+# Run container
+docker run -p 3000:80 renekris-web
 
-Status updates refresh automatically every 30 seconds with graceful fallback when monitoring is unavailable.
+# Test health endpoint
+curl http://localhost:3000/health
+```
+
+## Deployment
+
+The website deploys automatically via GitHub Actions when changes are pushed to the main branch. The deployment process:
+
+1. **Automated Testing**: All tests must pass before deployment
+2. **Docker Build**: Creates optimized production container
+3. **Rolling Deployment**: Zero-downtime updates to production
+4. **Health Verification**: Automatic rollback if health checks fail
+
+## API Endpoints
+
+- **`/health`**: Health check endpoint for load balancers
+- **`/api/status`**: Service status information (proxied from monitoring)
 
 ## Project Structure
 
 ```
-├── simple-site.html          # Main website
-├── server.js                 # Local development server
-├── tests/                    # Playwright test suite
-├── package.json              # Dependencies and scripts
-└── docker-compose-secure.yml # Production containerization
+src/
+├── components/          # React components
+├── App.js              # Main application component
+├── index.js            # Application entry point
+└── index.css           # Global styles
+
+public/
+├── index.html          # HTML template
+└── favicon.ico         # Site icon
+
+tests/
+├── e2e/                # Playwright E2E tests
+└── unit/               # Jest unit tests
+
+.github/workflows/       # GitHub Actions CI/CD
+├── deploy-website.yml  # Production deployment
+└── test.yml           # Test automation
+
+Dockerfile              # Container configuration
+package.json            # Dependencies and scripts
 ```
 
-## Infrastructure Integration
+## Environment Configuration
 
-This website showcases practical DevOps and infrastructure management skills including:
-- API integration and real-time data fetching
-- Professional monitoring and alerting systems
-- Container orchestration and reverse proxy configuration
-- Automated deployment pipelines
-- Security best practices implementation
+The application supports environment-based configuration:
+
+```bash
+# Development
+NODE_ENV=development
+
+# Production (set automatically in CI/CD)
+NODE_ENV=production
+```
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Make your changes with appropriate tests
+3. Ensure all tests pass: `npm test && npm run test:e2e`
+4. Submit a pull request
+
+### Code Quality
+
+- ESLint for code linting
+- Prettier for code formatting  
+- Jest for unit testing
+- Playwright for E2E testing
+- GitHub Actions for CI/CD
+
+## Infrastructure
+
+This website is part of a larger infrastructure setup that includes:
+- **Reverse Proxy**: Traefik for routing and SSL termination
+- **Container Orchestration**: Docker Swarm for high availability
+- **Monitoring**: Uptime Kuma for service monitoring
+- **DNS**: Cloudflare for domain management
+
+Infrastructure configurations are managed in a separate private repository for security.
