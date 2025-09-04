@@ -9,42 +9,26 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.ref == 'refs/heads/main'
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
-    
     - name: Deploy to VM 106
       run: |
-        ssh -o StrictHostKeyChecking=no root@192.168.1.236 '
-          echo "Deploying website updates..."
-          cd /opt/renekris-infrastructure
-          
-          # Pull latest website code
-          cd ../renekris-dev-website
-          git pull origin main
-          
-          # Deploy website-only update
-          cd ../renekris-infrastructure
-          ./deploy-website-only.sh
-        '
+        cd /opt/renekris-infrastructure
+        echo "🚀 Starting automated deployment..."
+        ./deploy-website-compose.sh
     
     - name: Verify deployment
       run: |
-        ssh -o StrictHostKeyChecking=no root@192.168.1.236 '
-          # Wait for service to stabilize
-          sleep 10
-          
-          # Check service status
-          docker service ls --filter name=traefik-stack_web
-          
-          # Test health endpoint
-          curl -f http://localhost/health || echo "Health check failed"
-        '
+        # Wait for service to stabilize
+        sleep 10
+        
+        # Check container status
+        docker ps --filter name=renekris-web --format "table {{.Names}}\t{{.Status}}"
+        
+        # Test health endpoint
+        curl -f -H 'Host: renekris.dev' http://localhost/ > /dev/null && echo "✅ External health check passed" || echo "❌ Health check failed"
