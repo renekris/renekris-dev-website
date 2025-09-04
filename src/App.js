@@ -3,7 +3,7 @@ import StatusOverview from './components/StatusOverview';
 import Services from './components/Services';
 import Footer from './components/Footer';
 
-// Test GitHub Actions deployment trigger
+// ✅ GitHub Actions deployment working!
 
 function App() {
   return (
