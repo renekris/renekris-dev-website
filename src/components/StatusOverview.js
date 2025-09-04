@@ -3,8 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 const StatusOverview = () => {
   const [statusData, setStatusData] = useState({
     minecraft: { 
-      online: true, 
-      status: 'Online',
+      online: false, 
+      status: 'Checking...',
       playerCount: null,
       uptime: null
     }
@@ -81,7 +81,14 @@ const StatusOverview = () => {
     const uptimeData = await fetchUptimeKumaStatus();
     const minecraftData = await fetchMinecraftStatus();
     
-    let newStatusData = { ...statusData };
+    let newStatusData = {
+      minecraft: { 
+        online: false, 
+        status: 'Checking...', 
+        playerCount: null,
+        uptime: null
+      }
+    };
     
     // Start with Uptime Kuma monitoring data
     if (uptimeData) {
@@ -116,7 +123,7 @@ const StatusOverview = () => {
       }
     }
     
-    // Enhance with Minecraft-specific data
+    // Enhance with Minecraft-specific data (prioritize over Uptime Kuma for accuracy)
     if (minecraftData) {
       console.log('Enhancing with Minecraft server data');
       newStatusData.minecraft = {
@@ -127,6 +134,17 @@ const StatusOverview = () => {
         maxPlayers: minecraftData.players.max,
         version: minecraftData.version,
         motd: minecraftData.motd
+      };
+    } else if (!uptimeData) {
+      // If neither source is available, explicitly set to monitoring unavailable
+      newStatusData.minecraft = {
+        online: false,
+        status: 'Server Offline',
+        playerCount: null,
+        maxPlayers: null,
+        version: null,
+        motd: null,
+        uptime: null
       };
     }
     
@@ -144,7 +162,7 @@ const StatusOverview = () => {
     }
     
     setStatusData(newStatusData);
-  }, [statusData]);
+  }, []);
 
   useEffect(() => {
     // Initial status check after delay
@@ -172,13 +190,23 @@ const StatusOverview = () => {
       <div className="status-details">
         <div className="status-main">
           <span className="status-text" style={{ 
-            color: service.online ? '#00ff88' : '#ff4444' 
+            color: service.online ? '#00ff88' : '#ff4444',
+            fontWeight: '600'
           }}>
             {service.status}
           </span>
           {service.uptime && (
             <span className="uptime-text">
               {service.uptime.toFixed(1)}% uptime (24h)
+            </span>
+          )}
+          {!service.online && service.status !== 'Checking...' && (
+            <span className="offline-note" style={{ 
+              color: '#ff7777', 
+              fontSize: '0.8rem', 
+              fontStyle: 'italic' 
+            }}>
+              Server is currently offline
             </span>
           )}
         </div>
@@ -212,11 +240,6 @@ const StatusOverview = () => {
       </h2>
       <div className="minecraft-status-container">
         <MinecraftStatusCard service={statusData.minecraft} />
-      </div>
-      <div className="status-link">
-        <a href="https://status.renekris.dev/status/services" target="_blank" rel="noopener noreferrer">
-          View Detailed Monitoring
-        </a>
       </div>
     </div>
   );

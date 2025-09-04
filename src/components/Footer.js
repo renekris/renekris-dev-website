@@ -15,6 +15,15 @@ const Footer = () => {
       </div>
       <div className="footer-links">
         <a 
+          href="https://status.renekris.dev/status/services" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="github-link" 
+          title="View Detailed Monitoring"
+        >
+          View Detailed Monitoring
+        </a>
+        <a 
           href="https://github.com/renekris/renekris-dev-website" 
           target="_blank" 
           rel="noopener noreferrer" 
