@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { FaGamepad } from 'react-icons/fa';
 
 const StatusOverview = () => {
   const [statusData, setStatusData] = useState({
@@ -56,7 +57,10 @@ const StatusOverview = () => {
 
   return (
     <div className="service-card">
-      <h3>⛏️ Minecraft Server</h3>
+      <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <FaGamepad style={{ flexShrink: 0 }} />
+        <span>Minecraft Server</span>
+      </h3>
       <div className="service-status" style={{ 
         background: statusData.online ? '#1a4a3a' : '#4a1a1a',
         color: statusData.online ? '#00ff88' : '#ff4444'

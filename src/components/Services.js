@@ -1,16 +1,39 @@
 import React from 'react';
 import ServiceCard from './ServiceCard';
 import StatusOverview from './StatusOverview';
+import { 
+  FaCode, 
+  FaChartLine, 
+  FaGamepad, 
+  FaServer,
+  FaTools,
+  FaCheckCircle,
+  FaLock,
+  FaBolt
+} from 'react-icons/fa';
 
 const Services = () => {
+  const IconTitle = ({ icon, title }) => (
+    <span style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '8px',
+      whiteSpace: 'nowrap',
+      flexShrink: 0
+    }}>
+      <span style={{ flexShrink: 0 }}>{icon}</span>
+      <span>{title}</span>
+    </span>
+  );
+
   return (
     <div className="services">
       {/* Live Minecraft Server Status - Real-time data */}
       <StatusOverview />
       
       <ServiceCard
-        title="🌐 Development Portfolio"
-        status="🚧 In Progress"
+        title={<IconTitle icon={<FaCode />} title="Development Portfolio" />}
+        status={<IconTitle icon={<FaTools />} title="In Progress" />}
         statusColor="coming-soon"
         connectionInfo={{
           label: "Preview",
@@ -24,8 +47,8 @@ const Services = () => {
       </ServiceCard>
       
       <ServiceCard
-        title="📊 Infrastructure Monitoring"
-        status="🟢 Healthy"
+        title={<IconTitle icon={<FaChartLine />} title="Infrastructure Monitoring" />}
+        status={<IconTitle icon={<FaCheckCircle />} title="Healthy" />}
         statusColor="active"
         connectionInfo={{
           label: "Public Status",
@@ -39,8 +62,8 @@ const Services = () => {
       </ServiceCard>
       
       <ServiceCard
-        title="🎮 Game Server Management"
-        status="🔐 Admin Only"
+        title={<IconTitle icon={<FaGamepad />} title="Game Server Management" />}
+        status={<IconTitle icon={<FaLock />} title="Admin Only" />}
         statusColor="private"
         connectionInfo={{
           label: "Control Panel",
@@ -54,8 +77,8 @@ const Services = () => {
       </ServiceCard>
       
       <ServiceCard
-        title="🏗️ Infrastructure Stack"
-        status="⚡ Production Ready"
+        title={<IconTitle icon={<FaServer />} title="Infrastructure Stack" />}
+        status={<IconTitle icon={<FaBolt />} title="Production Ready" />}
         statusColor="active"
         connectionInfo={{
           label: "Architecture",
