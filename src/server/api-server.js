@@ -77,7 +77,7 @@ const server = http.createServer(async (req, res) => {
     if (req.url === '/api/minecraft-status') {
         try {
             // Read status from the infrastructure service's status file
-            const statusFile = path.join(__dirname, '..', 'renekris-infrastructure', 'minecraft-server-status.json');
+            const statusFile = path.join(__dirname, '..', '..', '..', 'renekris-infrastructure', 'minecraft-server-status.json');
             const statusData = fs.readFileSync(statusFile, 'utf8');
             const minecraftStatus = JSON.parse(statusData);
             
