@@ -77,7 +77,7 @@ const server = http.createServer(async (req, res) => {
     if (req.url === '/api/minecraft-status') {
         try {
             // Read status from the infrastructure service's status file
-            const statusFile = path.join(__dirname, '..', '..', '..', 'renekris-infrastructure', 'minecraft-server-status.json');
+            const statusFile = path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
             const statusData = fs.readFileSync(statusFile, 'utf8');
             const minecraftStatus = JSON.parse(statusData);
             
@@ -106,10 +106,11 @@ const server = http.createServer(async (req, res) => {
 
     // Handle root path
     if (req.url === '/' || req.url === '/index.html') {
-        req.url = '/simple-site.html';
+        req.url = '/index.html';
     }
 
-    const filePath = path.join(__dirname, req.url);
+    // Serve static files from the build directory
+    const filePath = path.join(__dirname, 'build', req.url);
     const extname = String(path.extname(filePath)).toLowerCase();
     
     // MIME types
@@ -136,8 +137,20 @@ const server = http.createServer(async (req, res) => {
     fs.readFile(filePath, (error, content) => {
         if (error) {
             if (error.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('<h1>404 Not Found</h1>', 'utf-8');
+                // For React Router: serve index.html for non-API routes
+                const indexPath = path.join(__dirname, 'build', 'index.html');
+                fs.readFile(indexPath, (indexError, indexContent) => {
+                    if (indexError) {
+                        res.writeHead(404, { 'Content-Type': 'text/html' });
+                        res.end('<h1>404 Not Found</h1>', 'utf-8');
+                    } else {
+                        res.writeHead(200, { 
+                            'Content-Type': 'text/html',
+                            'Access-Control-Allow-Origin': '*'
+                        });
+                        res.end(indexContent, 'utf-8');
+                    }
+                });
             } else {
                 res.writeHead(500);
                 res.end(`Server Error: ${error.code}`, 'utf-8');

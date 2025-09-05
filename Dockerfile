@@ -13,37 +13,23 @@ COPY src/ ./src/
 # Build the React application
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Production stage - Use Node.js to serve both static files and API
+FROM node:18-alpine
+
+WORKDIR /app
 
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Copy built app from build stage
-COPY --from=build /app/build /usr/share/nginx/html
+# Copy built React app
+COPY --from=build /app/build ./build
 
-# Copy nginx configuration for React Router (if needed later)
-COPY <<EOF /etc/nginx/conf.d/default.conf
-server {
-    listen 80;
-    location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        try_files \$uri \$uri/ /index.html;
-    }
-    
-    # Health check endpoint
-    location /health {
-        access_log off;
-        return 200 "healthy\n";
-        add_header Content-Type text/plain;
-    }
-}
-EOF
+# Copy API server
+COPY src/server/api-server.js ./server.js
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8080
+CMD ["node", "server.js"]
