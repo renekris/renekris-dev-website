@@ -1,5 +1,4 @@
 import React from 'react';
-import StatusOverview from './components/StatusOverview';
 import Services from './components/Services';
 import Footer from './components/Footer';
 
@@ -13,7 +12,6 @@ function App() {
         <p className="tagline">Full-Stack Developer & Infrastructure Engineer</p>
       </header>
       
-      <StatusOverview />
       <Services />
       <Footer />
     </div>

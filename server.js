@@ -73,6 +73,37 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // Handle API endpoint for Minecraft server status
+    if (req.url === '/api/minecraft-status') {
+        try {
+            // Read status from the infrastructure service's status file
+            const statusFile = path.join(__dirname, '..', 'renekris-infrastructure', 'minecraft-server-status.json');
+            const statusData = fs.readFileSync(statusFile, 'utf8');
+            const minecraftStatus = JSON.parse(statusData);
+            
+            res.writeHead(200, { 
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'no-cache'
+            });
+            res.end(JSON.stringify(minecraftStatus));
+        } catch (error) {
+            console.error('Error reading Minecraft status:', error);
+            res.writeHead(200, { 
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'no-cache'
+            });
+            res.end(JSON.stringify({
+                online: false,
+                players: { online: 0, max: 20 },
+                motd: null,
+                error: 'Status unavailable'
+            }));
+        }
+        return;
+    }
+
     // Handle root path
     if (req.url === '/' || req.url === '/index.html') {
         req.url = '/simple-site.html';
@@ -127,4 +158,21 @@ server.listen(PORT, () => {
     console.log(`Local development server running at http://localhost:${PORT}`);
     console.log(`View the website at: http://localhost:${PORT}`);
     console.log('Press Ctrl+C to stop the server');
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+    console.log('\nShutting down server...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
+});
+
+process.on('SIGTERM', () => {
+    console.log('\nShutting down server...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
 });

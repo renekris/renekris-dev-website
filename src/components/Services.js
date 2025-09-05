@@ -1,9 +1,15 @@
 import React from 'react';
 import ServiceCard from './ServiceCard';
+import StatusOverview from './StatusOverview';
 
 const Services = () => {
   return (
     <div className="services">
+      {/* Live Minecraft Server Status - Real-time data */}
+      <div className="service-card">
+        <StatusOverview />
+      </div>
+      
       <ServiceCard
         title="🌐 Portfolio Website"
         status="Coming Soon"
@@ -25,33 +31,6 @@ const Services = () => {
       </ServiceCard>
       
       <ServiceCard
-        title="⛏️ Minecraft Server"
-        status="✅ Online"
-        statusColor="active"
-        connectionInfo={{
-          label: "Server Address",
-          value: "renekris.dev"
-        }}
-      >
-        <strong>Modpack:</strong> Life in the Village 3<br/>
-        <strong>Version:</strong> 1.19.2 + Forge<br/>
-        <strong>Features:</strong> Create mod, magic, exploration
-      </ServiceCard>
-      
-      <ServiceCard
-        title="🎯 Tarkov SPT"
-        status="✅ Online"
-        statusColor="active"
-        connectionInfo={{
-          label: "Server URL",
-          value: "https://tarkov.renekris.dev"
-        }}
-      >
-        <strong>Mode:</strong> Single Player Tarkov<br/>
-        <strong>Features:</strong> Offline gameplay with mods
-      </ServiceCard>
-      
-      <ServiceCard
         title="🛠️ Management"
         status="🔒 Private"
         statusColor="private"
@@ -68,10 +47,11 @@ const Services = () => {
         status="⚡ Optimized"
         statusColor="active"
       >
-        <strong>Platform:</strong> Proxmox VMs<br/>
-        <strong>Containers:</strong> Docker + Caddy<br/>
-        <strong>Security:</strong> UFW + Fail2ban<br/>
-        <strong>SSL:</strong> Automatic HTTPS
+        <strong>Platform:</strong> Proxmox VE hypervisor<br/>
+        <strong>Web Server:</strong> Docker + Traefik reverse proxy<br/>
+        <strong>Monitoring:</strong> Uptime Kuma + real-time status API<br/>
+        <strong>Security:</strong> UFW firewall + automatic SSL certificates<br/>
+        <strong>Network:</strong> Cloudflare DNS + DDoS protection
       </ServiceCard>
     </div>
   );
