@@ -55,56 +55,42 @@ const StatusOverview = () => {
   }, [updateStatus]);
 
   return (
-    <div className="minecraft-status-card">
-      <div className="status-header">
+    <div className="service-card">
+      <h3>⛏️ Minecraft Server</h3>
+      <div className="service-status" style={{ 
+        background: statusData.online ? '#1a4a3a' : '#4a1a1a',
+        color: statusData.online ? '#00ff88' : '#ff4444'
+      }}>
         <span 
           className="status-dot" 
           style={{ 
+            display: 'inline-block',
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            marginRight: '8px',
             background: statusData.online ? '#00ff88' : '#ff4444',
             animation: statusData.online ? 'pulse 2s infinite' : 'none'
           }}
         ></span>
-        <h3>Minecraft Server</h3>
+        {statusData.status}
       </div>
       
-      <div className="status-details">
-        <div className="status-main">
-          <span className="status-text" style={{ 
-            color: statusData.online ? '#00ff88' : '#ff4444',
-            fontWeight: '600'
-          }}>
-            {statusData.status}
-          </span>
-          
-          {!statusData.online && statusData.status !== 'Checking...' && (
-            <span className="offline-note" style={{ 
-              color: '#ff7777', 
-              fontSize: '0.8rem', 
-              fontStyle: 'italic' 
-            }}>
-              Server is currently offline
-            </span>
-          )}
-        </div>
-        
-        <div className="connection-info">
-          <div className="connection-item">
-            <span className="connection-label">Server Address:</span>
-            <span className="connection-value">renekris.dev</span>
-          </div>
-          
-          <div className="connection-item">
-            <span className="connection-label">Players Online:</span>
-            <span className="connection-value">{statusData.players.online}/{statusData.players.max}</span>
-          </div>
-          
-          {statusData.motd && (
-            <div className="connection-item">
-              <span className="connection-label">Server:</span>
-              <span className="connection-value">{statusData.motd}</span>
-            </div>
-          )}
-        </div>
+      <div className="connection-box">
+        <div className="label">Server Address:</div>
+        <div className="value">renekris.dev</div>
+      </div>
+      
+      <div className="service-details">
+        <strong>Players Online:</strong> {statusData.players.online}/{statusData.players.max}<br/>
+        {statusData.motd && (
+          <>
+            <strong>Server:</strong> {statusData.motd}<br/>
+          </>
+        )}
+        <strong>Modpack:</strong> Life in the Village 3<br/>
+        <strong>Version:</strong> 1.19.2 + Forge<br/>
+        <strong>Features:</strong> Create mod, magic, exploration
       </div>
     </div>
   );

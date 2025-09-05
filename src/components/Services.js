@@ -6,9 +6,7 @@ const Services = () => {
   return (
     <div className="services">
       {/* Live Minecraft Server Status - Real-time data */}
-      <div className="service-card">
-        <StatusOverview />
-      </div>
+      <StatusOverview />
       
       <ServiceCard
         title="🌐 Portfolio Website"
