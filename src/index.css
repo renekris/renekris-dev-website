@@ -1,370 +1,208 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    @apply bg-gray-900 text-white font-sans leading-relaxed;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  code {
+    @apply font-mono;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #1a1a1a;
-  color: #ffffff;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-h1 {
-  font-size: 3rem;
-  font-weight: 300;
-  margin-bottom: 0.5rem;
-  color: #00d4ff;
-  text-shadow: 
-    0 0 10px rgba(0, 212, 255, 0.3),
-    0 0 20px rgba(0, 212, 255, 0.2),
-    0 0 30px rgba(0, 212, 255, 0.1);
-  filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.4));
-}
-
-.tagline {
-  font-size: 1.2rem;
-  color: #888;
-  margin-bottom: 2rem;
-}
-
-.status-overview {
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 3rem;
-  border: 1px solid #333;
-}
-
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.status-item {
-  text-align: center;
-  padding: 1rem;
-  background: #333;
-  border-radius: 8px;
-}
-
-.status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #00ff88;
-  display: inline-block;
-  margin-right: 0.5rem;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.services {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-@keyframes fadeInUp {
-  from {
+/* Custom component styles */
+@layer components {
+  .glow-text {
+    text-shadow: 
+      0 0 10px rgba(0, 212, 255, 0.5),
+      0 0 20px rgba(0, 212, 255, 0.3),
+      0 0 30px rgba(0, 212, 255, 0.2);
+    filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.6));
+  }
+  
+  .minecraft-panel {
+    background: linear-gradient(135deg, #2d5016 0%, #3d6b1e 50%, #2d5016 100%);
+    border: 4px solid #5a8a2a;
+    border-style: outset;
+    box-shadow: 
+      inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.5),
+      0 8px 32px rgba(90, 138, 42, 0.3);
+    position: relative;
+  }
+  
+  .minecraft-panel::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    background: 
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(255, 255, 255, 0.05) 1px,
+        rgba(255, 255, 255, 0.05) 2px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 1px,
+        rgba(255, 255, 255, 0.05) 1px,
+        rgba(255, 255, 255, 0.05) 2px
+      );
+    pointer-events: none;
+    border-radius: 4px;
+  }
+  
+  .minecraft-text {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.5px;
+  }
+  
+  .minecraft-button {
+    background: linear-gradient(135deg, #8b8b8b 0%, #5a5a5a 50%, #8b8b8b 100%);
+    border: 2px solid #a0a0a0;
+    border-style: outset;
+    color: white;
+    padding: 8px 16px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    transition: all 0.1s ease;
+  }
+  
+  .minecraft-button:hover {
+    background: linear-gradient(135deg, #a0a0a0 0%, #707070 50%, #a0a0a0 100%);
+    border-color: #b5b5b5;
+    transform: translate(1px, 1px);
+  }
+  
+  .minecraft-button:active {
+    border-style: inset;
+    background: linear-gradient(135deg, #707070 0%, #8b8b8b 50%, #707070 100%);
+  }
+  
+  .server-status-online {
+    color: #55ff55;
+    text-shadow: 0 0 8px rgba(85, 255, 85, 0.6);
+  }
+  
+  .server-status-offline {
+    color: #ff5555;
+    text-shadow: 0 0 8px rgba(255, 85, 85, 0.6);
+  }
+  
+  .service-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+    border: 2px solid #475569;
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.6), transparent);
     opacity: 0;
-    transform: translateY(30px);
+    transition: opacity 0.3s ease;
   }
-  to {
+  
+  .service-card:hover {
+    transform: translateY(-8px);
+    border-color: #00d4ff;
+    box-shadow: 
+      0 20px 40px rgba(0, 212, 255, 0.1),
+      0 8px 24px rgba(0, 212, 255, 0.08);
+  }
+  
+  .service-card:hover::before {
     opacity: 1;
-    transform: translateY(0);
   }
-}
-
-.service-card:nth-child(1) { animation: fadeInUp 0.6s ease 0.1s both; }
-.service-card:nth-child(2) { animation: fadeInUp 0.6s ease 0.2s both; }
-.service-card:nth-child(3) { animation: fadeInUp 0.6s ease 0.3s both; }
-.service-card:nth-child(4) { animation: fadeInUp 0.6s ease 0.4s both; }
-.service-card:nth-child(5) { animation: fadeInUp 0.6s ease 0.5s both; }
-
-.service-card {
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid #333;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.service-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.service-card:hover {
-  transform: translateY(-8px);
-  border-color: #00d4ff;
-  box-shadow: 
-    0 10px 25px rgba(0, 212, 255, 0.1),
-    0 0 20px rgba(0, 212, 255, 0.05);
-}
-
-.service-card:hover::before {
-  opacity: 1;
-}
-
-.service-card h3 {
-  color: #00d4ff;
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-}
-
-.service-status {
-  display: inline-block;
-  background: #1a4a3a;
-  color: #00ff88;
-  padding: 0.3rem 0.8rem;
-  border-radius: 15px;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.connection-box {
-  background: #1a1a1a;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
-  border-left: 3px solid #00d4ff;
-  font-family: 'Courier New', monospace;
-}
-
-.connection-box .label {
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.connection-box .value {
-  color: #00d4ff;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-.service-details {
-  color: #ccc;
-  font-size: 0.9rem;
-}
-
-.service-details strong {
-  color: #fff;
-}
-
-footer {
-  margin-top: auto;
-  text-align: center;
-  padding-top: 2rem;
-  border-top: 1px solid #333;
-  color: #666;
-}
-
-.tech-info {
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.status-link {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.status-link a {
-  color: #00d4ff;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border: 1px solid #00d4ff;
-  border-radius: 20px;
-  transition: all 0.2s ease;
-}
-
-.status-link a:hover {
-  background: #00d4ff;
-  color: #1a1a1a;
-}
-
-.footer-links {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.github-link {
-  display: inline-flex;
-  align-items: center;
-  color: #666;
-  text-decoration: none;
-  font-size: 0.9rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #333;
-  border-radius: 6px;
-  background: #2a2a2a;
-  transition: all 0.3s ease;
-}
-
-.github-link:hover {
-  color: #00d4ff;
-  border-color: #00d4ff;
-  background: #1a1a1a;
-  transform: translateY(-1px);
-}
-
-.github-link svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  margin-right: 0.5rem;
-}
-
-@media (max-width: 768px) {
-  .footer-links {
-    flex-direction: column;
+  
+  .connection-display {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Courier New', monospace;
+    margin: 16px 0;
+  }
+  
+  .connection-display:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.4);
+  }
+  
+  .status-badge {
+    display: inline-flex;
     align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 8px 0;
   }
   
-  h1 {
-    font-size: 2.5rem;
+  .status-operational {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #22c55e;
   }
   
-  .container {
-    padding: 1rem;
+  .status-development {
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fbbf24;
   }
   
-  .services {
-    grid-template-columns: 1fr;
+  .status-private {
+    background: rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(147, 51, 234, 0.4);
+    color: #9333ea;
   }
   
-  .status-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    border-radius: 8px;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.3s ease;
   }
   
-  .minecraft-status-card {
-    min-width: unset;
-    margin: 0 0.5rem;
+  .github-link:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.4);
+    color: #00d4ff;
+    transform: translateY(-2px);
   }
-  
-  .connection-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 0.25rem;
-  }
-}
-
-/* Minecraft Status Card Styles */
-.minecraft-status-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.minecraft-status-card {
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid #333;
-  min-width: 300px;
-  max-width: 400px;
-  width: 100%;
-}
-
-.status-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.status-header h3 {
-  color: #00d4ff;
-  font-size: 1.5rem;
-  margin-left: 0.75rem;
-  font-weight: 400;
-}
-
-.status-details {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.status-main {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.status-text {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.uptime-text {
-  font-size: 0.9rem;
-  color: #888;
-}
-
-.connection-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.connection-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  background: #333;
-  border-radius: 6px;
-}
-
-.connection-label {
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.connection-value {
-  color: #00d4ff;
-  font-weight: 500;
-  font-family: 'Courier New', monospace;
 }

@@ -1,26 +1,62 @@
 import React from 'react';
 
 const ServiceCard = ({ title, status, statusColor, children, connectionInfo }) => {
+  const getStatusClass = () => {
+    switch(statusColor) {
+      case 'active':
+        return 'status-operational';
+      case 'private':
+        return 'status-private';
+      case 'coming-soon':
+        return 'status-development';
+      default:
+        return 'status-operational';
+    }
+  };
+
+  const getStatusIcon = () => {
+    switch(statusColor) {
+      case 'active':
+        return '✅';
+      case 'private':
+        return '🔒';
+      case 'coming-soon':
+        return '🚧';
+      default:
+        return '✅';
+    }
+  };
+
   return (
-    <div className="service-card">
-      <h3>{title}</h3>
-      <div className="service-status" style={{ 
-        background: statusColor === 'active' ? '#1a4a3a' : 
-                   statusColor === 'private' ? '#1a1a4a' :
-                   statusColor === 'coming-soon' ? '#4a3a1a' : '#1a4a3a',
-        color: statusColor === 'active' ? '#00ff88' :
-               statusColor === 'private' ? '#6666ff' :
-               statusColor === 'coming-soon' ? '#ffaa00' : '#00ff88'
-      }}>
-        {status}
+    <div 
+      className="service-card h-full flex flex-col" 
+      tabIndex="0"
+      role="region"
+      aria-label={`Service: ${typeof title === 'string' ? title : 'Service Details'}`}
+    >
+      {/* Card header */}
+      <div className="flex items-center gap-3 mb-4">
+        <h3 className="text-primary text-xl font-semibold flex-1">{title}</h3>
       </div>
+      
+      {/* Status badge */}
+      <div className={`status-badge ${getStatusClass()} mb-4`}>
+        <span>{getStatusIcon()}</span>
+        <span>{status}</span>
+      </div>
+      
+      {/* Connection info */}
       {connectionInfo && (
-        <div className="connection-box">
-          <div className="label">{connectionInfo.label}:</div>
-          <div className="value">{connectionInfo.value}</div>
+        <div className="connection-display mb-4">
+          <div className="text-gray-400 text-sm mb-1">{connectionInfo.label}:</div>
+          <div className="text-primary font-mono text-sm font-bold break-all">
+            {connectionInfo.value}
+          </div>
         </div>
       )}
-      <div className="service-details">
+      
+      {/* Service details */}
+      <div className="text-gray-300 text-sm leading-relaxed space-y-2 flex-1">
         {children}
       </div>
     </div>

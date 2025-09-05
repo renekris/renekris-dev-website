@@ -8,12 +8,12 @@ const Footer = () => {
   );
 
   return (
-    <footer>
-      <p>&copy; 2025 Renekris. Professional Infrastructure & Development.</p>
-      <div className="tech-info">
-        <strong>Tech Stack:</strong> React • Docker • Traefik • Cloudflare • Proxmox • Ubuntu Server
+    <footer className="mt-auto text-center pt-8 border-t border-bg-tertiary text-text-tertiary">
+      <p className="mb-4">&copy; 2025 Renekris. Professional Infrastructure & Development.</p>
+      <div className="mb-4 text-sm text-text-secondary">
+        <strong className="text-white">Tech Stack:</strong> React • Docker • Traefik • Cloudflare • Proxmox • Ubuntu Server
       </div>
-      <div className="footer-links">
+      <div className="flex flex-col md:flex-row justify-center items-center gap-4">
         <a 
           href="https://status.renekris.dev/status/services" 
           target="_blank" 

@@ -1,14 +1,12 @@
 import React from 'react';
 import ServiceCard from './ServiceCard';
-import StatusOverview from './StatusOverview';
+import GamingHub from './GamingHub';
 import { 
   FaCode, 
   FaChartLine, 
-  FaGamepad, 
   FaServer,
   FaTools,
   FaCheckCircle,
-  FaLock,
   FaBolt
 } from 'react-icons/fa';
 
@@ -27,70 +25,106 @@ const Services = () => {
   );
 
   return (
-    <div className="services">
-      {/* Live Minecraft Server Status - Real-time data */}
-      <StatusOverview />
+    <div className="space-y-16">
+      {/* Gaming Services Hub - Featured Section */}
+      <GamingHub />
       
-      <ServiceCard
-        title={<IconTitle icon={<FaCode />} title="Development Portfolio" />}
-        status={<IconTitle icon={<FaTools />} title="In Progress" />}
-        statusColor="coming-soon"
-        connectionInfo={{
-          label: "Preview",
-          value: "renekris.dev/portfolio"
-        }}
-      >
-        <strong>Purpose:</strong> Showcase full-stack development projects<br/>
-        <strong>Tech Stack:</strong> React, Node.js, PostgreSQL<br/>
-        <strong>Features:</strong> Interactive demos, case studies, GitHub integration<br/>
-        <strong>Timeline:</strong> Launch Q1 2025
-      </ServiceCard>
-      
-      <ServiceCard
-        title={<IconTitle icon={<FaChartLine />} title="Infrastructure Monitoring" />}
-        status={<IconTitle icon={<FaCheckCircle />} title="Healthy" />}
-        statusColor="active"
-        connectionInfo={{
-          label: "Public Status",
-          value: "status.renekris.dev"
-        }}
-      >
-        <strong>Coverage:</strong> 24/7 uptime monitoring across all services<br/>
-        <strong>Metrics:</strong> Response time, availability, SSL certificate expiry<br/>
-        <strong>Alerts:</strong> Discord notifications + email alerts<br/>
-        <strong>Retention:</strong> 90-day historical data with trend analysis
-      </ServiceCard>
-      
-      <ServiceCard
-        title={<IconTitle icon={<FaGamepad />} title="Game Server Management" />}
-        status={<IconTitle icon={<FaLock />} title="Admin Only" />}
-        statusColor="private"
-        connectionInfo={{
-          label: "Control Panel",
-          value: "192.168.1.232:8443"
-        }}
-      >
-        <strong>Platform:</strong> Crafty Controller with 2FA authentication<br/>
-        <strong>Features:</strong> Real-time console, file manager, backup scheduling<br/>
-        <strong>Monitoring:</strong> CPU/RAM usage, player activity, crash detection<br/>
-        <strong>Access:</strong> Private network only (192.168.1.x subnet)
-      </ServiceCard>
-      
-      <ServiceCard
-        title={<IconTitle icon={<FaServer />} title="Infrastructure Stack" />}
-        status={<IconTitle icon={<FaBolt />} title="Production Ready" />}
-        statusColor="active"
-        connectionInfo={{
-          label: "Architecture",
-          value: "Hybrid Cloud + On-Premises"
-        }}
-      >
-        <strong>Compute:</strong> Proxmox VE hypervisor with VM orchestration<br/>
-        <strong>Web Layer:</strong> Traefik reverse proxy with automatic SSL<br/>
-        <strong>Networking:</strong> Cloudflare CDN + DDoS protection<br/>
-        <strong>Security:</strong> UFW firewall, fail2ban intrusion detection<br/>
-        <strong>Deployment:</strong> GitHub Actions CI/CD with blue-green strategy
-      </ServiceCard>
+      {/* Supporting Services - Clean 3-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <ServiceCard
+          title={
+            <div className="flex items-center gap-3">
+              <FaCode className="text-xl" />
+              <span>Development Portfolio</span>
+            </div>
+          }
+          status="In Development"
+          statusColor="coming-soon"
+          connectionInfo={{
+            label: "Preview URL",
+            value: "renekris.dev/portfolio"
+          }}
+        >
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-400">🎯</span>
+              <span><strong className="text-white">Purpose:</strong> Interactive project showcase</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-400">⚛️</span>
+              <span><strong className="text-white">Stack:</strong> React 18, Node.js, Docker</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-purple-400">✨</span>
+              <span><strong className="text-white">Features:</strong> Live demos, case studies</span>
+            </div>
+          </div>
+        </ServiceCard>
+        
+        <ServiceCard
+          title={
+            <div className="flex items-center gap-3">
+              <FaChartLine className="text-xl" />
+              <span>Infrastructure Monitoring</span>
+            </div>
+          }
+          status="Operational"
+          statusColor="active"
+          connectionInfo={{
+            label: "Public Dashboard",
+            value: "status.renekris.dev"
+          }}
+        >
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-400">📊</span>
+              <span><strong className="text-white">Platform:</strong> Uptime Kuma</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-400">🔍</span>
+              <span><strong className="text-white">Monitoring:</strong> HTTP/HTTPS endpoints</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-400">🔒</span>
+              <span><strong className="text-white">Security:</strong> SSL certificates, DNS</span>
+            </div>
+          </div>
+        </ServiceCard>
+        
+        <ServiceCard
+          title={
+            <div className="flex items-center gap-3">
+              <FaServer className="text-xl" />
+              <span>Infrastructure Stack</span>
+            </div>
+          }
+          status="Production Grade"
+          statusColor="active"
+          connectionInfo={{
+            label: "Architecture",
+            value: "Hybrid Cloud + Self-Hosted"
+          }}
+        >
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-purple-400">🖥️</span>
+              <span><strong className="text-white">Hypervisor:</strong> Proxmox VE 8.x</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-400">🌐</span>
+              <span><strong className="text-white">Proxy:</strong> Traefik v3.5.1</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-orange-400">☁️</span>
+              <span><strong className="text-white">CDN:</strong> Cloudflare DDoS protection</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-400">🐳</span>
+              <span><strong className="text-white">Containers:</strong> Docker Swarm</span>
+            </div>
+          </div>
+        </ServiceCard>
+      </div>
     </div>
   );
 };

@@ -1,12 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaGamepad } from 'react-icons/fa';
+import { 
+  FaGamepad, 
+  FaUsers, 
+  FaComments, 
+  FaCube, 
+  FaCog,
+  FaBuilding,
+  FaServer,
+  FaCopy,
+  FaTools
+} from 'react-icons/fa';
 
 const StatusOverview = () => {
   const [statusData, setStatusData] = useState({
     online: false,
     players: { online: 0, max: 20 },
     motd: null,
-    status: 'Checking...'
+    status: 'Checking...',
+    loading: true
   });
 
   // Fetch Minecraft server status from our backend
@@ -32,7 +43,8 @@ const StatusOverview = () => {
         online: false,
         players: { online: 0, max: 20 },
         motd: null,
-        status: 'Offline'
+        status: 'Offline',
+        loading: false
       };
     }
   };
@@ -41,7 +53,8 @@ const StatusOverview = () => {
     const data = await fetchMinecraftStatus();
     setStatusData({
       ...data,
-      status: data.online ? 'Online' : 'Offline'
+      status: data.online ? 'Online' : 'Offline',
+      loading: false
     });
   }, []);
 
@@ -56,45 +69,88 @@ const StatusOverview = () => {
   }, [updateStatus]);
 
   return (
-    <div className="service-card">
-      <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <FaGamepad style={{ flexShrink: 0 }} />
-        <span>Minecraft Server</span>
-      </h3>
-      <div className="service-status" style={{ 
-        background: statusData.online ? '#1a4a3a' : '#4a1a1a',
-        color: statusData.online ? '#00ff88' : '#ff4444'
-      }}>
-        <span 
-          className="status-dot" 
-          style={{ 
-            display: 'inline-block',
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            marginRight: '8px',
-            background: statusData.online ? '#00ff88' : '#ff4444',
-            animation: statusData.online ? 'pulse 2s infinite' : 'none'
-          }}
-        ></span>
-        {statusData.status}
+    <div 
+      className="minecraft-panel rounded-lg p-6 h-full flex flex-col"
+      tabIndex="0"
+      role="region"
+      aria-label="Minecraft Server Status"
+      aria-live="polite"
+    >
+      {/* Minecraft-style header */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="minecraft-text text-white text-2xl flex items-center gap-3">
+          <FaGamepad className="text-green-400 text-2xl" />
+          <span>Minecraft Server</span>
+        </h3>
+        <div className={`minecraft-text text-sm px-3 py-1 rounded ${
+          statusData.loading ? 'text-gray-400' : 
+          statusData.online ? 'server-status-online' : 'server-status-offline'
+        }`}>
+          ● {statusData.loading ? 'Connecting...' : statusData.status}
+        </div>
       </div>
       
-      <div className="connection-box">
-        <div className="label">Server Address:</div>
-        <div className="value">renekris.dev</div>
+      {/* Server connection display - Minecraft server selection style */}
+      <div className="connection-display mb-4">
+        <div className="minecraft-text text-green-400 text-xl font-bold">renekris.dev</div>
+        <div className="text-gray-300 text-sm minecraft-text">
+          {statusData.players.online}/{statusData.players.max} players online
+        </div>
       </div>
       
-      <div className="service-details">
-        <strong>Players Online:</strong> {statusData.players.online}/{statusData.players.max}<br/>
+      {/* Players section with Minecraft styling */}
+      <div className="mb-4">
+        <div className="minecraft-text text-white text-base flex items-center gap-2 mb-2">
+          <FaUsers className="text-blue-400" />
+          <span>Players Online: <span className="text-green-400">{statusData.players.online}/{statusData.players.max}</span></span>
+        </div>
         {statusData.motd && (
-          <>
-            <strong>Server:</strong> {statusData.motd}<br/>
-          </>
+          <div className="minecraft-text text-gray-300 text-sm flex items-center gap-2">
+            <FaComments className="text-yellow-400" />
+            <span>MOTD: {statusData.motd}</span>
+          </div>
         )}
-        <strong>Modpack:</strong> Life in the Village 3<br/>
-        <strong>Version:</strong> 1.19.2 + Forge<br/>
-        <strong>Features:</strong> Create mod, magic, exploration
+      </div>
+      
+      {/* Server info in Minecraft style */}
+      <div className="space-y-2 minecraft-text text-sm text-gray-200 mb-6">
+        <div className="flex items-center gap-2">
+          <FaCube className="text-yellow-400" />
+          <span><strong className="text-white">Modpack:</strong> Life in the Village 3 (LitV3)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <FaCog className="text-blue-400" />
+          <span><strong className="text-white">Version:</strong> Minecraft 1.19.2 + Forge 43.3.0</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <FaBuilding className="text-purple-400" />
+          <span><strong className="text-white">Focus:</strong> MineColonies, building, exploration</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <FaServer className="text-red-400" />
+          <span><strong className="text-white">Hardware:</strong> VM 103 - 16GB RAM, SSD storage</span>
+        </div>
+      </div>
+      
+      {/* Minecraft-style action buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <button 
+          className="minecraft-button flex items-center justify-center gap-2 px-4 py-2 text-sm"
+          onClick={() => navigator.clipboard?.writeText('renekris.dev')}
+          title="Click to copy server address"
+        >
+          <FaCopy />
+          Copy Server Address
+        </button>
+        <a 
+          href="https://192.168.1.232:8443" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="minecraft-button flex items-center justify-center gap-2 px-4 py-2 text-sm no-underline"
+        >
+          <FaTools />
+          Control Panel
+        </a>
       </div>
     </div>
   );
