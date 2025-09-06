@@ -45,7 +45,7 @@ jobs:
         
         # Build Docker image with consistent naming (renekris-web not renekris-website)
         cd /opt/renekris-dev-website
-        docker build -t renekris-web:${BUILD_ID} .
+        docker build --no-cache -t renekris-web:${BUILD_ID} .
         
         # Generate stack file with dynamic image tag
         cd /opt/renekris-infrastructure
