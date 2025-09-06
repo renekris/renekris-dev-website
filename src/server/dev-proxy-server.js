@@ -89,7 +89,12 @@ const server = http.createServer(async (req, res) => {
     if (req.url === '/api/minecraft-status') {
         try {
             // Read status from the infrastructure service's status file
-            const statusFile = path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
+            // Use relative path for development, absolute path for production
+            const isDevelopment = process.env.NODE_ENV !== 'production';
+            const statusFile = isDevelopment 
+                ? path.join(__dirname, '..', '..', '..', 'renekris-infrastructure', 'minecraft-server-status.json')
+                : path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
+                
             const statusData = fs.readFileSync(statusFile, 'utf8');
             const minecraftStatus = JSON.parse(statusData);
             
