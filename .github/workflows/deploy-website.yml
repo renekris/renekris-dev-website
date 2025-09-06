@@ -81,7 +81,7 @@ jobs:
         
         # Test main page and check for build timestamp
         echo "🌐 Testing main page and content freshness..."
-        RESPONSE=$(curl -s -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' http://localhost/)
+        RESPONSE=$(curl -s -k https://${{ steps.env.outputs.HOST_HEADER }}/)
         
         if echo "$RESPONSE" | grep -q "<!DOCTYPE html"; then
           echo "✅ Main page is accessible and returns HTML"
@@ -91,7 +91,7 @@ jobs:
         fi
         
         # Check if build timestamp header is present (cache busting verification)
-        BUILD_TIMESTAMP=$(curl -s -I -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' http://localhost/ | grep -i "x-build-timestamp" | cut -d' ' -f2- | tr -d '\r')
+        BUILD_TIMESTAMP=$(curl -s -I -k https://${{ steps.env.outputs.HOST_HEADER }}/ | grep -i "x-build-timestamp" | cut -d' ' -f2- | tr -d '\r')
         
         if [ -n "$BUILD_TIMESTAMP" ]; then
           echo "✅ Build timestamp header found: $BUILD_TIMESTAMP"
