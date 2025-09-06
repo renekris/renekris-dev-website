@@ -19,6 +19,10 @@ jobs:
       run: |
         echo "🔑 Setting up SSH authentication for private repositories..."
         
+        # Ensure SSH directory exists
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        
         # Ensure SSH agent is running and keys are loaded
         eval "$(ssh-agent -s)"
         
@@ -26,6 +30,7 @@ jobs:
         if ! ssh-keygen -F github.com > /dev/null; then
           echo "📋 Adding GitHub to known hosts..."
           ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
         fi
         
         # Test SSH connection to GitHub
