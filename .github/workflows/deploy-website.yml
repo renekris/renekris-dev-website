@@ -83,10 +83,19 @@ jobs:
         echo "🌐 Testing main page and content freshness..."
         RESPONSE=$(curl -s -k -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' https://localhost/)
         
+        echo "📊 Response Debug Info:"
+        echo "   Response length: ${#RESPONSE}"
+        echo "   First 200 characters:"
+        echo "$RESPONSE" | head -c 200
+        echo ""
+        echo "   Looking for doctype pattern..."
+        
         if echo "$RESPONSE" | grep -i -q "<!doctype html"; then
           echo "✅ Main page is accessible and returns HTML"
         else
           echo "❌ Main page is not accessible or not returning HTML"
+          echo "🔍 Full response for debugging:"
+          echo "$RESPONSE"
           exit 1
         fi
         
