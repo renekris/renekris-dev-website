@@ -36,10 +36,10 @@
     border: 3px solid #2a2a3e;
     border-style: outset;
     box-shadow: 
-      inset 1px 1px 3px rgba(138, 43, 226, 0.3),
+      inset 1px 1px 3px rgba(74, 51, 87, 0.2),
       inset -1px -1px 3px rgba(0, 0, 0, 0.8),
-      0 6px 20px rgba(138, 43, 226, 0.2),
-      0 0 30px rgba(138, 43, 226, 0.1);
+      0 6px 20px rgba(74, 51, 87, 0.15),
+      0 0 30px rgba(74, 51, 87, 0.08);
     position: relative;
   }
   
@@ -54,9 +54,9 @@
       repeating-linear-gradient(
         45deg,
         transparent,
-        transparent 2px,
-        rgba(138, 43, 226, 0.08) 2px,
-        rgba(138, 43, 226, 0.08) 3px
+        transparent 4px,
+        rgba(74, 51, 87, 0.04) 4px,
+        rgba(74, 51, 87, 0.04) 6px
       );
     pointer-events: none;
     border-radius: 2px;
@@ -68,6 +68,14 @@
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
     letter-spacing: 1.5px;
     line-height: 1.6;
+  }
+  
+  .minecraft-title {
+    font-family: 'Minecraft', 'Minecraftia', 'Courier New', monospace;
+    font-weight: 300;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+    letter-spacing: 1px;
+    line-height: 1.4;
   }
   
   .minecraft-button {
@@ -119,13 +127,13 @@
   }
 
   .minecraft-button-square {
-    background: linear-gradient(135deg, #8b8b8b 0%, #5a5a5a 50%, #8b8b8b 100%);
-    border: 1px solid #a0a0a0;
+    background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 50%, #2a2a3e 100%);
+    border: 1px solid #3a3a4e;
     border-style: outset;
-    color: white;
-    font-family: 'Minecraft', 'Minecraftia', 'Courier New', monospace;
+    color: #00ff88;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-weight: normal;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 0 4px rgba(0, 255, 136, 0.6);
     cursor: pointer;
     transition: all 0.1s ease;
     border-radius: 2px;
@@ -138,14 +146,58 @@
   }
   
   .minecraft-button-square:hover {
-    background: linear-gradient(135deg, #a0a0a0 0%, #707070 50%, #a0a0a0 100%);
-    border-color: #b5b5b5;
+    background: linear-gradient(135deg, #3a3a4e 0%, #2a2a3e 50%, #3a3a4e 100%);
+    border-color: #4a4a5e;
+    color: #ffffff;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
     transform: translate(1px, 1px);
   }
   
   .minecraft-button-square:active {
     border-style: inset;
-    background: linear-gradient(135deg, #707070 0%, #8b8b8b 50%, #707070 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 50%, #1a1a2e 100%);
+  }
+  
+  .dropdown-toggle {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    transition: all 0.2s ease;
+  }
+  
+  .dropdown-toggle:hover {
+    color: #00ff88;
+  }
+  
+  .dropdown-toggle:hover .info-icon {
+    color: #00ff88;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 1));
+  }
+  
+  .collapsible-section {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
+  .collapsible-section.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+  
+  .collapsible-section.expanded {
+    max-height: 500px;
+    opacity: 1;
   }
   
   .server-status-online {
@@ -205,7 +257,7 @@
     cursor: text;
     transition: all 0.2s ease;
     box-shadow: 
-      inset 1px 1px 2px rgba(138, 43, 226, 0.2),
+      inset 1px 1px 2px rgba(74, 51, 87, 0.15),
       inset -1px -1px 2px rgba(0, 0, 0, 0.8),
       0 3px 6px rgba(0, 0, 0, 0.5);
     position: relative;
@@ -215,9 +267,9 @@
     background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 50%, #1a1a2e 100%);
     border-color: #3a3a4e;
     box-shadow: 
-      inset 1px 1px 2px rgba(138, 43, 226, 0.3),
+      inset 1px 1px 2px rgba(74, 51, 87, 0.2),
       inset -1px -1px 2px rgba(0, 0, 0, 0.8),
-      0 4px 8px rgba(138, 43, 226, 0.2);
+      0 4px 8px rgba(74, 51, 87, 0.15);
   }
 
   .command-prompt {
@@ -255,7 +307,7 @@
     letter-spacing: 1px;
     line-height: 1.5;
     box-shadow: 
-      inset 1px 1px 2px rgba(138, 43, 226, 0.2),
+      inset 1px 1px 2px rgba(74, 51, 87, 0.15),
       inset -1px -1px 2px rgba(0, 0, 0, 0.8),
       0 3px 6px rgba(0, 0, 0, 0.5);
     position: relative;
@@ -272,9 +324,9 @@
       repeating-linear-gradient(
         45deg,
         transparent,
-        transparent 2px,
-        rgba(138, 43, 226, 0.04) 2px,
-        rgba(138, 43, 226, 0.04) 3px
+        transparent 4px,
+        rgba(74, 51, 87, 0.02) 4px,
+        rgba(74, 51, 87, 0.02) 6px
       );
     pointer-events: none;
     border-radius: 2px;
@@ -376,23 +428,24 @@
   }
 
   .minecraft-tooltip {
-    background: linear-gradient(145deg, #100010 0%, #1a001a 50%, #100010 100%);
-    border: 2px solid #aa55ff;
+    background: linear-gradient(145deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
+    border: 2px solid #4a3357;
     border-radius: 3px;
     box-shadow: 
-      0 0 10px rgba(170, 85, 255, 0.5),
-      inset 1px 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(0, 0, 0, 0.8);
+      0 0 8px rgba(74, 51, 87, 0.4),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 16px rgba(0, 0, 0, 0.8);
     font-size: 12px;
     font-weight: bold;
     color: #ffffff;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
     white-space: nowrap;
+    font-family: 'Courier New', 'Consolas', monospace;
     animation: tooltipGlow 2s ease-in-out infinite alternate;
   }
 
   @keyframes tooltipGlow {
-    from { box-shadow: 0 0 10px rgba(170, 85, 255, 0.3), inset 1px 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(0, 0, 0, 0.8); }
-    to { box-shadow: 0 0 15px rgba(170, 85, 255, 0.6), inset 1px 1px 0 rgba(255, 255, 255, 0.2), 0 0 25px rgba(0, 0, 0, 0.8); }
+    from { box-shadow: 0 0 8px rgba(74, 51, 87, 0.3), inset 1px 1px 0 rgba(255, 255, 255, 0.1), 0 0 16px rgba(0, 0, 0, 0.8); }
+    to { box-shadow: 0 0 12px rgba(74, 51, 87, 0.5), inset 1px 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(0, 0, 0, 0.8); }
   }
 }

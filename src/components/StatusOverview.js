@@ -223,7 +223,7 @@ const StatusOverview = () => {
     >
       {/* Minecraft-style header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="minecraft-text text-white text-2xl">
+        <h3 className="minecraft-title text-white text-2xl">
           <span>Minecraft Server</span>
         </h3>
         <div className="flex items-center gap-3">
@@ -248,7 +248,7 @@ const StatusOverview = () => {
         title="Click to copy server address"
       >
         <div className="flex items-center">
-          <span className="command-prompt">minecraft@server:~$ </span>
+          <span className="command-prompt">user@renekris:~$ </span>
           <span className="server-address">{commandText}</span>
           <span className="cursor-blink">_</span>
         </div>
