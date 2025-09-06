@@ -3,7 +3,7 @@ import Navigation from './components/Navigation';
 import Services from './components/Services';
 import Footer from './components/Footer';
 
-// ✅ GitHub Actions deployment working!
+// ✅ GitHub Actions deployment working! - Fixed production build sync issue
 
 function App() {
   return (
