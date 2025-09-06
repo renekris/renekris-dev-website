@@ -8,7 +8,9 @@ import {
   FaBuilding,
   FaServer,
   FaCopy,
-  FaTools
+  FaTools,
+  FaChevronDown,
+  FaChevronUp
 } from 'react-icons/fa';
 
 const StatusOverview = () => {
@@ -30,18 +32,44 @@ const StatusOverview = () => {
 
   const [commandText, setCommandText] = useState('');
   const fullCommand = 'connect renekris.dev';
+  
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
 
-  // Typewriter effect for command line
+  // Typewriter effect with human-like entropy
   useEffect(() => {
     let index = 0;
-    const timer = setInterval(() => {
+    let timeoutId;
+    
+    const getRandomDelay = () => {
+      // Base typing speed: 80-150ms
+      // Occasional hesitation: 300-600ms (10% chance)
+      // Space after words: 150-250ms
+      const currentChar = fullCommand[index - 1];
+      const nextChar = fullCommand[index];
+      
+      if (Math.random() < 0.1) {
+        return 300 + Math.random() * 300; // Hesitation
+      } else if (currentChar === ' ' || nextChar === ' ') {
+        return 150 + Math.random() * 100; // Pause around spaces
+      } else {
+        return 80 + Math.random() * 70; // Normal typing
+      }
+    };
+    
+    const typeNextChar = () => {
       setCommandText(fullCommand.slice(0, index));
       index++;
-      if (index > fullCommand.length) {
-        clearInterval(timer);
+      
+      if (index <= fullCommand.length) {
+        timeoutId = setTimeout(typeNextChar, getRandomDelay());
       }
-    }, 100);
-    return () => clearInterval(timer);
+    };
+    
+    timeoutId = setTimeout(typeNextChar, 500); // Initial delay
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   // Minecraft-style tooltip component
@@ -236,7 +264,7 @@ const StatusOverview = () => {
         </a>
       </div>
       
-      {/* Nostalgic info sections */}
+      {/* Player info section */}
       <div className="nostalgic-info-section">
         <div className="info-line">
           <div className="info-icon"><FaUsers /></div>
@@ -250,9 +278,28 @@ const StatusOverview = () => {
             <span className="info-value">{statusData.motd}</span>
           </div>
         )}
+        
+        {/* Dropdown toggle button */}
+        <div className="info-line">
+          <button
+            className="dropdown-toggle"
+            onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
+            aria-expanded={isDetailsExpanded}
+            aria-controls="server-details"
+          >
+            <div className="info-icon">
+              {isDetailsExpanded ? <FaChevronUp /> : <FaChevronDown />}
+            </div>
+            <span className="info-label">Server Details</span>
+          </button>
+        </div>
       </div>
 
-      <div className="nostalgic-info-section">
+      {/* Collapsible server details section */}
+      <div 
+        className={`nostalgic-info-section collapsible-section ${isDetailsExpanded ? 'expanded' : 'collapsed'}`}
+        id="server-details"
+      >
         <div className="info-line">
           <div className="info-icon"><FaCube /></div>
           <span className="info-label">Modpack:</span>
