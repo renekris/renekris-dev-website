@@ -2,7 +2,7 @@ name: Deploy Website
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
     paths-ignore:
       - 'README.md'
       - '.github/**'
@@ -10,25 +10,56 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/main'
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Deploy to VM 106
+    - name: Determine deployment environment
+      id: env
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
+          echo "STACK_FILE=docker-stack-traefik.yml" >> $GITHUB_OUTPUT
+          echo "SERVICE_NAME=renekris-web" >> $GITHUB_OUTPUT
+          echo "HOST_HEADER=renekris.dev" >> $GITHUB_OUTPUT
+        else
+          echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
+          echo "STACK_FILE=docker-stack-staging.yml" >> $GITHUB_OUTPUT
+          echo "SERVICE_NAME=renekris-staging" >> $GITHUB_OUTPUT
+          echo "HOST_HEADER=staging.renekris.dev" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Deploy to ${{ steps.env.outputs.ENVIRONMENT }}
       run: |
         cd /opt/renekris-infrastructure
-        echo "🚀 Starting automated deployment..."
-        ./deploy-website-compose.sh
+        echo "🚀 Starting automated deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
+        echo "📦 Building Docker image for branch: ${{ github.ref_name }}"
+        
+        # Build Docker image with branch-specific tag
+        cd /opt/renekris-dev-website
+        docker build -t renekris-website:${{ github.ref_name }} .
+        
+        # Deploy using appropriate stack file
+        cd /opt/renekris-infrastructure
+        docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} renekris-stack
     
-    - name: Verify deployment
+    - name: Verify ${{ steps.env.outputs.ENVIRONMENT }} deployment
       run: |
+        echo "🔍 Verifying deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
+        
         # Wait for service to stabilize
-        sleep 10
+        sleep 15
         
         # Check container status
-        docker ps --filter name=renekris-web --format "table {{.Names}}\t{{.Status}}"
+        docker ps --filter name=${{ steps.env.outputs.SERVICE_NAME }} --format "table {{.Names}}\t{{.Status}}"
         
         # Test health endpoint
-        curl -f -H 'Host: renekris.dev' http://localhost/ > /dev/null && echo "✅ External health check passed" || echo "❌ Health check failed"
+        if curl -f -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' http://localhost/ > /dev/null; then
+          echo "✅ ${{ steps.env.outputs.ENVIRONMENT }} health check passed"
+        else
+          echo "❌ ${{ steps.env.outputs.ENVIRONMENT }} health check failed"
+          exit 1
+        fi
+        
+        echo "🎉 Deployment to ${{ steps.env.outputs.ENVIRONMENT }} completed successfully!"

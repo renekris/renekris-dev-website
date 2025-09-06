@@ -4,25 +4,10 @@ import GamingHub from './GamingHub';
 import { 
   FaCode, 
   FaChartLine, 
-  FaServer,
-  FaTools,
-  FaCheckCircle,
-  FaBolt
+  FaServer
 } from 'react-icons/fa';
 
 const Services = () => {
-  const IconTitle = ({ icon, title }) => (
-    <span style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: '8px',
-      whiteSpace: 'nowrap',
-      flexShrink: 0
-    }}>
-      <span style={{ flexShrink: 0 }}>{icon}</span>
-      <span>{title}</span>
-    </span>
-  );
 
   return (
     <div className="space-y-16">
