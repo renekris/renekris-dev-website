@@ -21,11 +21,13 @@ jobs:
         if [ "${{ github.ref }}" = "refs/heads/main" ]; then
           echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
           echo "STACK_FILE=docker-stack-traefik.yml" >> $GITHUB_OUTPUT
+          echo "STACK_NAME=renekris-stack" >> $GITHUB_OUTPUT
           echo "SERVICE_NAME=renekris-web" >> $GITHUB_OUTPUT
           echo "HOST_HEADER=renekris.dev" >> $GITHUB_OUTPUT
         else
           echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
           echo "STACK_FILE=docker-stack-staging.yml" >> $GITHUB_OUTPUT
+          echo "STACK_NAME=renekris-staging" >> $GITHUB_OUTPUT
           echo "SERVICE_NAME=renekris-staging" >> $GITHUB_OUTPUT
           echo "HOST_HEADER=staging.renekris.dev" >> $GITHUB_OUTPUT
         fi
@@ -51,7 +53,7 @@ jobs:
         echo "🔄 Deploying with image: renekris-web:${BUILD_ID}"
         
         # Deploy using generated stack file
-        docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} renekris-stack
+        docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}
         
         echo "📝 Deployment completed with image tag: ${BUILD_ID}"
     
@@ -98,7 +100,11 @@ jobs:
         fi
         
         # Verify Docker service is using the correct image
-        DEPLOYED_IMAGE=$(docker service inspect renekris-stack_web-${{ steps.env.outputs.ENVIRONMENT == 'staging' && 'staging' || '' }} --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null || docker service inspect renekris-stack_web --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}')
+        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
+          DEPLOYED_IMAGE=$(docker service inspect renekris-staging_web-staging --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
+        else
+          DEPLOYED_IMAGE=$(docker service inspect renekris-stack_web --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
+        fi
         
         if echo "$DEPLOYED_IMAGE" | grep -q "renekris-web:"; then
           echo "✅ Service is using correct image: $DEPLOYED_IMAGE"
