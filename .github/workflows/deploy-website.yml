@@ -15,59 +15,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Setup SSH for private repository access
-      run: |
-        echo "🔑 Setting up SSH authentication for private repositories..."
-        
-        # Ensure SSH directory exists
-        mkdir -p ~/.ssh
-        chmod 700 ~/.ssh
-        
-        # Setup SSH key if provided as secret
-        if [ -n "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-          echo "📝 Setting up SSH key from secrets..."
-          
-          # Write the key properly preserving newlines
-          cat > ~/.ssh/id_ed25519 << 'EOF'
-        ${{ secrets.SSH_PRIVATE_KEY }}
-        EOF
-          
-          chmod 600 ~/.ssh/id_ed25519
-          
-          # Verify the key format
-          echo "🔍 Verifying SSH key format..."
-          head -1 ~/.ssh/id_ed25519
-          tail -1 ~/.ssh/id_ed25519
-          
-          # Configure SSH to use the key
-          cat > ~/.ssh/config << 'EOF'
-        Host github.com
-            HostName github.com
-            User git
-            IdentityFile ~/.ssh/id_ed25519
-            IdentitiesOnly yes
-        EOF
-          chmod 600 ~/.ssh/config
-        fi
-        
-        # Ensure SSH agent is running and keys are loaded
-        eval "$(ssh-agent -s)"
-        
-        # Add the key to SSH agent if it exists
-        if [ -f ~/.ssh/id_ed25519 ]; then
-          ssh-add ~/.ssh/id_ed25519
-        fi
-        
-        # Add GitHub to known hosts if not already present
-        if ! ssh-keygen -F github.com > /dev/null 2>&1; then
-          echo "📋 Adding GitHub to known hosts..."
-          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-        fi
-        
-        # Test SSH connection to GitHub
-        echo "🔍 Testing SSH connection to GitHub..."
-        ssh -T git@github.com || true  # This will always "fail" but shows connection works
+    - name: Setup SSH Agent with private key
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
     
     - name: Determine deployment environment
       id: env
