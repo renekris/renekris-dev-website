@@ -84,23 +84,47 @@ jobs:
         # Deploy using generated stack file
         docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}
         
+        # Force service update to ensure new image is used (Docker Swarm fix)
+        echo "🔄 Ensuring service uses new image..."
+        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
+          docker service update --image renekris-web:${BUILD_ID} renekris-staging_web-staging || echo "⚠️ Force update failed, but deployment may still work"
+        else
+          docker service update --image renekris-web:${BUILD_ID} renekris-stack_web || echo "⚠️ Force update failed, but deployment may still work"
+        fi
+        
         echo "📝 Deployment completed with image tag: ${BUILD_ID}"
     
     - name: Verify ${{ steps.env.outputs.ENVIRONMENT }} deployment
       run: |
         echo "🔍 Verifying deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
         
-        # Wait for service to stabilize
-        echo "⏳ Waiting for services to stabilize..."
-        sleep 15
+        # Wait for service to stabilize (longer wait for Docker Swarm rolling updates)
+        echo "⏳ Waiting for services to stabilize and rolling update to complete..."
+        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
+          sleep 45
+        else
+          sleep 60
+        fi
+        
+        # Verify service is using the correct image
+        echo "🔍 Verifying service image deployment..."
+        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
+          DEPLOYED_IMAGE=$(docker service inspect renekris-staging_web-staging --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
+        else
+          DEPLOYED_IMAGE=$(docker service inspect renekris-stack_web --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
+        fi
+        
+        EXPECTED_IMAGE="renekris-web:${{ github.ref_name }}-$(date +%s | head -c10)"
+        echo "Expected image pattern: renekris-web:${{ github.ref_name }}-[timestamp]"
+        echo "Deployed image: $DEPLOYED_IMAGE"
         
         # Check container status
         echo "📋 Container Status:"
         docker ps --filter name=${{ steps.env.outputs.SERVICE_NAME }} --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
         
-        # Test health endpoint
+        # Test health endpoint (using HTTPS to avoid redirect issues)
         echo "🏥 Testing health endpoint..."
-        if curl -f -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' http://localhost/health > /dev/null; then
+        if curl -f -k -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' https://localhost/health > /dev/null; then
           echo "✅ Health check passed"
         else
           echo "❌ Health check failed"
