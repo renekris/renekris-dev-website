@@ -6,6 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Copy configuration files for Tailwind CSS
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
+
 # Copy source code
 COPY public/ ./public/
 COPY src/ ./src/
