@@ -39,7 +39,8 @@ jobs:
         echo "📦 Building Docker image for branch: ${{ github.ref_name }}"
         
         # Generate unique build identifier
-        BUILD_ID="${{ github.ref_name }}-$(date +%s)"
+        TIMESTAMP_ID="$(date +%s)"
+        BUILD_ID="${{ github.ref_name }}-${TIMESTAMP_ID}"
         COMMIT_HASH="${{ github.sha }}"
         
         # Build Docker image with consistent naming (renekris-web not renekris-website)
@@ -48,7 +49,7 @@ jobs:
         
         # Generate stack file with dynamic image tag
         cd /opt/renekris-infrastructure
-        ./generate-stack-files.sh ${{ steps.env.outputs.ENVIRONMENT }} ${{ github.ref_name }} ${BUILD_ID}
+        ./generate-stack-files.sh ${{ steps.env.outputs.ENVIRONMENT }} ${{ github.ref_name }} ${TIMESTAMP_ID}
         
         echo "🔄 Deploying with image: renekris-web:${BUILD_ID}"
         
