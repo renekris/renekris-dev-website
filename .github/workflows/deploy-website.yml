@@ -26,8 +26,18 @@ jobs:
         # Setup SSH key if provided as secret
         if [ -n "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
           echo "📝 Setting up SSH key from secrets..."
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          
+          # Write the key properly preserving newlines
+          cat > ~/.ssh/id_ed25519 << 'EOF'
+        ${{ secrets.SSH_PRIVATE_KEY }}
+        EOF
+          
           chmod 600 ~/.ssh/id_ed25519
+          
+          # Verify the key format
+          echo "🔍 Verifying SSH key format..."
+          head -1 ~/.ssh/id_ed25519
+          tail -1 ~/.ssh/id_ed25519
           
           # Configure SSH to use the key
           cat > ~/.ssh/config << 'EOF'
