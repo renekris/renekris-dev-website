@@ -34,7 +34,6 @@ jobs:
     
     - name: Deploy to ${{ steps.env.outputs.ENVIRONMENT }}
       run: |
-        cd /opt/renekris-infrastructure
         echo "🚀 Starting automated deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
         echo "📦 Building Docker image for branch: ${{ github.ref_name }}"
         
@@ -43,8 +42,20 @@ jobs:
         BUILD_ID="${{ github.ref_name }}-${TIMESTAMP_ID}"
         COMMIT_HASH="${{ github.sha }}"
         
-        # Build Docker image with consistent naming (renekris-web not renekris-website)
+        # Ensure infrastructure repo is up to date
+        echo "📥 Updating infrastructure repository..."
+        cd /opt/renekris-infrastructure
+        git fetch origin
+        git reset --hard origin/main
+        
+        # Ensure website repo is up to date with the exact commit being deployed
+        echo "📥 Updating website repository to commit: ${{ github.sha }}"
         cd /opt/renekris-dev-website
+        git fetch origin
+        git checkout ${{ github.sha }}
+        
+        # Build Docker image from the checked out commit
+        echo "🔨 Building Docker image from commit: ${{ github.sha }}"
         docker build --no-cache -t renekris-web:${BUILD_ID} .
         
         # Generate stack file with dynamic image tag

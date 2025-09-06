@@ -14,7 +14,6 @@ function App() {
         <header className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-light mb-2 text-primary glow-text">renekris.dev</h1>
           <p className="text-xl text-text-secondary mb-8">Full-Stack Developer & Infrastructure Engineer</p>
-          <div className="text-sm text-gray-500 mb-4">v1.1.8 - Latest deployment sync test</div>
         </header>
         
         <Services />
