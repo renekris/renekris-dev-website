@@ -22,179 +22,58 @@ jobs:
           echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
           echo "STACK_FILE=docker-stack-traefik.yml" >> $GITHUB_OUTPUT
           echo "STACK_NAME=renekris-stack" >> $GITHUB_OUTPUT
-          echo "SERVICE_NAME=renekris-web" >> $GITHUB_OUTPUT
-          echo "HOST_HEADER=renekris.dev" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=latest-production" >> $GITHUB_OUTPUT
         else
           echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
           echo "STACK_FILE=docker-stack-staging.yml" >> $GITHUB_OUTPUT
           echo "STACK_NAME=renekris-staging" >> $GITHUB_OUTPUT
-          echo "SERVICE_NAME=renekris-staging" >> $GITHUB_OUTPUT
-          echo "HOST_HEADER=staging.renekris.dev" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=latest-staging" >> $GITHUB_OUTPUT
         fi
+        echo "Deploying ${{ github.ref_name }} branch to $ENVIRONMENT environment"
     
     - name: Deploy to ${{ steps.env.outputs.ENVIRONMENT }}
       run: |
-        # Add unique identifier to debug potential duplication
-        DEPLOY_ID="deploy-$(date +%s)-$$"
-        echo "🚀 Starting automated deployment to ${{ steps.env.outputs.ENVIRONMENT }}... [$DEPLOY_ID]"
-        echo "📦 Building Docker image for branch: ${{ github.ref_name }} [$DEPLOY_ID]"
+        echo "🚀 Starting website deployment to ${{ steps.env.outputs.ENVIRONMENT }}"
+        echo "📦 Deploying from branch: ${{ github.ref_name }}"
         
-        # Generate unique build identifier
-        TIMESTAMP_ID="$(date +%s)"
-        BUILD_ID="${{ github.ref_name }}-${TIMESTAMP_ID}"
-        COMMIT_HASH="${{ github.sha }}"
-        
-        # Ensure infrastructure repo is up to date
-        echo "📥 Updating infrastructure repository..."
-        cd /opt/renekris-infrastructure
-        git fetch origin
-        git reset --hard origin/dev
-        
-        # Ensure website repo is up to date with the exact commit being deployed
-        echo "📥 Updating website repository to commit: ${{ github.sha }}"
+        # Update website repository to exact commit being deployed
+        echo "📥 Updating website repository..."
         cd /opt/renekris-dev-website
-        
-        # Clean up any uncommitted changes and reset repository state
-        echo "🧹 Cleaning repository state..."
-        git clean -fd
-        git reset --hard HEAD
-        
-        # Fetch latest changes
         git fetch origin
+        git reset --hard ${{ github.sha }}
         
-        # Checkout the specific commit for deployment
-        git checkout ${{ github.sha }}
+        # Build Docker image
+        echo "🔨 Building Docker image..."
+        docker build -t renekris-web:${{ steps.env.outputs.IMAGE_TAG }} .
         
-        # Build Docker image from the checked out commit
-        echo "🔨 Building Docker image from commit: ${{ github.sha }}"
-        docker build --no-cache -t renekris-web:${BUILD_ID} /opt/renekris-dev-website
-        
-        # Generate stack file with dynamic image tag
+        # Deploy stack
+        echo "🚀 Deploying stack..."
         cd /opt/renekris-infrastructure
+        docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}
         
-        # Initialize deployment logging
-        LOG_FILE=$(./deployment-logger.sh setup "website" "${{ steps.env.outputs.ENVIRONMENT }}")
-        echo "📝 Deployment log: $LOG_FILE"
-        
-        # Generate stack file with proper error handling
-        if ! ./deployment-logger.sh exec "./generate-stack-files.sh ${{ steps.env.outputs.ENVIRONMENT }} ${{ github.ref_name }} ${{ github.sha }}" "Generating stack files"; then
-            echo "❌ Stack file generation failed"
-            ./deployment-logger.sh finalize "website" "${{ steps.env.outputs.ENVIRONMENT }}" "false"
-            exit 1
-        fi
-        
-        echo "🔄 Deploying with image: renekris-web:${BUILD_ID}"
-        
-        # Deploy using generated stack file with logging
-        if ! ./deployment-logger.sh exec "docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}" "Deploying Docker stack"; then
-            echo "❌ Stack deployment failed"
-            ./deployment-logger.sh finalize "website" "${{ steps.env.outputs.ENVIRONMENT }}" "false"
-            exit 1
-        fi
-        
-        # Force service update to ensure new image is used (Docker Swarm fix)
-        echo "🔄 Ensuring service uses new image..."
-        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
-          ./deployment-logger.sh exec "docker service update --image renekris-web:${BUILD_ID} renekris-staging_web-staging" "Updating staging service image" || echo "⚠️ Force update failed, but deployment may still work"
-        else
-          ./deployment-logger.sh exec "docker service update --image renekris-web:${BUILD_ID} renekris-stack_web" "Updating production service image" || echo "⚠️ Force update failed, but deployment may still work"
-        fi
-        
-        # Finalize deployment logging with success
-        ./deployment-logger.sh finalize "website" "${{ steps.env.outputs.ENVIRONMENT }}" "true"
-        echo "📝 Deployment completed with image tag: ${BUILD_ID}"
+        echo "✅ Deployment completed"
     
     - name: Verify ${{ steps.env.outputs.ENVIRONMENT }} deployment
       run: |
         echo "🔍 Verifying deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
         
-        # Use deployment status checker
-        cd /opt/renekris-infrastructure
-        if [ -f "check-deployment-status.sh" ]; then
-          echo "📋 Running comprehensive deployment verification..."
-          ./check-deployment-status.sh ${{ steps.env.outputs.ENVIRONMENT }} all || echo "⚠️ Status checker indicated issues but continuing verification..."
-        fi
+        # Wait for service to be ready
+        echo "⏳ Waiting for service to be ready..."
+        sleep 30
         
-        # Wait for service to stabilize (longer wait for Docker Swarm rolling updates)
-        echo "⏳ Waiting for services to stabilize and rolling update to complete..."
+        # Test health endpoint
         if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
-          sleep 45
+          HEALTH_URL="https://staging.renekris.dev/health"
         else
-          sleep 60
+          HEALTH_URL="https://renekris.dev/health"
         fi
         
-        # Verify service is using the correct image
-        echo "🔍 Verifying service image deployment..."
-        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
-          DEPLOYED_IMAGE=$(docker service inspect renekris-staging_web-staging --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
-        else
-          DEPLOYED_IMAGE=$(docker service inspect renekris-stack_web --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
-        fi
-        
-        EXPECTED_IMAGE="renekris-web:${{ github.ref_name }}-$(date +%s | head -c10)"
-        echo "Expected image pattern: renekris-web:${{ github.ref_name }}-[timestamp]"
-        echo "Deployed image: $DEPLOYED_IMAGE"
-        
-        # Check container status
-        echo "📋 Container Status:"
-        docker ps --filter name=${{ steps.env.outputs.SERVICE_NAME }} --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
-        
-        # Test health endpoint (using HTTPS to avoid redirect issues)
-        echo "🏥 Testing health endpoint..."
-        if curl -f -k -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' https://localhost/health > /dev/null; then
+        echo "🏥 Testing health endpoint: $HEALTH_URL"
+        if curl -f -k "$HEALTH_URL" > /dev/null; then
           echo "✅ Health check passed"
         else
           echo "❌ Health check failed"
           exit 1
         fi
         
-        # Test main page and check for build timestamp
-        echo "🌐 Testing main page and content freshness..."
-        RESPONSE=$(curl -s -k -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' https://localhost/)
-        
-        echo "📊 Response Debug Info:"
-        echo "   Response length: ${#RESPONSE}"
-        echo "   First 200 characters:"
-        echo "$RESPONSE" | head -c 200
-        echo ""
-        echo "   Looking for doctype pattern..."
-        
-        if echo "$RESPONSE" | grep -i -q "<!doctype html"; then
-          echo "✅ Main page is accessible and returns HTML"
-        else
-          echo "❌ Main page is not accessible or not returning HTML"
-          echo "🔍 Full response for debugging:"
-          echo "$RESPONSE"
-          exit 1
-        fi
-        
-        # Check if build timestamp header is present (cache busting verification)
-        BUILD_TIMESTAMP=$(curl -s -I -k -H 'Host: ${{ steps.env.outputs.HOST_HEADER }}' https://localhost/ | grep -i "x-build-timestamp" | cut -d' ' -f2- | tr -d '\r')
-        
-        if [ -n "$BUILD_TIMESTAMP" ]; then
-          echo "✅ Build timestamp header found: $BUILD_TIMESTAMP"
-          echo "   This confirms cache busting is working"
-        else
-          echo "⚠️  No build timestamp header found (this is expected for production)"
-        fi
-        
-        # Verify Docker service is using the correct image
-        if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
-          DEPLOYED_IMAGE=$(docker service inspect renekris-staging_web-staging --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
-        else
-          DEPLOYED_IMAGE=$(docker service inspect renekris-stack_web --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
-        fi
-        
-        if echo "$DEPLOYED_IMAGE" | grep -q "renekris-web:"; then
-          echo "✅ Service is using correct image: $DEPLOYED_IMAGE"
-        else
-          echo "⚠️  Could not verify deployed image or image format unexpected"
-        fi
-        
-        echo ""
         echo "🎉 Deployment to ${{ steps.env.outputs.ENVIRONMENT }} completed successfully!"
-        echo "📊 Deployment Summary:"
-        echo "   Environment: ${{ steps.env.outputs.ENVIRONMENT }}"
-        echo "   Host: ${{ steps.env.outputs.HOST_HEADER }}"
-        echo "   Image: renekris-web:${{ github.ref_name }}-$(date +%s)"
-        echo "   Status: ✅ VERIFIED"
