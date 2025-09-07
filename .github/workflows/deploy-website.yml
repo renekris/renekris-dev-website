@@ -48,7 +48,7 @@ jobs:
         echo "📥 Updating infrastructure repository..."
         cd /opt/renekris-infrastructure
         git fetch origin
-        git reset --hard origin/main
+        git reset --hard origin/dev
         
         # Ensure website repo is up to date with the exact commit being deployed
         echo "📥 Updating website repository to commit: ${{ github.sha }}"
