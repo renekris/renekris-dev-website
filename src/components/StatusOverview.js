@@ -151,7 +151,12 @@ const StatusOverview = () => {
     };
 
     const handleMouseLeave = () => {
-      setTooltip(prev => ({ ...prev, visible: false }));
+      setTooltip({
+        visible: false,
+        x: 0,
+        y: 0,
+        text: ''
+      });
     };
 
     return (
