@@ -49,6 +49,14 @@ jobs:
         # Update infrastructure repository to dev branch
         echo "📥 Updating infrastructure repository..."
         cd /opt/renekris-infrastructure
+        
+        # Clean any problematic files and reset repository state
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+          echo "🧹 Cleaning untracked files and resetting repository..."
+          git clean -fd
+          git reset --hard HEAD
+        fi
+        
         git fetch origin
         git reset --hard origin/dev
         
