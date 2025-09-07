@@ -94,7 +94,7 @@ const StatusOverview = () => {
   // Minecraft-style connection bars component
   const ConnectionBars = ({ online, loading, ping }) => {
     const getPingLevel = (ping) => {
-      if (!online || loading || ping === null) return 0;
+      if (!online || loading || ping === null || ping === undefined || typeof ping !== 'number') return 0;
       // Minecraft ping ranges: 0-99=5bars, 100-299=4bars, 300-599=3bars, 600-999=2bars, 1000+=1bar
       if (ping <= 99) return 5;      // Excellent - all 5 bars
       if (ping <= 299) return 4;     // Good - 4 bars
@@ -122,9 +122,17 @@ const StatusOverview = () => {
     const barHeights = [2, 4, 6, 8, 10];
 
     const handleMouseEnter = (e) => {
-      const tooltipText = loading ? 'Connecting...' : 
-                          !online ? 'Server Offline' :
-                          `${ping}ms`;
+      let tooltipText;
+      if (loading) {
+        tooltipText = 'Connecting...';
+      } else if (!online) {
+        tooltipText = 'Server Offline';
+      } else if (ping === null || ping === undefined || typeof ping !== 'number') {
+        tooltipText = 'Ping unavailable';
+      } else {
+        tooltipText = `${ping}ms`;
+      }
+      
       setTooltip({
         visible: true,
         x: e.clientX,
