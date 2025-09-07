@@ -34,8 +34,10 @@ jobs:
     
     - name: Deploy to ${{ steps.env.outputs.ENVIRONMENT }}
       run: |
-        echo "🚀 Starting automated deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
-        echo "📦 Building Docker image for branch: ${{ github.ref_name }}"
+        # Add unique identifier to debug potential duplication
+        DEPLOY_ID="deploy-$(date +%s)-$$"
+        echo "🚀 Starting automated deployment to ${{ steps.env.outputs.ENVIRONMENT }}... [$DEPLOY_ID]"
+        echo "📦 Building Docker image for branch: ${{ github.ref_name }} [$DEPLOY_ID]"
         
         # Generate unique build identifier
         TIMESTAMP_ID="$(date +%s)"
@@ -51,7 +53,16 @@ jobs:
         # Ensure website repo is up to date with the exact commit being deployed
         echo "📥 Updating website repository to commit: ${{ github.sha }}"
         cd /opt/renekris-dev-website
+        
+        # Clean up any uncommitted changes and reset repository state
+        echo "🧹 Cleaning repository state..."
+        git clean -fd
+        git reset --hard HEAD
+        
+        # Fetch latest changes
         git fetch origin
+        
+        # Checkout the specific commit for deployment
         git checkout ${{ github.sha }}
         
         # Build Docker image from the checked out commit
@@ -80,6 +91,13 @@ jobs:
     - name: Verify ${{ steps.env.outputs.ENVIRONMENT }} deployment
       run: |
         echo "🔍 Verifying deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
+        
+        # Use deployment status checker
+        cd /opt/renekris-infrastructure
+        if [ -f "check-deployment-status.sh" ]; then
+          echo "📋 Running comprehensive deployment verification..."
+          ./check-deployment-status.sh ${{ steps.env.outputs.ENVIRONMENT }} all || echo "⚠️ Status checker indicated issues but continuing verification..."
+        fi
         
         # Wait for service to stabilize (longer wait for Docker Swarm rolling updates)
         echo "⏳ Waiting for services to stabilize and rolling update to complete..."
