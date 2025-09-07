@@ -67,25 +67,41 @@ jobs:
         
         # Build Docker image from the checked out commit
         echo "🔨 Building Docker image from commit: ${{ github.sha }}"
-        docker build --no-cache -t renekris-web:${BUILD_ID} .
+        docker build --no-cache -t renekris-web:${BUILD_ID} /opt/renekris-dev-website
         
         # Generate stack file with dynamic image tag
         cd /opt/renekris-infrastructure
-        ./generate-stack-files.sh ${{ steps.env.outputs.ENVIRONMENT }} ${{ github.ref_name }} ${TIMESTAMP_ID}
+        
+        # Initialize deployment logging
+        LOG_FILE=$(./deployment-logger.sh setup "website" "${{ steps.env.outputs.ENVIRONMENT }}")
+        echo "📝 Deployment log: $LOG_FILE"
+        
+        # Generate stack file with proper error handling
+        if ! ./deployment-logger.sh exec "./generate-stack-files.sh ${{ steps.env.outputs.ENVIRONMENT }} ${{ github.ref_name }} ${{ github.sha }}" "Generating stack files"; then
+            echo "❌ Stack file generation failed"
+            ./deployment-logger.sh finalize "website" "${{ steps.env.outputs.ENVIRONMENT }}" "false"
+            exit 1
+        fi
         
         echo "🔄 Deploying with image: renekris-web:${BUILD_ID}"
         
-        # Deploy using generated stack file
-        docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}
+        # Deploy using generated stack file with logging
+        if ! ./deployment-logger.sh exec "docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}" "Deploying Docker stack"; then
+            echo "❌ Stack deployment failed"
+            ./deployment-logger.sh finalize "website" "${{ steps.env.outputs.ENVIRONMENT }}" "false"
+            exit 1
+        fi
         
         # Force service update to ensure new image is used (Docker Swarm fix)
         echo "🔄 Ensuring service uses new image..."
         if [ "${{ steps.env.outputs.ENVIRONMENT }}" = "staging" ]; then
-          docker service update --image renekris-web:${BUILD_ID} renekris-staging_web-staging || echo "⚠️ Force update failed, but deployment may still work"
+          ./deployment-logger.sh exec "docker service update --image renekris-web:${BUILD_ID} renekris-staging_web-staging" "Updating staging service image" || echo "⚠️ Force update failed, but deployment may still work"
         else
-          docker service update --image renekris-web:${BUILD_ID} renekris-stack_web || echo "⚠️ Force update failed, but deployment may still work"
+          ./deployment-logger.sh exec "docker service update --image renekris-web:${BUILD_ID} renekris-stack_web" "Updating production service image" || echo "⚠️ Force update failed, but deployment may still work"
         fi
         
+        # Finalize deployment logging with success
+        ./deployment-logger.sh finalize "website" "${{ steps.env.outputs.ENVIRONMENT }}" "true"
         echo "📝 Deployment completed with image tag: ${BUILD_ID}"
     
     - name: Verify ${{ steps.env.outputs.ENVIRONMENT }} deployment
