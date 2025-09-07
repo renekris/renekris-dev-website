@@ -121,7 +121,7 @@ const StatusOverview = () => {
     // Minecraft-style bar heights: 2px, 4px, 6px, 8px, 10px
     const barHeights = [2, 4, 6, 8, 10];
 
-    const handleMouseEnter = (e) => {
+    const handleMouseEnter = useCallback((e) => {
       let tooltipText;
       if (loading) {
         tooltipText = 'Connecting...';
@@ -139,25 +139,23 @@ const StatusOverview = () => {
         y: e.clientY,
         text: tooltipText
       });
-    };
+    }, [loading, online, ping]);
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
       setTooltip(prev => ({
         ...prev,
         visible: true,
         x: e.clientX,
         y: e.clientY
       }));
-    };
+    }, []);
 
-    const handleMouseLeave = () => {
-      setTooltip({
-        visible: false,
-        x: 0,
-        y: 0,
-        text: ''
-      });
-    };
+    const handleMouseLeave = useCallback(() => {
+      setTooltip(prev => ({
+        ...prev,
+        visible: false
+      }));
+    }, []);
 
     return (
       <div 
