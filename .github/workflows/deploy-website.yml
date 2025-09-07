@@ -46,9 +46,14 @@ jobs:
         echo "🔨 Building Docker image..."
         docker build -t renekris-web:${{ steps.env.outputs.IMAGE_TAG }} .
         
+        # Update infrastructure repository to dev branch
+        echo "📥 Updating infrastructure repository..."
+        cd /opt/renekris-infrastructure
+        git fetch origin
+        git reset --hard origin/dev
+        
         # Deploy stack
         echo "🚀 Deploying stack..."
-        cd /opt/renekris-infrastructure
         docker stack deploy -c ${{ steps.env.outputs.STACK_FILE }} ${{ steps.env.outputs.STACK_NAME }}
         
         echo "✅ Deployment completed"
