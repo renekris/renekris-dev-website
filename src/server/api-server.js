@@ -80,8 +80,16 @@ const server = http.createServer(async (req, res) => {
     // Handle API endpoint for Minecraft server status
     if (req.url === '/api/minecraft-status') {
         try {
-            // Read status from the infrastructure service's status file
-            const statusFile = path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
+            // Read status from the monitoring service's shared volume
+            // Try new containerized path first, fallback to legacy path
+            const containerizedPath = path.join('/opt', 'monitoring', 'minecraft-server-status.json');
+            const legacyPath = path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
+            
+            let statusFile = containerizedPath;
+            if (!fs.existsSync(containerizedPath) && fs.existsSync(legacyPath)) {
+                statusFile = legacyPath;
+            }
+            
             const statusData = fs.readFileSync(statusFile, 'utf8');
             const minecraftStatus = JSON.parse(statusData);
             
