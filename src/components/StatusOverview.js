@@ -291,15 +291,15 @@ const StatusOverview = () => {
         {/* Dropdown toggle button */}
         <div className="info-line">
           <button
-            className="dropdown-toggle"
+            className="dropdown-toggle w-full flex justify-center"
             onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
             aria-expanded={isDetailsExpanded}
             aria-controls="server-details"
+            aria-label={isDetailsExpanded ? "Hide server details" : "Show server details"}
           >
             <div className="info-icon">
               {isDetailsExpanded ? <FaChevronUp /> : <FaChevronDown />}
             </div>
-            <span className="info-label">Server Details</span>
           </button>
         </div>
       </div>

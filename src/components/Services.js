@@ -30,19 +30,20 @@ const Services = () => {
             value: "renekris.dev/portfolio"
           }}
         >
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-blue-400">🎯</span>
-              <span><strong className="text-white">Purpose:</strong> Interactive project showcase</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-400">⚛️</span>
-              <span><strong className="text-white">Stack:</strong> React 18, Node.js, Docker</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-purple-400">✨</span>
-              <span><strong className="text-white">Features:</strong> Live demos, case studies</span>
-            </div>
+          <div className="info-line">
+            <div className="info-icon">🎯</div>
+            <span className="info-label">Purpose:</span>
+            <span className="info-value">Interactive project showcase</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">⚛️</div>
+            <span className="info-label">Stack:</span>
+            <span className="info-value">React 18, Node.js, Docker</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">✨</div>
+            <span className="info-label">Features:</span>
+            <span className="info-value">Live demos, case studies</span>
           </div>
         </ServiceCard>
         
@@ -60,19 +61,20 @@ const Services = () => {
             value: "status.renekris.dev"
           }}
         >
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-blue-400">📊</span>
-              <span><strong className="text-white">Platform:</strong> Uptime Kuma</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-400">🔍</span>
-              <span><strong className="text-white">Monitoring:</strong> HTTP/HTTPS endpoints</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-400">🔒</span>
-              <span><strong className="text-white">Security:</strong> SSL certificates, DNS</span>
-            </div>
+          <div className="info-line">
+            <div className="info-icon">📊</div>
+            <span className="info-label">Platform:</span>
+            <span className="info-value">Uptime Kuma</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">🔍</div>
+            <span className="info-label">Monitoring:</span>
+            <span className="info-value">HTTP/HTTPS endpoints</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">🔒</div>
+            <span className="info-label">Security:</span>
+            <span className="info-value">SSL certificates, DNS</span>
           </div>
         </ServiceCard>
         
@@ -90,23 +92,25 @@ const Services = () => {
             value: "Hybrid Cloud + Self-Hosted"
           }}
         >
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-purple-400">🖥️</span>
-              <span><strong className="text-white">Hypervisor:</strong> Proxmox VE 8.x</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-blue-400">🌐</span>
-              <span><strong className="text-white">Proxy:</strong> Traefik v3.5.1</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-orange-400">☁️</span>
-              <span><strong className="text-white">CDN:</strong> Cloudflare DDoS protection</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-400">🐳</span>
-              <span><strong className="text-white">Containers:</strong> Docker Swarm</span>
-            </div>
+          <div className="info-line">
+            <div className="info-icon">🖥️</div>
+            <span className="info-label">Hypervisor:</span>
+            <span className="info-value">Proxmox VE 8.x</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">🌐</div>
+            <span className="info-label">Proxy:</span>
+            <span className="info-value">Traefik v3.5.1</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">☁️</div>
+            <span className="info-label">CDN:</span>
+            <span className="info-value">Cloudflare DDoS protection</span>
+          </div>
+          <div className="info-line">
+            <div className="info-icon">🐳</div>
+            <span className="info-label">Containers:</span>
+            <span className="info-value">Docker Swarm</span>
           </div>
         </ServiceCard>
       </div>
