@@ -1,39 +1,61 @@
-# Build stage
-FROM node:18-alpine as build
+# syntax=docker/dockerfile:1
+
+# Build stage with cache optimization
+FROM node:18-alpine AS build
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better layer caching
 COPY package*.json ./
-RUN npm install
 
-# Copy configuration files for Tailwind CSS
-COPY tailwind.config.js ./
-COPY postcss.config.js ./
+# Use cache mount for npm to persist downloads between builds
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev --prefer-offline
 
-# Copy source code
+# Copy configuration files (these change less frequently)
+COPY tailwind.config.js postcss.config.js ./
+
+# Copy source files (these change most frequently)
 COPY public/ ./public/
 COPY src/ ./src/
 
-# Build the React application
-RUN npm run build
+# Build with cache mount for build artifacts
+RUN --mount=type=cache,target=/root/.cache \
+    npm run build
 
-# Production stage - Use Node.js to serve both static files and API
-FROM node:18-alpine
+# Production stage - minimal runtime image
+FROM node:18-alpine AS runtime
+
+# Add security updates
+RUN apk upgrade --no-cache
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Install only curl for health checks
+RUN apk add --no-cache curl dumb-init
 
 WORKDIR /app
 
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Copy built React app
-COPY --from=build /app/build ./build
+# Copy built React app from build stage
+COPY --from=build --chown=nextjs:nodejs /app/build ./build
 
 # Copy API server
-COPY src/server/api-server.js ./server.js
+COPY --from=build --chown=nextjs:nodejs /app/src/server/api-server.js ./server.js
 
-# Add health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+# Switch to non-root user
+USER nextjs
+
+# Add health check with faster intervals for better reliability
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 EXPOSE 8080
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
