@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  FaGamepad, 
   FaUsers, 
   FaComments, 
   FaCube, 
   FaCog,
   FaBuilding,
   FaServer,
-  FaCopy,
   FaTools,
   FaChevronDown,
   FaChevronUp
