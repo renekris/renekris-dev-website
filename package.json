@@ -1,6 +1,6 @@
 {
   "name": "renekris-dev-website",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "Renekris.dev React website with system status monitoring",
   "private": true,
   "dependencies": {
