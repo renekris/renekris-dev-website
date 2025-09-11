@@ -1,32 +1,6 @@
 import React from 'react';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const ServiceCard = ({ title, status, statusColor, children, connectionInfo }) => {
-  const getStatusClass = () => {
-    switch(statusColor) {
-      case 'active':
-        return 'status-operational';
-      case 'private':
-        return 'status-private';
-      case 'coming-soon':
-        return 'status-development';
-      default:
-        return 'status-operational';
-    }
-  };
-
-  const getStatusIcon = () => {
-    switch(statusColor) {
-      case 'active':
-        return '✅';
-      case 'private':
-        return '🔒';
-      case 'coming-soon':
-        return '🚧';
-      default:
-        return '✅';
-    }
-  };
 
   return (
     <div 
