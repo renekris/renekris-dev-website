@@ -146,3 +146,4 @@ This website is part of a larger infrastructure setup that includes:
 - **DNS**: Cloudflare for domain management
 
 Infrastructure configurations are managed in a separate private repository for security.
+# Test deployment pipeline with INFRASTRUCTURE_DISPATCH_TOKEN
