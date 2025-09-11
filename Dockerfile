@@ -11,9 +11,11 @@ WORKDIR /app
 # Copy package files first for better layer caching
 COPY package*.json ./
 
-# Use cache mount for npm to persist downloads between builds
+# Use multiple cache mounts for optimal npm performance
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --prefer-offline
+    --mount=type=cache,target=/root/.cache \
+    --mount=type=cache,target=/tmp/.npm \
+    npm ci --omit=dev --prefer-offline --cache /tmp/.npm
 
 # Copy configuration files (these change less frequently)
 COPY tailwind.config.js postcss.config.js ./
@@ -22,8 +24,10 @@ COPY tailwind.config.js postcss.config.js ./
 COPY public/ ./public/
 COPY src/ ./src/
 
-# Build with cache mount for build artifacts
+# Build with comprehensive cache mounts for build artifacts
 RUN --mount=type=cache,target=/root/.cache \
+    --mount=type=cache,target=/app/node_modules/.cache \
+    --mount=type=cache,target=/tmp/webpack-cache \
     npm run build
 
 # Production stage - minimal runtime image

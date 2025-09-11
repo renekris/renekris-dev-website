@@ -9,7 +9,7 @@ const Footer = () => {
 
   return (
     <footer className="mt-auto text-center pt-8 border-t border-bg-tertiary text-text-tertiary">
-      <p className="mb-4">&copy; 2025 Renekris. Professional Infrastructure & Development.</p>
+      <p className="mb-4">&copy; 2025 Renekris. Professional Infrastructure & Development Solutions.</p>
       <div className="mb-4 text-sm text-text-secondary">
         <strong className="text-white">Tech Stack:</strong> React • Docker Swarm • Traefik • Let's Encrypt • GitHub Actions • GHCR
       </div>
