@@ -136,7 +136,7 @@ jobs:
             "environment": "${{ steps.env.outputs.environment }}",
             "image_tag": "${{ steps.env.outputs.image-tag }}",
             "commit_sha": "${{ github.sha }}",
-            "commit_message": "${{ github.event.head_commit.message }}",
+            "commit_message": ${{ toJSON(github.event.head_commit.message) }},
             "branch": "${{ github.ref_name }}",
             "actor": "${{ github.actor }}",
             "repository": "${{ github.repository }}"
