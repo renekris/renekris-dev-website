@@ -1,25 +1,35 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
-import Services from './components/Services';
-import Footer from './components/Footer';
+import Home from './components/Home';
+import Portfolio from './components/Portfolio';
+import About from './components/About';
 
 // ✅ GitHub Actions deployment working! - Fixed production build sync issue
 
 function App() {
   return (
-    <div>
-      <Navigation />
-      
-      <div className="max-w-4xl mx-auto px-4 py-8 min-h-screen flex flex-col">
-        <header className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-light mb-2 text-primary glow-text">renekris.dev</h1>
-          <p className="text-xl text-text-secondary mb-8">Full-Stack Developer & Infrastructure Engineer</p>
-        </header>
+    <Router>
+      <div>
+        <Navigation />
         
-        <Services />
-        <Footer />
+        <main className="min-h-screen">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/portfolio" element={
+              <div className="max-w-6xl mx-auto px-4 py-8">
+                <Portfolio />
+              </div>
+            } />
+            <Route path="/about" element={
+              <div className="max-w-6xl mx-auto px-4 py-8">
+                <About />
+              </div>
+            } />
+          </Routes>
+        </main>
       </div>
-    </div>
+    </Router>
   );
 }
 

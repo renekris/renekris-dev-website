@@ -6,15 +6,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#00d4ff',
-        'primary-dark': '#00a8cc',
+        primary: '#0EA5E9',
+        'primary-dark': '#0284C7',
         'bg-primary': '#1a1a1a',
         'bg-secondary': '#2a2a2a',
         'bg-tertiary': '#333333',
         'text-secondary': '#888888',
         'text-tertiary': '#666666',
-        'accent-green': '#00ff88',
-        'accent-purple': '#6666ff',
+        'accent-green': '#059669',
+        'accent-purple': '#7C3AED',
+        // New subtle neon colors
+        'neon-blue': '#0EA5E9',
+        'neon-purple': '#7C3AED',
+        'neon-pink': '#DB2777',
+        'neon-cyan': '#0891B2',
+        'neon-green': '#059669',
+        'neon-orange': '#EA580C',
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
@@ -42,10 +49,10 @@ module.exports = {
         },
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(0, 212, 255, 0.3)',
-        'glow-sm': '0 0 10px rgba(0, 212, 255, 0.2)',
-        'card': '0 10px 25px rgba(0, 212, 255, 0.1), 0 0 20px rgba(0, 212, 255, 0.05)',
-        'card-purple': '0 8px 20px rgba(102, 102, 255, 0.1), 0 0 15px rgba(102, 102, 255, 0.05)',
+        'glow': '0 0 12px rgba(14, 165, 233, 0.2)',
+        'glow-sm': '0 0 6px rgba(14, 165, 233, 0.15)',
+        'card': '0 8px 20px rgba(14, 165, 233, 0.08), 0 0 12px rgba(14, 165, 233, 0.04)',
+        'card-purple': '0 6px 16px rgba(124, 58, 237, 0.08), 0 0 12px rgba(124, 58, 237, 0.04)',
       },
       backdropBlur: {
         xs: '2px',
