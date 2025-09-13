@@ -1,127 +1,100 @@
 import React from 'react';
-import { FaHome, FaUser, FaBriefcase, FaEnvelope } from 'react-icons/fa';
+import { FaHome, FaUser, FaBriefcase } from 'react-icons/fa';
 
 const Navigation = () => {
+  const navSectionStyle = {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem 0',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    background: 'rgba(255, 255, 255, 0.9)',
+    backdropFilter: 'blur(10px)',
+    textDecoration: 'none',
+    color: '#000000',
+    fontWeight: '500'
+  };
+
+  const activeSectionStyle = {
+    ...navSectionStyle,
+    background: 'radial-gradient(ellipse at center, #050505 0%, #0a0a0a 30%, #000000 70%, #000000 100%)',
+    color: '#ffffff',
+  };
+
+  const lastSectionStyle = {
+    ...navSectionStyle,
+    borderRight: 'none'
+  };
+
   return (
     <nav style={{
-      background: 'rgba(0, 0, 0, 0.2)',
-      backdropFilter: 'blur(10px)',
+      background: 'rgba(0, 0, 0, 0.4)',
+      backdropFilter: 'blur(15px)',
       borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      padding: '1rem 0',
       position: 'sticky',
       top: 0,
       zIndex: 100
     }}>
       <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 2rem'
+        width: '100%'
       }}>
-        <div style={{
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          color: '#00d4ff'
-        }}>
-          renekris.dev
-        </div>
-        
-        <ul style={{
-          display: 'flex',
-          listStyle: 'none',
-          margin: 0,
-          padding: 0,
-          gap: '2rem'
-        }}>
-          <li>
-            <a href="/" style={{
-              color: '#ffffff',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              transition: 'all 0.3s ease',
-              background: 'rgba(0, 212, 255, 0.1)',
-              border: '1px solid rgba(0, 212, 255, 0.3)'
-            }}>
-              <FaHome />
-              Home
-            </a>
-          </li>
-          <li>
-            <a href="/portfolio" style={{
-              color: '#cccccc',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.color = '#ffffff';
-              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = '#cccccc';
-              e.target.style.background = 'transparent';
-            }}>
-              <FaBriefcase />
-              Portfolio
-            </a>
-          </li>
-          <li>
-            <a href="/about" style={{
-              color: '#cccccc',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.color = '#ffffff';
-              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = '#cccccc';
-              e.target.style.background = 'transparent';
-            }}>
-              <FaUser />
-              About
-            </a>
-          </li>
-          <li>
-            <a href="/contact" style={{
-              color: '#cccccc',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.color = '#ffffff';
-              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = '#cccccc';
-              e.target.style.background = 'transparent';
-            }}>
-              <FaEnvelope />
-              Contact
-            </a>
-          </li>
-        </ul>
+        {/* Portfolio Section */}
+        <a 
+          href="/portfolio" 
+          style={navSectionStyle}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 1)';
+            e.target.style.color = '#000000';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+            e.target.style.color = '#000000';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FaBriefcase />
+            <span>Portfolio</span>
+          </div>
+        </a>
+
+        {/* Home Section (Active) */}
+        <a 
+          href="/" 
+          style={activeSectionStyle}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'radial-gradient(ellipse at center, #0a0a0a 0%, #0f0f0f 30%, #050505 70%, #000000 100%)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'radial-gradient(ellipse at center, #050505 0%, #0a0a0a 30%, #000000 70%, #000000 100%)';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FaHome />
+            <span>Home</span>
+          </div>
+        </a>
+
+        {/* About Section */}
+        <a 
+          href="/about" 
+          style={lastSectionStyle}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 1)';
+            e.target.style.color = '#000000';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+            e.target.style.color = '#000000';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FaUser />
+            <span>About</span>
+          </div>
+        </a>
       </div>
     </nav>
   );

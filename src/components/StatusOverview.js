@@ -2,13 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   FaUsers, 
   FaComments, 
-  FaCube, 
-  FaCog,
-  FaBuilding,
-  FaServer,
-  FaTools,
-  FaChevronDown,
-  FaChevronUp
+  FaCube,
+  FaTools
 } from 'react-icons/fa';
 
 const StatusOverview = () => {
@@ -29,9 +24,7 @@ const StatusOverview = () => {
   });
 
   const [commandText, setCommandText] = useState('');
-  const fullCommand = 'connect renekris.dev';
-  
-  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
+  const fullCommand = 'renekris.dev';
 
   // Typewriter effect with human-like entropy
   useEffect(() => {
@@ -70,24 +63,6 @@ const StatusOverview = () => {
     };
   }, []);
 
-  // Minecraft-style tooltip component
-  const MinecraftTooltip = () => {
-    if (!tooltip.visible) return null;
-
-    return (
-      <div
-        className="fixed z-50 pointer-events-none transition-opacity duration-100"
-        style={{
-          left: `${tooltip.x - 50}px`, // Center horizontally
-          top: `${tooltip.y - 40}px`,  // Position above cursor
-        }}
-      >
-        <div className="minecraft-tooltip minecraft-text text-white text-sm px-2 py-1 rounded shadow-lg">
-          {tooltip.text}
-        </div>
-      </div>
-    );
-  };
 
   // Minecraft-style connection bars component
   const ConnectionBars = ({ online, loading, ping }) => {
@@ -102,7 +77,7 @@ const StatusOverview = () => {
     };
 
     const getBarColor = (barIndex, pingLevel, loading, online) => {
-      if (loading) return 'bg-gray-500';
+      if (loading) return 'bg-gray-500 animate-pulse';
       if (!online) return 'bg-red-600';
       
       if (barIndex < pingLevel) {
@@ -122,13 +97,13 @@ const StatusOverview = () => {
     const handleMouseEnter = useCallback((e) => {
       let tooltipText;
       if (loading) {
-        tooltipText = 'Connecting...';
+        tooltipText = 'Connecting to server...';
       } else if (!online) {
-        tooltipText = 'Server Offline';
+        tooltipText = 'Server is offline - unable to connect';
       } else if (ping === null || ping === undefined || typeof ping !== 'number') {
-        tooltipText = 'Ping unavailable';
+        tooltipText = 'Ping measurement unavailable';
       } else {
-        tooltipText = `${ping}ms`;
+        tooltipText = `Ping: ${ping}ms (round-trip to server)`;
       }
       
       setTooltip({
@@ -157,7 +132,7 @@ const StatusOverview = () => {
 
     return (
       <div 
-        className="flex items-end gap-px h-3 cursor-pointer"
+        className="flex items-end gap-px h-3 cursor-pointer relative"
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -165,9 +140,15 @@ const StatusOverview = () => {
         {[...Array(5)].map((_, index) => (
           <div
             key={index}
-            className={`w-1 transition-colors duration-200 ${getBarColor(index, pingLevel, loading, online)}`}
+            className={`w-1 transition-colors duration-200 ${getBarColor(index, pingLevel, loading, online)} relative`}
             style={{ height: `${barHeights[index]}px` }}
-          />
+          >
+            {!online && !loading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-red-400 text-xs leading-none" style={{ fontSize: '6px' }}>×</div>
+              </div>
+            )}
+          </div>
         ))}
       </div>
     );
@@ -224,7 +205,7 @@ const StatusOverview = () => {
 
   return (
     <div 
-      className="minecraft-panel rounded-lg p-4 h-full flex flex-col"
+      className="minecraft-panel"
       tabIndex="0"
       role="region"
       aria-label="Minecraft Server Status"
@@ -232,16 +213,21 @@ const StatusOverview = () => {
     >
       {/* Minecraft-style header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="minecraft-title text-white text-2xl">
+        <h3 className="minecraft-title text-white text-2xl flex items-center gap-2">
+          <FaCube className="text-green-400" />
           <span>Minecraft Server</span>
         </h3>
         <div className="flex items-center gap-3">
-          <div className={`minecraft-text text-sm font-bold ${
-            statusData.loading ? 'text-gray-300' : 
-            statusData.online ? 'text-green-300' : 'text-red-300'
-          }`} style={{ textShadow: '0 0 8px currentColor' }}>
-            {statusData.loading ? 'Connecting...' : statusData.status}
+          {/* Player count with minecraft font */}
+          <div className="flex items-center gap-1">
+            <FaUsers className="text-green-400 text-xs" />
+            <span className="minecraft-text text-green-300">{statusData.players.online}/{statusData.players.max}</span>
           </div>
+          {statusData.loading && (
+            <div className="minecraft-text text-sm font-bold text-gray-300" style={{ textShadow: '0 0 8px currentColor' }}>
+              Connecting...
+            </div>
+          )}
           <ConnectionBars 
             online={statusData.online}
             loading={statusData.loading}
@@ -249,91 +235,55 @@ const StatusOverview = () => {
           />
         </div>
       </div>
-      
+
       {/* Server connection display - Command line style */}
-      <div 
-        className="connection-display mb-3 flex justify-between items-center"
-        onClick={() => navigator.clipboard?.writeText('renekris.dev')}
-        title="Click to copy server address"
-      >
-        <div className="flex items-center">
-          <span className="command-prompt">user@renekris:~$ </span>
-          <span className="server-address">{commandText}</span>
-          <span className="cursor-blink">_</span>
+      <div className="mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-gray-400 text-sm font-semibold">Server IP Address</span>
         </div>
-        <a 
-          href="https://192.168.1.232:8443" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="minecraft-button-square no-underline"
-          onClick={(e) => e.stopPropagation()}
-          title="Open Control Panel"
+        <div 
+          className="connection-display flex justify-between items-center cursor-pointer"
+          onClick={() => navigator.clipboard?.writeText('renekris.dev')}
+          title="Click to copy server address"
         >
-          <FaTools />
-        </a>
-      </div>
-      
-      {/* Player info section */}
-      <div className="nostalgic-info-section">
-        <div className="info-line">
-          <div className="info-icon"><FaUsers /></div>
-          <span className="info-label">Players:</span>
-          <span className="info-value">{statusData.players.online}/{statusData.players.max} online</span>
-        </div>
-        {statusData.motd && (
-          <div className="info-line">
-            <div className="info-icon"><FaComments /></div>
-            <span className="info-label">MOTD:</span>
-            <span className="info-value">{statusData.motd}</span>
+          <div className="flex items-center" style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+            <span className="server-address text-green-400 text-lg font-bold" style={{ whiteSpace: 'nowrap' }}>{commandText}</span>
+            <span className="cursor-blink">_</span>
           </div>
-        )}
-        
-        {/* Dropdown toggle button */}
-        <div className="info-line">
-          <button
-            className="dropdown-toggle w-full flex justify-center"
-            onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
-            aria-expanded={isDetailsExpanded}
-            aria-controls="server-details"
-            aria-label={isDetailsExpanded ? "Hide server details" : "Show server details"}
-          >
-            <div className="info-icon">
-              {isDetailsExpanded ? <FaChevronUp /> : <FaChevronDown />}
-            </div>
-          </button>
+          <div className="flex items-center gap-2">
+            <a 
+              href="https://192.168.1.232:8443" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="minecraft-button-square no-underline"
+              onClick={(e) => e.stopPropagation()}
+              title="Open Control Panel"
+            >
+              <FaTools />
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Collapsible server details section */}
-      <div 
-        className={`nostalgic-info-section collapsible-section ${isDetailsExpanded ? 'expanded' : 'collapsed'}`}
-        id="server-details"
-      >
-        <div className="info-line">
-          <div className="info-icon"><FaCube /></div>
-          <span className="info-label">Modpack:</span>
-          <span className="info-value">Life in the Village 3 (LitV3)</span>
-        </div>
-        <div className="info-line">
-          <div className="info-icon"><FaCog /></div>
-          <span className="info-label">Version:</span>
-          <span className="info-value">Minecraft 1.19.2</span>
-        </div>
-        <div className="info-line">
-          <div className="info-icon"><FaBuilding /></div>
-          <span className="info-label">Focus:</span>
-          <span className="info-value">MineColonies, building, exploration</span>
-        </div>
-        <div className="info-line">
-          <div className="info-icon"><FaServer /></div>
-          <span className="info-label">Hardware:</span>
-          <span className="info-value">Intel i7 7700K, 12GB RAM, SSD storage</span>
-        </div>
+      {/* MOTD Section */}
+      <div className="text-center py-3 border-t border-gray-700">
+        <p className="text-gray-400 text-sm font-mono italic">
+          {statusData.motd || "Welcome to renekris.dev Minecraft server"}
+        </p>
       </div>
-      
-      
-      {/* Minecraft-style tooltip overlay */}
-      <MinecraftTooltip />
+
+      {/* Tooltip */}
+      {tooltip.visible && (
+        <div 
+          className="minecraft-tooltip fixed px-3 py-2 z-50 pointer-events-none"
+          style={{
+            left: `${tooltip.x + 15}px`,
+            top: `${tooltip.y - 35}px`
+          }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   );
 };

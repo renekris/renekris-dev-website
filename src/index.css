@@ -4,20 +4,47 @@
 
 /* Custom base styles */
 @layer base {
+  :root {
+    /* 2025 Gaming Professional Color Palette */
+    --minecraft-green: #4CAF50;
+    --success-green: #10B981;
+    --accent-blue: #3B82F6;
+    --warning-amber: #F59E0B;
+    --error-red: #EF4444;
+
+    /* Dark Theme Base */
+    --bg-primary: #0F172A;
+    --bg-secondary: #1E293B;
+    --bg-card: #334155;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --border: #475569;
+
+    /* Interactive States */
+    --hover-bg: #475569;
+    --focus-ring: #3B82F6;
+    --shadow-card: rgba(0, 0, 0, 0.25);
+
+    /* Typography System */
+    --font-primary: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  }
+
   * {
     box-sizing: border-box;
   }
   
   body {
     @apply bg-gray-900 text-white font-sans leading-relaxed;
-    background: radial-gradient(ellipse at center, #0a0a0a 0%, #1a1a1a 50%, #000000 100%);
+    background: radial-gradient(ellipse at center, #050505 0%, #0a0a0a 30%, #000000 70%, #000000 100%);
+    font-family: var(--font-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   
   code {
-    @apply font-mono;
+    font-family: var(--font-mono);
   }
 }
 
@@ -32,35 +59,53 @@
   }
   
   .minecraft-panel {
-    background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
-    border: 3px solid #2a2a3e;
-    border-style: outset;
+    background: linear-gradient(145deg, #0a0a0f 0%, #140a1f 30%, #1a0a2a 50%, #140a1f 70%, #0a0a0f 100%);
+    border: 4px solid #000000;
+    border-style: solid;
     box-shadow: 
-      inset 1px 1px 3px rgba(74, 51, 87, 0.2),
-      inset -1px -1px 3px rgba(0, 0, 0, 0.8),
-      0 6px 20px rgba(74, 51, 87, 0.15),
-      0 0 30px rgba(74, 51, 87, 0.08);
+      inset 2px 2px 4px rgba(88, 28, 135, 0.15),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.9),
+      0 8px 25px rgba(0, 0, 0, 0.6),
+      0 0 40px rgba(88, 28, 135, 0.1);
     position: relative;
+    padding: 2rem;
+    max-width: none;
+    margin-bottom: 2rem;
   }
   
   .minecraft-panel::before {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    right: 3px;
-    bottom: 3px;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
     background: 
       repeating-linear-gradient(
         45deg,
         transparent,
-        transparent 4px,
-        rgba(74, 51, 87, 0.04) 4px,
-        rgba(74, 51, 87, 0.04) 6px
+        transparent 8px,
+        rgba(88, 28, 135, 0.03) 8px,
+        rgba(88, 28, 135, 0.03) 10px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 12px,
+        rgba(139, 69, 19, 0.02) 12px,
+        rgba(139, 69, 19, 0.02) 14px
       );
     pointer-events: none;
-    border-radius: 2px;
+    border-radius: 1px;
   }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+  }
+  
   
   .minecraft-text {
     font-family: 'Courier New', 'Consolas', monospace;
@@ -245,43 +290,36 @@
   }
   
   .connection-display {
-    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
-    border: 2px solid #2a2a3e;
-    border-style: inset;
-    border-radius: 4px;
-    padding: 8px 12px;
-    font-family: 'Courier New', 'Consolas', monospace;
-    letter-spacing: 1px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
     line-height: 1.4;
-    margin: 12px 0;
-    cursor: text;
+    cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 
-      inset 1px 1px 2px rgba(74, 51, 87, 0.15),
-      inset -1px -1px 2px rgba(0, 0, 0, 0.8),
-      0 3px 6px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 4px var(--shadow-card);
     position: relative;
   }
   
   .connection-display:hover {
-    background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 50%, #1a1a2e 100%);
-    border-color: #3a3a4e;
-    box-shadow: 
-      inset 1px 1px 2px rgba(74, 51, 87, 0.2),
-      inset -1px -1px 2px rgba(0, 0, 0, 0.8),
-      0 4px 8px rgba(74, 51, 87, 0.15);
+    background: var(--hover-bg);
+    border-color: var(--minecraft-green);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.15), 0 2px 4px var(--shadow-card);
+    transform: translateY(-1px);
   }
 
   .command-prompt {
-    color: #00ff88;
+    color: var(--minecraft-green);
     font-weight: bold;
-    text-shadow: 0 0 4px rgba(0, 255, 136, 0.8);
+    text-shadow: 0 0 4px rgba(76, 175, 80, 0.8);
   }
 
   .server-address {
-    color: #ffffff;
+    color: var(--text-primary);
     font-weight: normal;
-    text-shadow: 0 0 3px rgba(255, 255, 255, 0.6);
+    text-shadow: 0 0 3px rgba(248, 250, 252, 0.6);
   }
 
   .cursor-blink {
