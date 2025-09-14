@@ -1,10 +1,25 @@
+const path = require('path');
+
+// Load environment variables from .env file
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '..', '.env') });
+
 const http = require('http');
 const httpProxy = require('http-proxy-middleware');
 const fs = require('fs');
-const path = require('path');
 
-const PORT = process.env.PORT || 3000;
-const REACT_DEV_PORT = 3001; // React dev server port
+// Configuration with environment variables and error handling
+const PORT = process.env.DEV_PANEL_PORT || process.env.PORT || 3000;
+const REACT_DEV_PORT = process.env.REACT_DEV_PORT || 3001;
+const WEB_SERVER_IP = process.env.WEB_SERVER_IP;
+const UPTIME_KUMA_PORT = process.env.UPTIME_KUMA_PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Validate required environment variables
+if (!WEB_SERVER_IP) {
+    console.error('ERROR: WEB_SERVER_IP environment variable is required');
+    console.error('Please check your .env file in the project root');
+    process.exit(1);
+}
 
 // Create proxy middleware
 const reactProxy = httpProxy.createProxyMiddleware({
@@ -35,9 +50,9 @@ async function fetchUptimeKumaStatus() {
     try {
         console.log('Dev-proxy: Fetching status from Uptime Kuma...');
         
-        // Use configurable host or fallback to hardcoded IP
-        const uptimeHost = process.env.UPTIME_KUMA_HOST || '192.168.1.236';
-        const uptimePort = process.env.UPTIME_KUMA_PORT || '3001';
+        // Use environment variables for Uptime Kuma configuration
+        const uptimeHost = WEB_SERVER_IP; // Uptime Kuma runs on the web server
+        const uptimePort = UPTIME_KUMA_PORT;
         
         // Use internal HTTP since we're server-side (no mixed content issues)
         const config = await httpGet(`http://${uptimeHost}:${uptimePort}/api/status-page/services`);
@@ -89,11 +104,13 @@ const server = http.createServer(async (req, res) => {
     if (req.url === '/api/minecraft-status') {
         try {
             // Read status from the infrastructure service's status file
-            // Use relative path for development, absolute path for production
-            const isDevelopment = process.env.NODE_ENV !== 'production';
-            const statusFile = isDevelopment 
-                ? path.join(__dirname, '..', '..', '..', 'renekris-infrastructure', 'minecraft-server-status.json')
-                : path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
+            // Use environment-based path configuration
+            const isDevelopment = NODE_ENV !== 'production';
+            const infraBasePath = process.env.INFRASTRUCTURE_BASE_PATH || 
+                (isDevelopment 
+                    ? path.join(__dirname, '..', '..', '..', 'renekris-infrastructure')
+                    : '/opt/renekris-infrastructure');
+            const statusFile = path.join(infraBasePath, 'minecraft-server-status.json');
                 
             const statusData = fs.readFileSync(statusFile, 'utf8');
             const minecraftStatus = JSON.parse(statusData);
