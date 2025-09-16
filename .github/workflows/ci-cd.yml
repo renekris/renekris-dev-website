@@ -15,76 +15,76 @@ env:
 jobs:
   test:
     runs-on: self-hosted
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run linting
       run: npm run lint
-    
+
     - name: Run tests
       run: npm test -- --coverage --watchAll=false
-    
+
     - name: Build application
       run: npm run build
 
   build-and-deploy:
     needs: test
     runs-on: self-hosted
-    
+
     permissions:
       contents: read
       packages: write
-    
+
     outputs:
       image-tag: ${{ steps.meta.outputs.tags }}
       image-digest: ${{ steps.build.outputs.digest }}
       environment: ${{ steps.env.outputs.environment }}
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Determine environment and image tag
       id: env
       run: |
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-        
+
         if [ "${{ github.ref_name }}" = "main" ]; then
           ENVIRONMENT="production"
           IMAGE_TAG="production-${SHORT_SHA}"
         else
-          ENVIRONMENT="staging"
-          IMAGE_TAG="staging-${SHORT_SHA}"
+          ENVIRONMENT="dev"
+          IMAGE_TAG="dev-${SHORT_SHA}"
         fi
-        
+
         echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
         echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
         echo "short-sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
-        
+
         echo "🚀 Building for environment: ${ENVIRONMENT}"
         echo "📦 Image tag: ${IMAGE_TAG}"
-    
+
     - name: Setup Docker Buildx
       uses: docker/setup-buildx-action@v3
-    
+
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
@@ -92,8 +92,8 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
           type=raw,value=${{ steps.env.outputs.image-tag }}
-          type=raw,value=latest-${{ steps.env.outputs.environment }}
-    
+          type=raw,value=${{ steps.env.outputs.environment }}-latest
+
     - name: Build and push Docker image
       id: build
       uses: docker/build-push-action@v5
@@ -103,23 +103,19 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: |
-          type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          type=gha
-        cache-to: |
-          type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
-          type=gha,mode=max
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         build-args: |
           BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
-    
+
     - name: Verify image build
       run: |
         echo "✅ Image built successfully"
         echo "📋 Image tags: ${{ steps.meta.outputs.tags }}"
         echo "🔍 Image digest: ${{ steps.build.outputs.digest }}"
-    
+
     - name: Validate dispatch token
       run: |
         if [ -z "${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}" ]; then
@@ -140,12 +136,12 @@ jobs:
             "environment": "${{ steps.env.outputs.environment }}",
             "image_tag": "${{ steps.env.outputs.image-tag }}",
             "commit_sha": "${{ github.sha }}",
-            "commit_message": ${{ toJSON(github.event.head_commit.message) }},
+            "commit_message": "${{ github.event.head_commit.message }}",
             "branch": "${{ github.ref_name }}",
             "actor": "${{ github.actor }}",
             "repository": "${{ github.repository }}"
           }
-    
+
     - name: Deployment summary
       run: |
         echo "🎉 Build and dispatch completed successfully!"
@@ -163,36 +159,34 @@ jobs:
     needs: build-and-deploy
     runs-on: self-hosted
     if: github.ref_name == 'dev'
-    
+
     steps:
     - name: Wait for staging deployment
       run: |
         echo "⏳ Waiting for staging deployment to complete..."
-        sleep 90
-    
+        sleep 60
+
     - name: Verify staging deployment
       run: |
         echo "🔍 Verifying staging deployment..."
-        
-        # Test staging health endpoint with more retries and longer timeouts
-        for i in {1..10}; do
-          echo "🏥 Health check attempt $i/10..."
-          if curl -f -k --connect-timeout 10 --max-time 30 "https://staging.renekris.dev/health" > /dev/null 2>&1; then
+
+        # Test staging health endpoint with retries
+        for i in {1..5}; do
+          echo "🏥 Health check attempt $i/5..."
+          if curl -f -k "https://staging.renekris.dev/health" > /dev/null 2>&1; then
             echo "✅ Staging health check passed"
             exit 0
           fi
-          sleep 15
+          sleep 10
         done
-        
-        echo "❌ Staging health check failed after 10 attempts"
-        echo "Final attempt with verbose output:"
-        curl -v -k --connect-timeout 10 --max-time 30 "https://staging.renekris.dev/health" || true
+
+        echo "❌ Staging health check failed after 5 attempts"
         exit 1
-    
+
     - name: Verify staging functionality
       run: |
         echo "🧪 Running staging functionality tests..."
-        
+
         # Test main page loads
         if curl -f -k "https://staging.renekris.dev" > /dev/null 2>&1; then
           echo "✅ Staging main page accessible"
@@ -200,7 +194,7 @@ jobs:
           echo "❌ Staging main page failed"
           exit 1
         fi
-        
+
         # Test API endpoints
         if curl -f -k "https://staging.renekris.dev/api/minecraft-status" > /dev/null 2>&1; then
           echo "✅ Staging API endpoints accessible"
@@ -208,43 +202,41 @@ jobs:
           echo "❌ Staging API endpoints failed"
           exit 1
         fi
-        
+
         echo "🎉 All staging verification tests passed!"
 
   verify-production:
     needs: build-and-deploy
     runs-on: self-hosted
     if: github.ref_name == 'main'
-    
+
     steps:
     - name: Wait for production deployment
       run: |
         echo "⏳ Waiting for production deployment to complete..."
-        sleep 120
-    
+        sleep 90
+
     - name: Verify production deployment
       run: |
         echo "🔍 Verifying production deployment..."
-        
-        # Test production health endpoint with more retries and longer timeouts
-        for i in {1..8}; do
-          echo "🏥 Health check attempt $i/8..."
-          if curl -f -k --connect-timeout 10 --max-time 30 "https://renekris.dev/health" > /dev/null 2>&1; then
+
+        # Test production health endpoint with retries
+        for i in {1..5}; do
+          echo "🏥 Health check attempt $i/5..."
+          if curl -f -k "https://renekris.dev/health" > /dev/null 2>&1; then
             echo "✅ Production health check passed"
             exit 0
           fi
-          sleep 20
+          sleep 15
         done
-        
-        echo "❌ Production health check failed after 8 attempts"
-        echo "Final attempt with verbose output:"
-        curl -v -k --connect-timeout 10 --max-time 30 "https://renekris.dev/health" || true
+
+        echo "❌ Production health check failed after 5 attempts"
         exit 1
-    
+
     - name: Verify production functionality
       run: |
         echo "🧪 Running production functionality tests..."
-        
+
         # Test main page loads
         if curl -f -k "https://renekris.dev" > /dev/null 2>&1; then
           echo "✅ Production main page accessible"
@@ -252,7 +244,7 @@ jobs:
           echo "❌ Production main page failed"
           exit 1
         fi
-        
+
         # Test API endpoints
         if curl -f -k "https://renekris.dev/api/minecraft-status" > /dev/null 2>&1; then
           echo "✅ Production API endpoints accessible"
@@ -260,9 +252,9 @@ jobs:
           echo "❌ Production API endpoints failed"
           exit 1
         fi
-        
+
         echo "🎉 All production verification tests passed!"
-    
+
     - name: Notify deployment success
       run: |
         echo "🚀 Production deployment completed successfully!"
