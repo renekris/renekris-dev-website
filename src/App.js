@@ -5,7 +5,7 @@ import Home from './components/Home';
 import Portfolio from './components/Portfolio';
 import About from './components/About';
 
-// ✅ GitHub Actions deployment working! - Fixed production build sync issue
+// ✅ Testing automatic dev-latest tagging system
 
 function App() {
   return (
