@@ -47,19 +47,143 @@ async function fetchUptimeKumaStatus() {
     }
 }
 
+// Health check state tracking
+let isReady = false;
+let healthCheckData = {
+    dependencies: {
+        uptimeKuma: false,
+        fileSystem: false
+    },
+    lastCheck: null
+};
+
+// Function to check dependencies health
+async function checkDependencies() {
+    const checks = {
+        uptimeKuma: false,
+        fileSystem: false
+    };
+
+    // Check Uptime Kuma connectivity
+    try {
+        const uptimeHost = process.env.UPTIME_KUMA_HOST || '192.168.1.236';
+        const uptimePort = process.env.UPTIME_KUMA_PORT || '3001';
+        await httpGet(`http://${uptimeHost}:${uptimePort}/api/status-page/services`);
+        checks.uptimeKuma = true;
+    } catch (error) {
+        console.error('Uptime Kuma health check failed:', error.message);
+    }
+
+    // Check file system access
+    try {
+        const testPath = '/opt/monitoring';
+        if (fs.existsSync(testPath) || fs.existsSync('/app')) {
+            checks.fileSystem = true;
+        }
+    } catch (error) {
+        console.error('File system health check failed:', error.message);
+    }
+
+    return checks;
+}
+
+// Periodic health check
+setInterval(async () => {
+    healthCheckData.dependencies = await checkDependencies();
+    healthCheckData.lastCheck = new Date().toISOString();
+}, 30000); // Check every 30 seconds
+
+// Initial check on startup
+setTimeout(async () => {
+    healthCheckData.dependencies = await checkDependencies();
+    healthCheckData.lastCheck = new Date().toISOString();
+    isReady = true;
+    console.log('Server is ready to handle requests');
+}, 2000);
+
 const server = http.createServer(async (req, res) => {
-    // Health check endpoint for blue-green deployment
+    // Enhanced health check endpoint
     if (req.url === '/health') {
         const deploymentSlot = process.env.DEPLOYMENT_SLOT || 'unknown';
-        res.writeHead(200, { 
+        const environment = process.env.NODE_ENV || 'development';
+        const version = process.env.APP_VERSION || '1.0.0';
+
+        // Basic health status
+        const healthStatus = {
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            environment,
+            version,
+            slot: deploymentSlot,
+            uptime: process.uptime(),
+            memory: {
+                used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+                total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+                unit: 'MB'
+            },
+            dependencies: healthCheckData.dependencies,
+            lastDependencyCheck: healthCheckData.lastCheck
+        };
+
+        res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+        });
+        res.end(JSON.stringify(healthStatus));
+        return;
+    }
+
+    // Readiness probe endpoint - checks if service is ready to accept traffic
+    if (req.url === '/ready') {
+        if (!isReady) {
+            res.writeHead(503, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            });
+            res.end(JSON.stringify({
+                status: 'not_ready',
+                message: 'Service is still initializing'
+            }));
+            return;
+        }
+
+        // Check critical dependencies
+        const allHealthy = Object.values(healthCheckData.dependencies).every(v => v === true);
+
+        if (allHealthy) {
+            res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            });
+            res.end(JSON.stringify({
+                status: 'ready',
+                timestamp: new Date().toISOString()
+            }));
+        } else {
+            res.writeHead(503, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            });
+            res.end(JSON.stringify({
+                status: 'degraded',
+                dependencies: healthCheckData.dependencies,
+                message: 'Some dependencies are unhealthy'
+            }));
+        }
+        return;
+    }
+
+    // Liveness probe endpoint - simple check that process is alive
+    if (req.url === '/live') {
+        res.writeHead(200, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         });
-        res.end(JSON.stringify({ 
-            status: 'healthy', 
-            slot: deploymentSlot,
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime()
+        res.end(JSON.stringify({
+            status: 'alive',
+            pid: process.pid,
+            timestamp: new Date().toISOString()
         }));
         return;
     }

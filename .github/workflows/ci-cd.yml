@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Modernized CI/CD Pipeline 2025
 
 on:
   push:
@@ -7,78 +7,159 @@ on:
       - 'README.md'
       - '.github/**'
       - 'docs/**'
+      - '*.md'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment for manual deployment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip test execution'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: renekris/renekris-dev-website
+  NODE_VERSION: '20'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # Test and Quality Checks
   test:
+    name: Test & Quality Checks
     runs-on: self-hosted
+    if: ${{ !inputs.skip_tests }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
 
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+
     - name: Run linting
       run: npm run lint
 
-    - name: Run tests
-      run: npm test -- --coverage --watchAll=false
+    - name: Run type checking
+      run: npm run type-check
+      continue-on-error: false
+
+    - name: Run unit tests
+      run: npm test -- --coverage --watchAll=false --maxWorkers=2
+
+    - name: Upload test coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 7
 
     - name: Build application
       run: npm run build
 
-  build-and-deploy:
-    needs: test
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: build/
+        retention-days: 1
+
+  # Security and Vulnerability Scanning
+  security-scan:
+    name: Security Scanning
     runs-on: self-hosted
-
-    permissions:
-      contents: read
-      packages: write
-
-    outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
-      image-digest: ${{ steps.build.outputs.digest }}
-      environment: ${{ steps.env.outputs.environment }}
+    needs: test
+    if: always() && (needs.test.result == 'success' || inputs.skip_tests)
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Determine environment and image tag
+    - name: Run Trivy filesystem scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-fs-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-fs-results.sarif'
+
+  # Build and Push Container Images
+  build:
+    name: Build & Push Container
+    runs-on: self-hosted
+    needs: [test, security-scan]
+    if: always() && (needs.test.result == 'success' || inputs.skip_tests) && needs.security-scan.result == 'success'
+
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+      environment: ${{ steps.env.outputs.environment }}
+      short-sha: ${{ steps.env.outputs.short-sha }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Determine environment and image tags
       id: env
       run: |
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
 
-        if [ "${{ github.ref_name }}" = "main" ]; then
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          ENVIRONMENT="${{ inputs.environment }}"
+        elif [ "${{ github.ref_name }}" = "main" ]; then
           ENVIRONMENT="production"
-          IMAGE_TAG="production-${SHORT_SHA}"
         else
-          ENVIRONMENT="dev"
-          IMAGE_TAG="dev-${SHORT_SHA}"
+          ENVIRONMENT="staging"
         fi
 
         echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
-        echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
         echo "short-sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
         echo "🚀 Building for environment: ${ENVIRONMENT}"
-        echo "📦 Image tag: ${IMAGE_TAG}"
+        echo "📦 Short SHA: ${SHORT_SHA}"
 
-    - name: Setup Docker Buildx
+    - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: |
+          image=moby/buildkit:buildx-stable-1
 
-    - name: Login to GitHub Container Registry
+    - name: Log in to Container Registry
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
@@ -91,41 +172,78 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=raw,value=${{ steps.env.outputs.image-tag }}
           type=raw,value=${{ steps.env.outputs.environment }}-latest
+          type=raw,value=${{ steps.env.outputs.environment }}-${{ steps.env.outputs.short-sha }}
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=sha,prefix={{branch}}-,format=short
+        labels: |
+          org.opencontainers.image.title=Renekris Dev Website
+          org.opencontainers.image.description=Modern React website with monitoring
+          org.opencontainers.image.vendor=Renekris
+          org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
     - name: Build and push Docker image
       id: build
       uses: docker/build-push-action@v5
       with:
         context: .
-        platforms: linux/amd64
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: |
+          type=gha,scope=${{ github.workflow }}
+          type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache
+        cache-to: |
+          type=gha,mode=max,scope=${{ github.workflow }}
+          type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache,mode=max
         build-args: |
           BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+        provenance: true
+        sbom: true
+
+    - name: Run Trivy container scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.env.outputs.environment }}-${{ steps.env.outputs.short-sha }}
+        format: 'sarif'
+        output: 'trivy-container-results.sarif'
+
+    - name: Upload Trivy container scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-container-results.sarif'
 
     - name: Verify image build
       run: |
         echo "✅ Image built successfully"
         echo "📋 Image tags: ${{ steps.meta.outputs.tags }}"
         echo "🔍 Image digest: ${{ steps.build.outputs.digest }}"
+        echo "🏷️ Environment: ${{ steps.env.outputs.environment }}"
 
+  # Staging Deployment (Automatic)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: self-hosted
+    needs: build
+    if: needs.build.outputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.renekris.dev
+
+    steps:
     - name: Validate dispatch token
       run: |
         if [ -z "${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}" ]; then
           echo "❌ ERROR: INFRASTRUCTURE_DISPATCH_TOKEN not configured"
-          echo "Please add the GitHub token as a repository secret"
           exit 1
         fi
         echo "✅ Dispatch token is configured"
 
-    - name: Dispatch deployment to infrastructure repository
+    - name: Dispatch deployment to infrastructure
       uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}
@@ -133,62 +251,44 @@ jobs:
         event-type: deploy-infrastructure
         client-payload: |
           {
-            "environment": "${{ steps.env.outputs.environment }}",
-            "image_tag": "${{ steps.env.outputs.image-tag }}",
+            "environment": "staging",
+            "image_tag": "${{ needs.build.outputs.environment }}-${{ needs.build.outputs.short-sha }}",
             "commit_sha": "${{ github.sha }}",
             "commit_message": "${{ github.event.head_commit.message }}",
             "branch": "${{ github.ref_name }}",
             "actor": "${{ github.actor }}",
-            "repository": "${{ github.repository }}"
+            "repository": "${{ github.repository }}",
+            "workflow_run_id": "${{ github.run_id }}"
           }
 
-    - name: Deployment summary
-      run: |
-        echo "🎉 Build and dispatch completed successfully!"
-        echo ""
-        echo "📋 **Deployment Summary:**"
-        echo "- Environment: ${{ steps.env.outputs.environment }}"
-        echo "- Image Tag: ${{ steps.env.outputs.image-tag }}"
-        echo "- Commit: ${{ github.sha }}"
-        echo "- Branch: ${{ github.ref_name }}"
-        echo ""
-        echo "🚀 Infrastructure deployment triggered via repository dispatch"
-        echo "⏳ Check the infrastructure repository for deployment progress"
-
-  verify-staging:
-    needs: build-and-deploy
-    runs-on: self-hosted
-    if: github.ref_name == 'dev'
-
-    steps:
-    - name: Wait for staging deployment
+    - name: Wait for deployment
       run: |
         echo "⏳ Waiting for staging deployment to complete..."
-        sleep 60
+        sleep 90
 
-    - name: Verify staging deployment
+    - name: Health check with retry
       run: |
         echo "🔍 Verifying staging deployment..."
 
-        # Test staging health endpoint with retries
-        for i in {1..5}; do
-          echo "🏥 Health check attempt $i/5..."
-          if curl -f -k "https://staging.renekris.dev/health" > /dev/null 2>&1; then
+        for i in {1..10}; do
+          echo "🏥 Health check attempt $i/10..."
+          if curl -f --cacert /etc/ssl/certs/ca-certificates.crt --max-time 30 "https://staging.renekris.dev/health" > /dev/null 2>&1; then
             echo "✅ Staging health check passed"
-            exit 0
+            break
           fi
-          sleep 10
+          if [ $i -eq 10 ]; then
+            echo "❌ Staging health check failed after 10 attempts"
+            exit 1
+          fi
+          sleep 15
         done
 
-        echo "❌ Staging health check failed after 5 attempts"
-        exit 1
-
-    - name: Verify staging functionality
+    - name: Functional verification
       run: |
         echo "🧪 Running staging functionality tests..."
 
-        # Test main page loads
-        if curl -f -k "https://staging.renekris.dev" > /dev/null 2>&1; then
+        # Test main page
+        if curl -f --cacert /etc/ssl/certs/ca-certificates.crt --max-time 30 "https://staging.renekris.dev" > /dev/null 2>&1; then
           echo "✅ Staging main page accessible"
         else
           echo "❌ Staging main page failed"
@@ -196,7 +296,7 @@ jobs:
         fi
 
         # Test API endpoints
-        if curl -f -k "https://staging.renekris.dev/api/minecraft-status" > /dev/null 2>&1; then
+        if curl -f --cacert /etc/ssl/certs/ca-certificates.crt --max-time 30 "https://staging.renekris.dev/api/minecraft-status" > /dev/null 2>&1; then
           echo "✅ Staging API endpoints accessible"
         else
           echo "❌ Staging API endpoints failed"
@@ -205,40 +305,99 @@ jobs:
 
         echo "🎉 All staging verification tests passed!"
 
-  verify-production:
-    needs: build-and-deploy
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "🚨 Staging deployment failed - initiating rollback"
+        # Trigger rollback via infrastructure repository
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/renekris/renekris-infrastructure/dispatches \
+          -d '{
+            "event_type": "rollback-deployment",
+            "client_payload": {
+              "environment": "staging",
+              "failed_deployment_sha": "${{ github.sha }}",
+              "rollback_reason": "Health check failed"
+            }
+          }'
+
+  # Production Deployment (Manual Approval Required)
+  deploy-production:
+    name: Deploy to Production
     runs-on: self-hosted
-    if: github.ref_name == 'main'
+    needs: build
+    if: needs.build.outputs.environment == 'production'
+    environment:
+      name: production
+      url: https://renekris.dev
 
     steps:
-    - name: Wait for production deployment
+    - name: Production deployment warning
+      run: |
+        echo "🚨 PRODUCTION DEPLOYMENT"
+        echo "Environment: production"
+        echo "Image: ${{ needs.build.outputs.environment }}-${{ needs.build.outputs.short-sha }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Actor: ${{ github.actor }}"
+        echo ""
+        echo "⚠️  This deployment requires manual approval and will affect live users."
+
+    - name: Validate dispatch token
+      run: |
+        if [ -z "${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}" ]; then
+          echo "❌ ERROR: INFRASTRUCTURE_DISPATCH_TOKEN not configured"
+          exit 1
+        fi
+        echo "✅ Dispatch token is configured"
+
+    - name: Dispatch deployment to infrastructure
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}
+        repository: renekris/renekris-infrastructure
+        event-type: deploy-infrastructure
+        client-payload: |
+          {
+            "environment": "production",
+            "image_tag": "${{ needs.build.outputs.environment }}-${{ needs.build.outputs.short-sha }}",
+            "commit_sha": "${{ github.sha }}",
+            "commit_message": "${{ github.event.head_commit.message }}",
+            "branch": "${{ github.ref_name }}",
+            "actor": "${{ github.actor }}",
+            "repository": "${{ github.repository }}",
+            "workflow_run_id": "${{ github.run_id }}"
+          }
+
+    - name: Wait for deployment
       run: |
         echo "⏳ Waiting for production deployment to complete..."
-        sleep 90
+        sleep 120
 
-    - name: Verify production deployment
+    - name: Health check with retry
       run: |
         echo "🔍 Verifying production deployment..."
 
-        # Test production health endpoint with retries
-        for i in {1..5}; do
-          echo "🏥 Health check attempt $i/5..."
-          if curl -f -k "https://renekris.dev/health" > /dev/null 2>&1; then
+        for i in {1..15}; do
+          echo "🏥 Health check attempt $i/15..."
+          if curl -f --cacert /etc/ssl/certs/ca-certificates.crt --max-time 30 "https://renekris.dev/health" > /dev/null 2>&1; then
             echo "✅ Production health check passed"
-            exit 0
+            break
           fi
-          sleep 15
+          if [ $i -eq 15 ]; then
+            echo "❌ Production health check failed after 15 attempts"
+            exit 1
+          fi
+          sleep 20
         done
 
-        echo "❌ Production health check failed after 5 attempts"
-        exit 1
-
-    - name: Verify production functionality
+    - name: Functional verification
       run: |
         echo "🧪 Running production functionality tests..."
 
-        # Test main page loads
-        if curl -f -k "https://renekris.dev" > /dev/null 2>&1; then
+        # Test main page
+        if curl -f --cacert /etc/ssl/certs/ca-certificates.crt --max-time 30 "https://renekris.dev" > /dev/null 2>&1; then
           echo "✅ Production main page accessible"
         else
           echo "❌ Production main page failed"
@@ -246,7 +405,7 @@ jobs:
         fi
 
         # Test API endpoints
-        if curl -f -k "https://renekris.dev/api/minecraft-status" > /dev/null 2>&1; then
+        if curl -f --cacert /etc/ssl/certs/ca-certificates.crt --max-time 30 "https://renekris.dev/api/minecraft-status" > /dev/null 2>&1; then
           echo "✅ Production API endpoints accessible"
         else
           echo "❌ Production API endpoints failed"
@@ -255,8 +414,58 @@ jobs:
 
         echo "🎉 All production verification tests passed!"
 
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "🚨 Production deployment failed - initiating emergency rollback"
+        # Trigger emergency rollback
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.INFRASTRUCTURE_DISPATCH_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/renekris/renekris-infrastructure/dispatches \
+          -d '{
+            "event_type": "emergency-rollback",
+            "client_payload": {
+              "environment": "production",
+              "failed_deployment_sha": "${{ github.sha }}",
+              "rollback_reason": "Health check failed",
+              "priority": "critical"
+            }
+          }'
+
     - name: Notify deployment success
+      if: success()
       run: |
         echo "🚀 Production deployment completed successfully!"
         echo "🌐 Website: https://renekris.dev"
         echo "📊 Status: https://status.renekris.dev"
+        echo "🔍 Image: ${{ needs.build.outputs.environment }}-${{ needs.build.outputs.short-sha }}"
+
+  # Deployment Notifications
+  notify:
+    name: Send Notifications
+    runs-on: self-hosted
+    needs: [build, deploy-staging, deploy-production]
+    if: always() && needs.build.result == 'success'
+
+    steps:
+    - name: Deployment notification
+      run: |
+        if [ "${{ needs.deploy-staging.result }}" = "success" ]; then
+          echo "✅ Staging deployment successful"
+        elif [ "${{ needs.deploy-staging.result }}" = "failure" ]; then
+          echo "❌ Staging deployment failed"
+        fi
+
+        if [ "${{ needs.deploy-production.result }}" = "success" ]; then
+          echo "✅ Production deployment successful"
+        elif [ "${{ needs.deploy-production.result }}" = "failure" ]; then
+          echo "❌ Production deployment failed"
+        fi
+
+        echo "📋 Build Summary:"
+        echo "- Environment: ${{ needs.build.outputs.environment }}"
+        echo "- Image Tag: ${{ needs.build.outputs.environment }}-${{ needs.build.outputs.short-sha }}"
+        echo "- Commit: ${{ github.sha }}"
+        echo "- Branch: ${{ github.ref_name }}"
+        echo "- Actor: ${{ github.actor }}"
