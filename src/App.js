@@ -5,7 +5,7 @@ import Home from './components/Home';
 import Portfolio from './components/Portfolio';
 import About from './components/About';
 
-// ✅ Testing automatic dev-latest tagging system
+// Testing complete CI/CD pipeline with all tools installed
 
 function App() {
   return (
