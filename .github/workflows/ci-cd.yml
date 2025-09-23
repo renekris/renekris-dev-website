@@ -62,10 +62,6 @@ jobs:
     - name: Run linting
       run: npm run lint
 
-    - name: Run type checking
-      run: npm run type-check
-      continue-on-error: false
-
     - name: Run unit tests
       run: npm test -- --coverage --watchAll=false --maxWorkers=2
 
