@@ -115,7 +115,7 @@ jobs:
     name: Build & Push Container
     runs-on: self-hosted
     needs: [test, security-scan]
-    if: always() && (needs.test.result == 'success' || inputs.skip_tests) && (needs.security-scan.result == 'success' || needs.security-scan.result == 'failure')
+    if: always() && (needs.test.result == 'success' || inputs.skip_tests)
 
     permissions:
       contents: read
