@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  FaUsers, 
-  FaComments, 
+import {
+  FaUsers,
   FaCube,
   FaTools
 } from 'react-icons/fa';

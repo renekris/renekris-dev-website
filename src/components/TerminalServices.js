@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaCode, FaServer, FaArrowRight, FaCircle } from 'react-icons/fa';
+import { FaCode, FaServer } from 'react-icons/fa';
 
 const TerminalServices = () => {
   const services = [
