@@ -27,7 +27,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: renekris/renekris-web
+  IMAGE_NAME: renekris/renekris-dev-website
   NODE_VERSION: '20'
 
 concurrency:
