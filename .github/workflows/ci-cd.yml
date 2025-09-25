@@ -508,7 +508,7 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=raw,value=${{ steps.env.outputs.environment }}
+          type=raw,value=${{ steps.env.outputs.environment }}-latest
         labels: |
           org.opencontainers.image.title=Renekris Dev Website
           org.opencontainers.image.description=Modern React website with monitoring
