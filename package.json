@@ -17,9 +17,21 @@
     "dev": "concurrently \"PORT=3001 react-scripts start\" \"node src/server/dev-proxy-server.js\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test:e2e": "playwright test",
-    "test:e2e:local": "PLAYWRIGHT_BASE_URL=http://localhost:3000 playwright test",
-    "test:e2e:headed": "playwright test --headed",
+    "test:e2e": "node scripts/smart-test-runner.js",
+    "test:e2e:quick": "node scripts/smart-test-runner.js --quick",
+    "test:e2e:full": "node scripts/smart-test-runner.js --full",
+    "test:e2e:changed": "node scripts/smart-test-runner.js --changed-only",
+    "test:e2e:local": "PLAYWRIGHT_BASE_URL=http://localhost:3000 node scripts/smart-test-runner.js",
+    "test:e2e:headed": "node scripts/smart-test-runner.js --headed",
+    "test:e2e:debug": "node scripts/smart-test-runner.js --debug",
+    "test:e2e:mobile": "node scripts/smart-test-runner.js --mobile-only",
+    "test:e2e:desktop": "node scripts/smart-test-runner.js --desktop-only",
+    "test:e2e:browsers": "node scripts/smart-test-runner.js --all-browsers",
+    "test:playwright:raw": "playwright test",
+    "test:install": "playwright install",
+    "test:performance": "node scripts/smart-test-runner.js --grep performance",
+    "test:visual": "node scripts/smart-test-runner.js --grep visual",
+    "test:update-snapshots": "node scripts/smart-test-runner.js --update-snapshots",
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix",
     "eject": "react-scripts eject"
@@ -59,5 +71,8 @@
     "nth-check": "^2.0.1",
     "webpack-dev-server": "^5.2.1",
     "resolve-url-loader": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

@@ -1,65 +1,153 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 
-# Build stage with cache optimization
-FROM node:18-alpine AS build
+# Build dependencies stage - optimized for caching
+FROM node:20-alpine AS dependencies
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Set build-time arguments for optimization
+ARG BUILDKIT_INLINE_CACHE=1
+ARG NODE_ENV=production
+
+# Install system dependencies with security updates
+RUN apk add --no-cache \
+    ca-certificates \
+    tini \
+    && apk upgrade --no-cache
 
 WORKDIR /app
 
-# Copy package files first for better layer caching
+# Copy package files for dependency resolution
 COPY package*.json ./
 
-# Use multiple cache mounts for optimal npm performance
-RUN --mount=type=cache,target=/root/.npm \
-    --mount=type=cache,target=/root/.cache \
-    --mount=type=cache,target=/tmp/.npm \
-    npm ci --omit=dev --prefer-offline --cache /tmp/.npm
+# Install dependencies with advanced caching and optimization
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    --mount=type=cache,target=/root/.cache,sharing=locked \
+    --mount=type=cache,target=/tmp/.npm-cache,sharing=locked \
+    --mount=type=bind,source=package-lock.json,target=/app/package-lock.json,readonly \
+    npm ci \
+        --omit=dev \
+        --prefer-offline \
+        --cache /tmp/.npm-cache \
+        --no-audit \
+        --no-fund \
+        --ignore-scripts \
+        --production=false
 
-# Copy configuration files (these change less frequently)
-COPY tailwind.config.js postcss.config.js ./
+# Build stage - optimized for React app compilation
+FROM dependencies AS build
 
-# Copy source files (these change most frequently)
-COPY public/ ./public/
-COPY src/ ./src/
+# Set build environment variables
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+ENV CI=true
+ENV INLINE_RUNTIME_CHUNK=false
 
-# Build with comprehensive cache mounts for build artifacts
-RUN --mount=type=cache,target=/root/.cache \
-    --mount=type=cache,target=/app/node_modules/.cache \
-    --mount=type=cache,target=/tmp/webpack-cache \
+# Copy configuration files first (least frequently changed)
+COPY --chown=node:node tailwind.config.js postcss.config.js ./
+
+# Copy source files with specific order for better caching
+COPY --chown=node:node public/ ./public/
+COPY --chown=node:node src/ ./src/
+
+# Build application with comprehensive caching
+RUN --mount=type=cache,target=/root/.cache,sharing=locked \
+    --mount=type=cache,target=/app/node_modules/.cache,sharing=locked \
+    --mount=type=cache,target=/tmp/webpack-cache,sharing=locked \
+    --mount=type=cache,target=/tmp/babel-cache,sharing=locked \
+    --mount=type=cache,target=/tmp/terser-cache,sharing=locked \
+    --mount=type=cache,target=/tmp/css-cache,sharing=locked \
+    BABEL_CACHE_PATH=/tmp/babel-cache \
+    WEBPACK_CACHE_PATH=/tmp/webpack-cache \
     npm run build
 
-# Production stage - minimal runtime image
-FROM node:18-alpine AS runtime
+# Minimize build artifacts
+RUN rm -rf node_modules/.cache src public
 
-# Add security updates
-RUN apk upgrade --no-cache
+# Runtime base - distroless for security
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runtime-base
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+# Production runtime stage
+FROM runtime-base AS runtime
 
-# Install only curl for health checks
-RUN apk add --no-cache curl dumb-init
+# Set runtime labels for metadata
+LABEL org.opencontainers.image.title="Renekris Dev Website" \
+      org.opencontainers.image.description="Optimized React website with monitoring" \
+      org.opencontainers.image.vendor="Renekris" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.source="https://github.com/renekris/renekris-dev-website"
+
+# Create application directories with proper ownership
+USER 0
+RUN mkdir -p /app /tmp/app-cache && \
+    chown -R 65532:65532 /app /tmp/app-cache && \
+    chmod 755 /app && \
+    chmod 750 /tmp/app-cache
+USER 65532
 
 WORKDIR /app
 
-# Copy built React app from build stage
-COPY --from=build --chown=nextjs:nodejs /app/build ./build
+# Copy built application with minimal footprint and strict permissions
+COPY --from=build --chown=65532:65532 --chmod=644 /app/build ./build
+COPY --from=build --chown=65532:65532 --chmod=644 /app/src/server/api-server.js ./server.js
 
-# Copy API server
-COPY --from=build --chown=nextjs:nodejs /app/src/server/api-server.js ./server.js
+# Runtime environment configuration with security hardening
+ENV NODE_ENV=production \
+    PORT=8080 \
+    HOST=0.0.0.0 \
+    NODE_OPTIONS="--max-old-space-size=512 --max-http-header-size=8192" \
+    NODE_TLS_REJECT_UNAUTHORIZED=1 \
+    UV_THREADPOOL_SIZE=4
 
-# Switch to non-root user
-USER nextjs
+# Health check with optimized parameters
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["node", "-e", "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
 
-# Add health check with faster intervals for better reliability
-HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+EXPOSE 8080
+
+# Use distroless nonroot user with explicit UID
+USER 65532:65532
+
+# Start application with security constraints
+CMD ["node", "server.js"]
+
+# Alternative runtime with debugging capabilities (for development only)
+FROM node:20-alpine AS runtime-debug
+
+# Install minimal debugging tools
+RUN apk add --no-cache \
+    curl \
+    tini \
+    ca-certificates \
+    && apk upgrade --no-cache \
+    && rm -rf /var/cache/apk/*
+
+# Create consistent nonroot user (65532:65532 for compatibility)
+RUN mkdir -p /app /tmp/app-cache && \
+    chown -R 65532:65532 /app /tmp/app-cache && \
+    chmod 755 /app && \
+    chmod 750 /tmp/app-cache
+
+WORKDIR /app
+
+# Copy application from build stage with strict permissions
+COPY --from=build --chown=65532:65532 --chmod=644 /app/build ./build
+COPY --from=build --chown=65532:65532 --chmod=644 /app/src/server/api-server.js ./server.js
+
+# Standardized runtime configuration
+ENV NODE_ENV=production \
+    PORT=8080 \
+    HOST=0.0.0.0 \
+    NODE_OPTIONS="--max-old-space-size=512 --max-http-header-size=8192" \
+    NODE_TLS_REJECT_UNAUTHORIZED=1 \
+    UV_THREADPOOL_SIZE=4
+
+# Standardized health check
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 EXPOSE 8080
 
-# Use dumb-init for proper signal handling
-ENTRYPOINT ["dumb-init", "--"]
+# Use standardized nonroot user
+USER 65532:65532
+
+ENTRYPOINT ["tini", "--"]
 CMD ["node", "server.js"]

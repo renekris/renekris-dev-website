@@ -1,0 +1,275 @@
+name: 'Advanced Security Scanning'
+description: 'Comprehensive security scanning with severity-based gates and policy enforcement'
+
+inputs:
+  scan-type:
+    description: 'Type of scan to perform (fs, image)'
+    required: true
+  scan-target:
+    description: 'Target to scan (filesystem path or container image)'
+    required: true
+  environment:
+    description: 'Target environment (staging, production)'
+    required: false
+    default: 'staging'
+  policy-file:
+    description: 'Path to security policy file'
+    required: false
+    default: '.github/security-policy.yml'
+  fail-on-severity:
+    description: 'Comma-separated list of severities that should fail the build'
+    required: false
+    default: 'CRITICAL'
+  github-token:
+    description: 'GitHub token for uploading results'
+    required: true
+  sarif-upload:
+    description: 'Whether to upload SARIF results to GitHub Security'
+    required: false
+    default: 'true'
+
+outputs:
+  scan-result:
+    description: 'Overall scan result (pass, fail, review-required)'
+    value: ${{ steps.evaluate.outputs.result }}
+  critical-count:
+    description: 'Number of critical vulnerabilities found'
+    value: ${{ steps.evaluate.outputs.critical-count }}
+  high-count:
+    description: 'Number of high vulnerabilities found'
+    value: ${{ steps.evaluate.outputs.high-count }}
+  medium-count:
+    description: 'Number of medium vulnerabilities found'
+    value: ${{ steps.evaluate.outputs.medium-count }}
+  low-count:
+    description: 'Number of low vulnerabilities found'
+    value: ${{ steps.evaluate.outputs.low-count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install yq for policy parsing
+      shell: bash
+      run: |
+        if ! command -v yq &> /dev/null; then
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+        fi
+
+    - name: Parse security policy
+      id: policy
+      shell: bash
+      run: |
+        POLICY_FILE="${{ inputs.policy-file }}"
+        ENV="${{ inputs.environment }}"
+
+        if [[ ! -f "$POLICY_FILE" ]]; then
+          echo "⚠️ Security policy file not found: $POLICY_FILE"
+          echo "Using default security settings"
+          echo "critical-threshold=0" >> $GITHUB_OUTPUT
+          echo "high-threshold=5" >> $GITHUB_OUTPUT
+          echo "medium-threshold=20" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # Parse thresholds from policy file
+        CRITICAL_THRESHOLD=$(yq eval ".environments.${ENV}.vulnerabilities.thresholds.CRITICAL // .security.vulnerabilities.thresholds.CRITICAL // 0" "$POLICY_FILE")
+        HIGH_THRESHOLD=$(yq eval ".environments.${ENV}.vulnerabilities.thresholds.HIGH // .security.vulnerabilities.thresholds.HIGH // 5" "$POLICY_FILE")
+        MEDIUM_THRESHOLD=$(yq eval ".environments.${ENV}.vulnerabilities.thresholds.MEDIUM // .security.vulnerabilities.thresholds.MEDIUM // 20" "$POLICY_FILE")
+
+        echo "critical-threshold=$CRITICAL_THRESHOLD" >> $GITHUB_OUTPUT
+        echo "high-threshold=$HIGH_THRESHOLD" >> $GITHUB_OUTPUT
+        echo "medium-threshold=$MEDIUM_THRESHOLD" >> $GITHUB_OUTPUT
+
+        echo "📋 Security Policy Thresholds for $ENV:"
+        echo "  CRITICAL: $CRITICAL_THRESHOLD"
+        echo "  HIGH: $HIGH_THRESHOLD"
+        echo "  MEDIUM: $MEDIUM_THRESHOLD"
+
+    - name: Create Trivy config file
+      shell: bash
+      run: |
+        cat > trivy-config.yaml << 'EOF'
+        format: sarif
+        output: trivy-results.sarif
+        severity:
+          - UNKNOWN
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+        vulnerability:
+          type:
+            - os
+            - library
+        secret:
+          config: .trivyignore
+        EOF
+
+    - name: Create .trivyignore file
+      shell: bash
+      run: |
+        cat > .trivyignore << 'EOF'
+        # Ignore test files and development dependencies
+        **/node_modules/**
+        **/test/**
+        **/tests/**
+        **/*.test.js
+        **/*.spec.js
+        **/coverage/**
+        **/build/**
+        **/.git/**
+
+        # Ignore known false positives (add CVE IDs as needed)
+        # CVE-2021-44228  # Example: Log4j vulnerability with mitigation
+        EOF
+
+    - name: Run Trivy scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: ${{ inputs.scan-type }}
+        scan-ref: ${{ inputs.scan-target }}
+        trivy-config: trivy-config.yaml
+        format: 'sarif,json,table'
+        output: 'trivy-results.sarif,trivy-results.json,trivy-results.txt'
+
+    - name: Parse scan results and evaluate
+      id: evaluate
+      shell: bash
+      run: |
+        RESULTS_FILE="trivy-results.json"
+
+        if [[ ! -f "$RESULTS_FILE" ]]; then
+          echo "❌ Trivy results file not found"
+          echo "result=fail" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        # Count vulnerabilities by severity
+        CRITICAL_COUNT=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+        HIGH_COUNT=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+        MEDIUM_COUNT=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+        LOW_COUNT=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "LOW")] | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
+
+        # Get thresholds from policy
+        CRITICAL_THRESHOLD="${{ steps.policy.outputs.critical-threshold }}"
+        HIGH_THRESHOLD="${{ steps.policy.outputs.high-threshold }}"
+        MEDIUM_THRESHOLD="${{ steps.policy.outputs.medium-threshold }}"
+
+        echo "critical-count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+        echo "high-count=$HIGH_COUNT" >> $GITHUB_OUTPUT
+        echo "medium-count=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
+        echo "low-count=$LOW_COUNT" >> $GITHUB_OUTPUT
+
+        echo "🔍 Vulnerability Scan Results:"
+        echo "  CRITICAL: $CRITICAL_COUNT (threshold: $CRITICAL_THRESHOLD)"
+        echo "  HIGH: $HIGH_COUNT (threshold: $HIGH_THRESHOLD)"
+        echo "  MEDIUM: $MEDIUM_COUNT (threshold: $MEDIUM_THRESHOLD)"
+        echo "  LOW: $LOW_COUNT"
+
+        # Determine result based on thresholds
+        RESULT="pass"
+        BLOCKING_ISSUES=""
+
+        if [[ $CRITICAL_COUNT -gt $CRITICAL_THRESHOLD ]]; then
+          RESULT="fail"
+          BLOCKING_ISSUES="$BLOCKING_ISSUES CRITICAL($CRITICAL_COUNT>$CRITICAL_THRESHOLD)"
+        fi
+
+        if [[ $HIGH_COUNT -gt $HIGH_THRESHOLD ]]; then
+          if [[ "$RESULT" != "fail" ]]; then
+            RESULT="review-required"
+          fi
+          BLOCKING_ISSUES="$BLOCKING_ISSUES HIGH($HIGH_COUNT>$HIGH_THRESHOLD)"
+        fi
+
+        if [[ $MEDIUM_COUNT -gt $MEDIUM_THRESHOLD ]] && [[ $MEDIUM_THRESHOLD -ge 0 ]]; then
+          if [[ "$RESULT" == "pass" ]]; then
+            RESULT="review-required"
+          fi
+          BLOCKING_ISSUES="$BLOCKING_ISSUES MEDIUM($MEDIUM_COUNT>$MEDIUM_THRESHOLD)"
+        fi
+
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+        echo "blocking-issues=$BLOCKING_ISSUES" >> $GITHUB_OUTPUT
+
+        # Display results
+        if [[ "$RESULT" == "fail" ]]; then
+          echo "❌ Security scan FAILED - Blocking vulnerabilities found:$BLOCKING_ISSUES"
+          echo "::error::Security scan failed due to policy violations"
+        elif [[ "$RESULT" == "review-required" ]]; then
+          echo "⚠️ Security scan requires MANUAL REVIEW:$BLOCKING_ISSUES"
+          echo "::warning::Manual review required for security findings"
+        else
+          echo "✅ Security scan PASSED - All vulnerability counts within policy thresholds"
+        fi
+
+    - name: Upload SARIF results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always() && inputs.sarif-upload == 'true'
+      with:
+        sarif_file: 'trivy-results.sarif'
+        token: ${{ inputs.github-token }}
+
+    - name: Upload detailed results as artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-scan-results-${{ inputs.scan-type }}-${{ github.run_id }}
+        path: |
+          trivy-results.sarif
+          trivy-results.json
+          trivy-results.txt
+          trivy-config.yaml
+          .trivyignore
+        retention-days: 30
+
+    - name: Create security summary
+      shell: bash
+      if: always()
+      run: |
+        RESULT="${{ steps.evaluate.outputs.result }}"
+        CRITICAL="${{ steps.evaluate.outputs.critical-count }}"
+        HIGH="${{ steps.evaluate.outputs.high-count }}"
+        MEDIUM="${{ steps.evaluate.outputs.medium-count }}"
+        LOW="${{ steps.evaluate.outputs.low-count }}"
+
+        cat >> $GITHUB_STEP_SUMMARY << EOF
+        ## 🔒 Security Scan Summary
+
+        **Scan Type:** ${{ inputs.scan-type }}
+        **Target:** ${{ inputs.scan-target }}
+        **Environment:** ${{ inputs.environment }}
+        **Result:** $RESULT
+
+        ### Vulnerability Counts
+        | Severity | Count | Threshold | Status |
+        |----------|-------|-----------|--------|
+        | 🔴 CRITICAL | $CRITICAL | ${{ steps.policy.outputs.critical-threshold }} | $([ $CRITICAL -le ${{ steps.policy.outputs.critical-threshold }} ] && echo "✅ Pass" || echo "❌ Fail") |
+        | 🟠 HIGH | $HIGH | ${{ steps.policy.outputs.high-threshold }} | $([ $HIGH -le ${{ steps.policy.outputs.high-threshold }} ] && echo "✅ Pass" || echo "⚠️ Review") |
+        | 🟡 MEDIUM | $MEDIUM | ${{ steps.policy.outputs.medium-threshold }} | $([ $MEDIUM -le ${{ steps.policy.outputs.medium-threshold }} ] && echo "✅ Pass" || echo "⚠️ Review") |
+        | 🔵 LOW | $LOW | N/A | ℹ️ Info |
+
+        ### Next Steps
+        $(if [[ "$RESULT" == "fail" ]]; then
+          echo "❌ **Deployment blocked** - Critical vulnerabilities must be resolved"
+          echo "- Review and fix critical security issues"
+          echo "- Update vulnerable dependencies"
+          echo "- Consider adding to allowlist if false positive"
+        elif [[ "$RESULT" == "review-required" ]]; then
+          echo "⚠️ **Manual review required** - High/Medium vulnerabilities found"
+          echo "- Review security findings"
+          echo "- Assess risk and business impact"
+          echo "- Proceed with deployment if acceptable"
+        else
+          echo "✅ **Ready to deploy** - All security checks passed"
+        fi)
+        EOF
+
+    - name: Fail if security policy violated
+      shell: bash
+      if: steps.evaluate.outputs.result == 'fail'
+      run: |
+        echo "❌ Security scan failed policy evaluation"
+        echo "Blocking issues: ${{ steps.evaluate.outputs.blocking-issues }}"
+        exit 1

@@ -1,0 +1,171 @@
+# Security Policy Configuration
+# This file defines security scanning thresholds and policies for the CI/CD pipeline
+
+security:
+  # Vulnerability severity thresholds
+  vulnerabilities:
+    # Block deployment for these severities
+    blocking_severities:
+      - CRITICAL
+
+    # Require manual review/approval for these severities
+    review_required_severities:
+      - HIGH
+
+    # Allow with reporting for these severities
+    auto_pass_severities:
+      - MEDIUM
+      - LOW
+      - UNKNOWN
+
+    # Maximum allowed vulnerabilities by severity (0 = none allowed)
+    thresholds:
+      CRITICAL: 0
+      HIGH: 5
+      MEDIUM: 20
+      LOW: -1  # unlimited
+      UNKNOWN: 10
+
+  # Known false positives or accepted risks
+  allowlist:
+    # CVE IDs that are accepted (with justification)
+    cves:
+      # Example: CVE-2021-44228 is mitigated by runtime configuration
+      # - id: "CVE-2021-44228"
+      #   reason: "Log4j vulnerability mitigated by runtime configuration"
+      #   expires: "2025-12-31"
+
+    # Package vulnerabilities that are accepted
+    packages:
+      # Example: Accept specific vulnerability in development dependencies
+      # - package: "webpack-dev-server"
+      #   cve: "CVE-2023-1234"
+      #   reason: "Development dependency, not used in production"
+      #   expires: "2025-06-30"
+
+  # Security scanning configuration
+  scanning:
+    # File patterns to exclude from scanning
+    exclude_patterns:
+      - "node_modules/**"
+      - "build/**"
+      - "coverage/**"
+      - "**/*.test.js"
+      - "**/*.spec.js"
+      - "**/.git/**"
+
+    # Include patterns for focused scanning
+    include_patterns:
+      - "src/**"
+      - "public/**"
+      - "package*.json"
+      - "Dockerfile"
+      - "*.js"
+      - "*.ts"
+      - "*.tsx"
+
+    # Container scanning options
+    container:
+      # Scan both OS packages and application dependencies
+      scan_types:
+        - "os"
+        - "library"
+
+      # Security scanners to use
+      scanners:
+        - "vuln"
+        - "secret"
+        - "config"
+
+    # Filesystem scanning options
+    filesystem:
+      scan_types:
+        - "vuln"
+        - "secret"
+        - "config"
+        - "license"
+
+  # Notification settings
+  notifications:
+    # When to send security alerts
+    triggers:
+      - "new_critical_vulnerability"
+      - "new_high_vulnerability"
+      - "scan_failure"
+      - "policy_violation"
+
+    # Notification channels (configured via secrets)
+    channels:
+      - "github_issues"
+      - "github_security_advisories"
+      # - "slack"  # Configure via SLACK_WEBHOOK secret
+      # - "email"  # Configure via EMAIL_RECIPIENTS secret
+
+  # Automated maintenance
+  automation:
+    # Automatic dependency updates for security patches
+    dependency_updates:
+      enabled: true
+      # Auto-merge for these severity levels
+      auto_merge_severities:
+        - "CRITICAL"
+        - "HIGH"
+      # Schedule for dependency update checks
+      schedule: "weekly"  # daily, weekly, monthly
+
+    # Automatic container base image updates
+    base_image_updates:
+      enabled: true
+      schedule: "weekly"
+
+    # Security scan schedule (beyond PR/push triggers)
+    scheduled_scans:
+      enabled: true
+      schedule: "daily"  # daily, weekly
+      time: "02:00"  # UTC time
+
+  # Compliance and reporting
+  compliance:
+    # Generate compliance reports
+    reports:
+      - "sarif"
+      - "json"
+      - "cyclonedx"  # SBOM format
+
+    # Retention policies
+    retention:
+      scan_results: 90  # days
+      compliance_reports: 365  # days
+
+    # Required metadata for compliance
+    metadata:
+      - "sbom"  # Software Bill of Materials
+      - "provenance"  # Build provenance
+      - "signatures"  # Container signatures
+
+# Environment-specific overrides
+environments:
+  staging:
+    # More lenient for staging
+    vulnerabilities:
+      thresholds:
+        CRITICAL: 1
+        HIGH: 10
+        MEDIUM: 50
+
+  production:
+    # Strict for production
+    vulnerabilities:
+      thresholds:
+        CRITICAL: 0
+        HIGH: 2
+        MEDIUM: 15
+
+    # Additional requirements for production
+    requirements:
+      - "signed_containers"
+      - "sbom_required"
+      - "provenance_required"
+
+# Version of this policy (for tracking changes)
+version: "1.0.0"
