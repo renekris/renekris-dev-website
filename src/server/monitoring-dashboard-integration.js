@@ -221,7 +221,7 @@ function calculatePerformanceScore(performance) {
  */
 async function processCrossSystemAlerts() {
     try {
-        const healthData = healthMonitor.getCurrentHealthData();
+        // const healthData = healthMonitor.getCurrentHealthData();
         const deploymentStatus = deploymentMonitor.getDeploymentStatus();
 
         // Check for rollback triggers

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { performance } = require('perf_hooks');
+// const { performance } = require('perf_hooks');
 
 /**
  * Comprehensive Performance Monitoring System
@@ -490,7 +490,7 @@ function addPerformanceAlert(type, data) {
 function getPerformanceDashboard() {
     const now = Date.now();
     const oneDayAgo = now - (24 * 60 * 60 * 1000);
-    const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
+    // const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
 
     const recentDeployments = performanceState.metrics.deployments
         .filter(d => new Date(d.timestamp).getTime() > oneDayAgo);

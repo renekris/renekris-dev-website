@@ -223,7 +223,7 @@ async function checkDependencies() {
     try {
         const startTime = Date.now();
         // Test internal network connectivity
-        await testTcpConnection('127.0.0.1', PORT || 8080, 2000);
+        await testTcpConnection('127.0.0.1', process.env.PORT || 8080, 2000);
         checks.network.status = true;
         checks.network.latency = Date.now() - startTime;
     } catch (error) {
