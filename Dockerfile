@@ -59,8 +59,8 @@ RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     WEBPACK_CACHE_PATH=/tmp/webpack-cache \
     npm run build
 
-# Minimize build artifacts
-RUN rm -rf node_modules/.cache src public
+# Minimize build artifacts (keep server files for runtime)
+RUN rm -rf node_modules/.cache public
 
 # Runtime base - distroless for security
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runtime-base
