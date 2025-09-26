@@ -86,7 +86,7 @@ USER 65532
 WORKDIR /app
 
 # Copy built application with minimal footprint and strict permissions
-COPY --from=build --chown=65532:65532 --chmod=644 /app/build ./build
+COPY --from=build --chown=65532:65532 --chmod=755 /app/build ./build
 COPY --from=build --chown=65532:65532 --chmod=644 /app/src/server/api-server.js ./server.js
 
 # Runtime environment configuration with security hardening
@@ -129,7 +129,7 @@ RUN mkdir -p /app /tmp/app-cache && \
 WORKDIR /app
 
 # Copy application from build stage with strict permissions
-COPY --from=build --chown=65532:65532 --chmod=644 /app/build ./build
+COPY --from=build --chown=65532:65532 --chmod=755 /app/build ./build
 COPY --from=build --chown=65532:65532 --chmod=644 /app/src/server/api-server.js ./server.js
 
 # Standardized runtime configuration
