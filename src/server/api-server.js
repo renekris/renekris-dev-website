@@ -204,8 +204,8 @@ const server = http.createServer(async (req, res) => {
     if (req.url === '/api/minecraft-status') {
         try {
             // Read status from the monitoring service's shared volume
-            // Try new containerized path first, fallback to legacy path
-            const containerizedPath = path.join('/opt', 'monitoring', 'minecraft-server-status.json');
+            // Try containerized path first, fallback to legacy paths
+            const containerizedPath = path.join('/app', 'public', 'minecraft-server-status.json');
             const legacyPath = path.join('/opt', 'renekris-infrastructure', 'minecraft-server-status.json');
             
             let statusFile = containerizedPath;
