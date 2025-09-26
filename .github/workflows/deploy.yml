@@ -36,7 +36,11 @@ jobs:
         npm test -- --coverage --watchAll=false
 
     - name: Build application
-      run: npm run build
+      run: |
+        npm run build
+        echo "Build completed. Checking build directory:"
+        ls -la
+        ls -la build/ || echo "Build directory not found"
 
     - name: Set image tag
       id: tag
