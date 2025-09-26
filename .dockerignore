@@ -14,8 +14,7 @@ yarn-error.log*
 .yarn/
 .pnpm-debug.log*
 
-# Build outputs (rebuilt in container)
-build/
+# Build outputs (build/ needed for pre-built files from CI)
 dist/
 out/
 .next/
