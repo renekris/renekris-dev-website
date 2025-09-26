@@ -7,7 +7,7 @@ const Footer = () => {
 
   return (
     <footer className="mt-auto text-center pt-8 border-t border-bg-tertiary text-text-tertiary">
-      <p className="mb-6">&copy; 2025 Renekris. BuildKit cache working perfectly!</p>
+      <p className="mb-6">&copy; 2025 Renekris. Auto-deployment with force update working!</p>
       
       <div className="flex flex-col md:flex-row justify-center items-center gap-3">
         <button 

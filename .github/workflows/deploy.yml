@@ -65,7 +65,7 @@ jobs:
     - name: Deploy to Docker Swarm
       run: |
         echo "Updating Docker service: ${{ steps.tag.outputs.service }}"
-        docker service update --image ${{ steps.tag.outputs.tag }} ${{ steps.tag.outputs.service }}
+        docker service update --force --image ${{ steps.tag.outputs.tag }} ${{ steps.tag.outputs.service }}
 
         echo "Waiting for service convergence..."
         timeout 300 bash -c 'until [ "$(docker service ps ${{ steps.tag.outputs.service }} --format "table {{.CurrentState}}" | grep -c "Running")" -gt 0 ]; do sleep 5; done'
