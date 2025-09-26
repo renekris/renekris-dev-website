@@ -7,7 +7,7 @@ const Footer = () => {
 
   return (
     <footer className="mt-auto text-center pt-8 border-t border-bg-tertiary text-text-tertiary">
-      <p className="mb-6">&copy; 2025 Renekris. Zero npm downloads achieved!</p>
+      <p className="mb-6">&copy; 2025 Renekris. Optimized build pipeline complete!</p>
       
       <div className="flex flex-col md:flex-row justify-center items-center gap-3">
         <button 
