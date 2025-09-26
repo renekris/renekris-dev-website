@@ -1,67 +1,5 @@
 # syntax=docker/dockerfile:1.7
 
-# Build dependencies stage - optimized for caching
-FROM node:20-alpine AS dependencies
-
-# Set build-time arguments for optimization
-ARG BUILDKIT_INLINE_CACHE=1
-ARG NODE_ENV=production
-
-# Install system dependencies with security updates
-RUN apk add --no-cache \
-    ca-certificates \
-    tini \
-    && apk upgrade --no-cache
-
-WORKDIR /app
-
-# Copy package files for dependency resolution
-COPY package*.json ./
-
-# Install dependencies with advanced caching and optimization
-RUN --mount=type=cache,target=/root/.npm,sharing=locked \
-    --mount=type=cache,target=/root/.cache,sharing=locked \
-    --mount=type=cache,target=/tmp/.npm-cache,sharing=locked \
-    --mount=type=bind,source=package-lock.json,target=/app/package-lock.json,readonly \
-    npm ci \
-        --omit=dev \
-        --prefer-offline \
-        --cache /tmp/.npm-cache \
-        --no-audit \
-        --no-fund \
-        --ignore-scripts \
-        --production=false
-
-# Build stage - optimized for React app compilation
-FROM dependencies AS build
-
-# Set build environment variables
-ENV NODE_ENV=production
-ENV GENERATE_SOURCEMAP=false
-ENV CI=true
-ENV INLINE_RUNTIME_CHUNK=false
-
-# Copy configuration files first (least frequently changed)
-COPY --chown=node:node tailwind.config.js postcss.config.js ./
-
-# Copy source files with specific order for better caching
-COPY --chown=node:node public/ ./public/
-COPY --chown=node:node src/ ./src/
-
-# Build application with comprehensive caching
-RUN --mount=type=cache,target=/root/.cache,sharing=locked \
-    --mount=type=cache,target=/app/node_modules/.cache,sharing=locked \
-    --mount=type=cache,target=/tmp/webpack-cache,sharing=locked \
-    --mount=type=cache,target=/tmp/babel-cache,sharing=locked \
-    --mount=type=cache,target=/tmp/terser-cache,sharing=locked \
-    --mount=type=cache,target=/tmp/css-cache,sharing=locked \
-    BABEL_CACHE_PATH=/tmp/babel-cache \
-    WEBPACK_CACHE_PATH=/tmp/webpack-cache \
-    npm run build
-
-# Minimize build artifacts (keep server files for runtime)
-RUN rm -rf node_modules/.cache public
-
 # Runtime base - distroless for security
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runtime-base
 
@@ -85,9 +23,9 @@ USER 65532
 
 WORKDIR /app
 
-# Copy built application with minimal footprint and strict permissions
-COPY --from=build --chown=65532:65532 --chmod=755 /app/build ./build
-COPY --from=build --chown=65532:65532 --chmod=644 /app/src/server/api-server.js ./server.js
+# Copy pre-built application from GitHub Actions workflow
+COPY --chown=65532:65532 --chmod=755 ./build ./build
+COPY --chown=65532:65532 --chmod=644 ./src/server/api-server.js ./server.js
 
 # Runtime environment configuration with security hardening
 ENV NODE_ENV=production \
@@ -128,9 +66,9 @@ RUN mkdir -p /app /tmp/app-cache && \
 
 WORKDIR /app
 
-# Copy application from build stage with strict permissions
-COPY --from=build --chown=65532:65532 --chmod=755 /app/build ./build
-COPY --from=build --chown=65532:65532 --chmod=644 /app/src/server/api-server.js ./server.js
+# Copy pre-built application from GitHub Actions workflow
+COPY --chown=65532:65532 --chmod=755 ./build ./build
+COPY --chown=65532:65532 --chmod=644 ./src/server/api-server.js ./server.js
 
 # Standardized runtime configuration
 ENV NODE_ENV=production \
