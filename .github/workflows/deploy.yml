@@ -1,0 +1,41 @@
+name: Deploy Website
+
+on:
+  push:
+    branches: [main, dev]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - run: npm ci
+    - run: npm test -- --watchAll=false
+    - run: npm run build
+
+    - name: Set image tag
+      id: tag
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          echo "tag=production-latest" >> $GITHUB_OUTPUT
+        else
+          echo "tag=staging-latest" >> $GITHUB_OUTPUT
+        fi
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/renekris/renekris-dev-website:${{ steps.tag.outputs.tag }}
