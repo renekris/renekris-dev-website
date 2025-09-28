@@ -21,31 +21,31 @@ const Skills = () => {
   ];
 
   return (
-    <section id="skills" className="py-16 px-6 bg-gray-50">
+    <section id="skills" className="py-20 px-6 bg-gray-50">
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
             Technical Skills
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Technologies and tools I work with
           </p>
         </div>
 
         {/* Skills Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {skillCategories.map((category, index) => (
-            <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <div key={index} className="bg-white rounded-xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 {category.title}
               </h3>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {category.skills.map((skill, skillIndex) => (
                   <div key={skillIndex} className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                    <span className="text-gray-700 font-medium">{skill}</span>
+                    <div className="w-3 h-3 bg-blue-600 rounded-full mr-4"></div>
+                    <span className="text-lg text-gray-800 font-medium">{skill}</span>
                   </div>
                 ))}
               </div>
@@ -54,15 +54,24 @@ const Skills = () => {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-12 text-center">
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="text-center">
+          <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Languages
             </h3>
-            <div className="flex justify-center space-x-8 text-gray-600">
-              <span>🇪🇪 Estonian (Native)</span>
-              <span>🇬🇧 English (Proficient)</span>
-              <span>🇯🇵 Japanese (Upper-Intermediate)</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+              <div className="text-gray-800">
+                <span className="text-2xl font-bold text-blue-600 block mb-2">EST</span>
+                <p className="text-base font-medium">Estonian (Native)</p>
+              </div>
+              <div className="text-gray-800">
+                <span className="text-2xl font-bold text-blue-600 block mb-2">ENG</span>
+                <p className="text-base font-medium">English (Proficient)</p>
+              </div>
+              <div className="text-gray-800">
+                <span className="text-2xl font-bold text-blue-600 block mb-2">JPN</span>
+                <p className="text-base font-medium">Japanese (Upper-Intermediate)</p>
+              </div>
             </div>
           </div>
         </div>
