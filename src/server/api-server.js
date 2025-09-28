@@ -21,28 +21,20 @@ function httpGet(url) {
     });
 }
 
-// Function to fetch status from Uptime Kuma
-async function fetchUptimeKumaStatus() {
+// Function to fetch status from monitoring system
+async function fetchMonitoringStatus() {
     try {
-        console.log('Server-side: Fetching status from Uptime Kuma...');
+        console.log('Server-side: Fetching status from monitoring system...');
         
-        // Use configurable host or fallback to hardcoded IP
-        const uptimeHost = process.env.UPTIME_KUMA_HOST || '192.168.1.236';
-        const uptimePort = process.env.UPTIME_KUMA_PORT || '3001';
-        
-        // Use internal HTTP since we're server-side (no mixed content issues)
-        const config = await httpGet(`http://${uptimeHost}:${uptimePort}/api/status-page/services`);
-        const heartbeatData = await httpGet(`http://${uptimeHost}:${uptimePort}/api/status-page/heartbeat/services`);
-        
-        console.log('Server-side: Successfully fetched Uptime Kuma data');
+        // Placeholder for external monitoring system integration
+        console.log('Server-side: Monitoring system integration not configured');
         
         return {
-            monitors: config.publicGroupList[0].monitorList,
-            heartbeats: heartbeatData.heartbeatList,
-            uptimes: heartbeatData.uptimeList
+            status: 'not_configured',
+            message: 'External monitoring system not configured'
         };
     } catch (error) {
-        console.error('Server-side: Failed to fetch Uptime Kuma status:', error);
+        console.error('Server-side: Failed to fetch monitoring status:', error);
         return null;
     }
 }
@@ -51,7 +43,7 @@ async function fetchUptimeKumaStatus() {
 let isReady = false;
 let healthCheckData = {
     dependencies: {
-        uptimeKuma: false,
+        monitoring: false,
         fileSystem: false
     },
     lastCheck: null
@@ -60,18 +52,16 @@ let healthCheckData = {
 // Function to check dependencies health
 async function checkDependencies() {
     const checks = {
-        uptimeKuma: false,
+        monitoring: false,
         fileSystem: false
     };
 
-    // Check Uptime Kuma connectivity
+    // Check monitoring system connectivity
     try {
-        const uptimeHost = process.env.UPTIME_KUMA_HOST || '192.168.1.236';
-        const uptimePort = process.env.UPTIME_KUMA_PORT || '3001';
-        await httpGet(`http://${uptimeHost}:${uptimePort}/api/status-page/services`);
-        checks.uptimeKuma = true;
+        // Placeholder - would check external monitoring system here
+        checks.monitoring = true;
     } catch (error) {
-        console.error('Uptime Kuma health check failed:', error.message);
+        console.error('Monitoring system health check failed:', error.message);
     }
 
     // Check file system access
@@ -190,7 +180,7 @@ const server = http.createServer(async (req, res) => {
 
     // Handle API endpoint for status
     if (req.url === '/api/status') {
-        const statusData = await fetchUptimeKumaStatus();
+        const statusData = await fetchMonitoringStatus();
         res.writeHead(200, { 
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
