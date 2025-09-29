@@ -54,53 +54,69 @@ const SmoothScrollNavigation = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo/Name */}
+          {/* Logo/Brand */}
           <button
             onClick={() => scrollToSection('hero')}
-            className="text-xl font-bold transition-colors duration-200"
-            style={{ 
-              color: 'var(--text-primary)',
+            className="text-2xl font-bold transition-all duration-300 tracking-tight"
+            style={{
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              letterSpacing: '-0.02em',
+              textShadow: 'none'
             }}
-            onMouseEnter={(e) => e.target.style.color = 'var(--primary)'}
-            onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.filter = 'brightness(1.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.filter = 'brightness(1)';
+            }}
           >
-            Rene Kristofer Pohlak
+            renekris.dev
           </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-3">
             {navigationItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 ${
-                  activeSection === item.id
-                    ? 'text-white dark:text-gray-900'
-                    : 'hover:scale-105'
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  activeSection === item.id ? '' : ''
                 }`}
                 style={{
                   color: activeSection === item.id ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                  backgroundColor: activeSection === item.id ? 'var(--primary)' : 'transparent'
+                  backgroundColor: activeSection === item.id ? 'var(--primary)' : 'transparent',
+                  border: activeSection === item.id ? 'none' : '1px solid transparent',
+                  transform: activeSection === item.id ? 'scale(1)' : 'scale(1)'
                 }}
                 onMouseEnter={(e) => {
                   if (activeSection !== item.id) {
                     e.target.style.color = 'var(--primary)';
-                    e.target.style.backgroundColor = 'var(--hover-bg)';
+                    e.target.style.borderColor = 'var(--border-primary)';
+                    e.target.style.transform = 'translateY(-1px)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (activeSection !== item.id) {
                     e.target.style.color = 'var(--text-secondary)';
-                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.borderColor = 'transparent';
+                    e.target.style.transform = 'translateY(0)';
                   }
                 }}
               >
                 {item.label}
               </button>
             ))}
-            
+
             {/* Theme Toggle */}
-            <ThemeToggleMinimal className="ml-2" />
+            <div className="ml-1">
+              <ThemeToggleMinimal />
+            </div>
           </div>
 
           {/* Mobile Menu Button and Theme Toggle */}

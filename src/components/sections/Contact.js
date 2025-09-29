@@ -1,11 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiMail, FiLinkedin, FiGithub, FiMapPin, FiCheck } from 'react-icons/fi';
+import { FiMail, FiLinkedin, FiGithub } from 'react-icons/fi';
 import AnimatedSection from '../animations/AnimatedSection';
-import { 
-  staggerContainer, 
-  staggerItem, 
-  fadeInUp
+import {
+  staggerContainer,
+  staggerItem
 } from '../animations/motionUtils';
 
 const Contact = () => {
@@ -18,23 +17,17 @@ const Contact = () => {
       <div className="max-w-2xl mx-auto">
         {/* Section Header */}
         <AnimatedSection variant="fadeInUp" className="text-center mb-16">
-          <h2 
+          <h2
             className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 transition-colors duration-200"
             style={{ color: 'var(--text-primary)' }}
           >
             Get In Touch
           </h2>
-          <p 
-            className="text-xl mb-3 transition-colors duration-200"
+          <p
+            className="text-lg md:text-xl mb-2 transition-colors duration-200"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Open to opportunities in Tallinn and remote work
-          </p>
-          <p 
-            className="text-lg transition-colors duration-200"
-            style={{ color: 'var(--text-tertiary)' }}
-          >
-            Let's build something great together
+            Open to remote & hybrid opportunities
           </p>
         </AnimatedSection>
 
@@ -96,46 +89,16 @@ const Contact = () => {
           </motion.a>
         </motion.div>
 
-        {/* Location & Status */}
-        <AnimatedSection variant="fadeInUp" delay={0.4} className="text-center space-y-4">
-          <motion.div 
-            className="flex items-center justify-center space-x-3 transition-colors duration-200"
-            style={{ color: 'var(--text-secondary)' }}
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            transition={{ delay: 0.2 }}
-          >
-            <FiMapPin className="w-5 h-5" />
-            <span className="text-lg">Based in <strong style={{ color: 'var(--text-primary)' }}>Tallinn, Estonia</strong></span>
-          </motion.div>
-          <motion.div 
-            className="flex items-center justify-center space-x-3 font-semibold transition-colors duration-200"
-            style={{ color: 'var(--success)' }}
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            transition={{ delay: 0.4 }}
-          >
-            <FiCheck className="w-5 h-5" />
-            <span className="text-lg">Available for new opportunities</span>
-          </motion.div>
-        </AnimatedSection>
 
         {/* Footer */}
-        <AnimatedSection variant="fadeInUp" delay={0.6}>
-          <div 
-            className="mt-20 pt-8 border-t text-center transition-colors duration-200"
-            style={{ borderColor: 'var(--border-primary)' }}
-          >
-            <p 
-              className="text-base transition-colors duration-200"
-              style={{ color: 'var(--text-tertiary)' }}
-            >
-              © 2025 Rene Kristofer Pohlak. Built with React & Tailwind CSS.
-            </p>
-          </div>
-        </AnimatedSection>
+        <div className="mt-20 pt-8 border-t text-center" style={{ borderColor: 'var(--border-primary)' }}>
+          <p className="text-base mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Built with React, Framer Motion & Tailwind CSS
+          </p>
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            © 2025 renekris.dev
+          </p>
+        </div>
       </div>
     </section>
   );

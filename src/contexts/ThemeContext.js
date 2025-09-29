@@ -11,16 +11,15 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('dark');
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Initialize theme from localStorage or system preference
+  // Initialize theme from localStorage, defaulting to dark
   useEffect(() => {
     const initializeTheme = () => {
       const savedTheme = localStorage.getItem('theme');
-      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      
-      const initialTheme = savedTheme || systemPreference;
+
+      const initialTheme = savedTheme || 'dark';
       setTheme(initialTheme);
       updateDocumentTheme(initialTheme);
       setIsLoaded(true);
