@@ -1,9 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  fadeInUp,
-  fadeInScale
-} from '../animations/motionUtils';
 import { HeroResumeButton } from '../resume/ResumeDownloader';
 
 const Hero = () => {
