@@ -1,111 +1,140 @@
-name: Local Build & Deploy
+name: Build & Deploy
 
 on:
   push:
     branches: [main, dev]
 
+# Prevent concurrent deployments to same environment
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
-  local-deploy:
+  deploy:
     runs-on: self-hosted
+    timeout-minutes: 15
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-
-    - name: Cache node_modules
-      id: cache-node-modules
-      uses: actions/cache@v4
-      with:
-        path: node_modules
-        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-        restore-keys: |
-          node-modules-${{ runner.os }}-
+        cache: 'npm'
 
     - name: Install dependencies
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: npm ci --no-audit
+      run: npm ci
 
-    - name: Run tests
+    - name: Lint & Test
       run: |
         npm run lint
         npm test -- --coverage --watchAll=false
 
-    - name: Build application
-      run: |
-        npm run build
-        echo "Build completed. Checking build directory:"
-        ls -la
-        ls -la build/ || echo "Build directory not found"
+    - name: Build
+      run: npm run build
 
-    - name: Set image tag
-      id: tag
+    - name: Set deployment variables
+      id: vars
       run: |
         if [ "${{ github.ref_name }}" = "main" ]; then
-          echo "tag=renekris-website:production-latest" >> $GITHUB_OUTPUT
+          echo "image=renekris-website:production-latest" >> $GITHUB_OUTPUT
           echo "service=production-website_web" >> $GITHUB_OUTPUT
+          echo "url=https://renekris.dev" >> $GITHUB_OUTPUT
+          echo "env=Production" >> $GITHUB_OUTPUT
         else
-          echo "tag=renekris-website:staging-latest" >> $GITHUB_OUTPUT
+          echo "image=renekris-website:staging-latest" >> $GITHUB_OUTPUT
           echo "service=staging-website_web" >> $GITHUB_OUTPUT
+          echo "url=https://staging.renekris.dev" >> $GITHUB_OUTPUT
+          echo "env=Staging" >> $GITHUB_OUTPUT
         fi
 
-    - name: Set up Docker Buildx
+    - name: Setup Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image with BuildKit caching
-      uses: docker/build-push-action@v5
+    - name: Build image
+      uses: docker/build-push-action@v6
       with:
         context: .
         push: false
-        tags: ${{ steps.tag.outputs.tag }}
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-          type=gha
-        cache-to: |
-          type=local,dest=/tmp/.buildx-cache-new,mode=max
-          type=gha,mode=max
         load: true
+        tags: ${{ steps.vars.outputs.image }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        provenance: false
 
-    - name: Move cache
+    - name: Deploy to Swarm
+      id: deploy
       run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+        echo "Deploying ${{ steps.vars.outputs.image }} to ${{ steps.vars.outputs.env }}..."
+        docker service update \
+          --force \
+          --image ${{ steps.vars.outputs.image }} \
+          --update-parallelism 1 \
+          --update-delay 10s \
+          ${{ steps.vars.outputs.service }}
 
-    - name: Deploy to Docker Swarm
+    - name: Wait for convergence
       run: |
-        echo "Updating Docker service: ${{ steps.tag.outputs.service }}"
-        docker service update --force --image ${{ steps.tag.outputs.tag }} ${{ steps.tag.outputs.service }}
-
         echo "Waiting for service convergence..."
-        timeout 300 bash -c 'until [ "$(docker service ps ${{ steps.tag.outputs.service }} --format "table {{.CurrentState}}" | grep -c "Running")" -gt 0 ]; do sleep 5; done'
-        echo "Service updated successfully"
-
-    - name: Health check deployment
-      run: |
-        if [ "${{ github.ref_name }}" = "main" ]; then
-          URL="https://renekris.dev"
-        else
-          URL="https://staging.renekris.dev"
-        fi
-
-        echo "Waiting for deployment to be ready..."
-        sleep 30
-
-        echo "Testing deployment health..."
-        for i in {1..10}; do
-          if curl -f --max-time 10 "$URL" > /dev/null 2>&1; then
-            echo "Deployment successful - site is responding"
+        for i in {1..60}; do
+          RUNNING=$(docker service ps ${{ steps.vars.outputs.service }} --filter "desired-state=running" --format "{{.CurrentState}}" | grep -c "Running" || echo "0")
+          if [ "$RUNNING" -gt 0 ]; then
+            echo "Service converged successfully"
             exit 0
           fi
-          echo "Attempt $i/10 failed, waiting..."
-          sleep 15
+          echo "Attempt $i/60: No running tasks yet..."
+          sleep 5
+        done
+        echo "Service failed to converge"
+        exit 1
+
+    - name: Health check
+      run: |
+        echo "Health checking ${{ steps.vars.outputs.url }}..."
+        MAX_ATTEMPTS=10
+        ATTEMPT=0
+
+        while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+          ATTEMPT=$((ATTEMPT + 1))
+
+          if curl -f -s --max-time 10 "${{ steps.vars.outputs.url }}" > /dev/null; then
+            echo "✓ Health check passed (attempt $ATTEMPT/$MAX_ATTEMPTS)"
+            exit 0
+          fi
+
+          echo "✗ Attempt $ATTEMPT/$MAX_ATTEMPTS failed"
+          [ $ATTEMPT -lt $MAX_ATTEMPTS ] && sleep 15
         done
 
-        echo "Health check failed after 10 attempts"
-        echo "Rolling back deployment..."
-        docker service rollback ${{ steps.tag.outputs.service }}
+        echo "Health check failed after $MAX_ATTEMPTS attempts"
         exit 1
+
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "Deployment failed - rolling back..."
+        docker service rollback ${{ steps.vars.outputs.service }}
+
+        echo "Waiting for rollback..."
+        sleep 30
+
+        if curl -f -s --max-time 10 "${{ steps.vars.outputs.url }}" > /dev/null; then
+          echo "Rollback successful"
+        else
+          echo "Rollback may have failed - manual intervention required"
+        fi
+
+    - name: Deployment summary
+      if: always()
+      run: |
+        echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: ${{ steps.vars.outputs.env }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Image**: ${{ steps.vars.outputs.image }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Service**: ${{ steps.vars.outputs.service }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **URL**: ${{ steps.vars.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
