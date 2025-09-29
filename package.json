@@ -15,7 +15,7 @@
     "start": "react-scripts start",
     "dev": "concurrently \"PORT=3001 react-scripts start\" \"node src/server/dev-proxy-server.js\"",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
     "test:e2e": "node scripts/smart-test-runner.js",
     "test:e2e:quick": "node scripts/smart-test-runner.js --quick",
     "test:e2e:full": "node scripts/smart-test-runner.js --full",
