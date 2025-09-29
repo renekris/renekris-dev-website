@@ -3,8 +3,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import SmoothScrollNavigation from './components/SmoothScrollNavigation';
 import ScrollProgressIndicator from './components/ScrollProgressIndicator';
 import Hero from './components/sections/Hero';
-import Projects from './components/sections/Projects';
-import Skills from './components/sections/Skills';
 import Contact from './components/sections/Contact';
 
 function App() {
@@ -27,8 +25,6 @@ function App() {
         {/* Mobile-First Linear Portfolio - Add padding top for fixed nav */}
         <div className="pt-20">
           <Hero />
-          <Projects />
-          <Skills />
           <Contact />
         </div>
       </div>

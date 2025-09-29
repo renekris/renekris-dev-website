@@ -5,7 +5,7 @@ import { ThemeToggleMinimal } from './ui/ThemeToggle';
 
 const SmoothScrollNavigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const sections = ['hero', 'projects', 'skills', 'contact'];
+  const sections = ['hero', 'contact'];
   const activeSection = useIntersectionObserver(sections);
   const { scrollY, scrollDirection } = useScrollPosition();
 
@@ -38,8 +38,6 @@ const SmoothScrollNavigation = () => {
 
   const navigationItems = [
     { id: 'hero', label: 'Home' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'skills', label: 'Skills' },
     { id: 'contact', label: 'Contact' }
   ];
 

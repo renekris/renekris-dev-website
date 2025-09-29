@@ -65,39 +65,13 @@ const Hero = () => {
           Building scalable web solutions and infrastructure
         </motion.p>
         
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <motion.button
-            onClick={() => {
-              const element = document.getElementById('projects');
-              if (element) {
-                const navHeight = 80;
-                const elementPosition = element.offsetTop - navHeight;
-                window.scrollTo({
-                  top: elementPosition,
-                  behavior: 'smooth'
-                });
-              }
-            }}
-            className="font-semibold py-4 px-10 rounded-lg text-lg min-h-[52px] shadow-lg focus:ring-4 focus:ring-offset-2 hover:shadow-xl transition-all duration-200"
-            style={{
-              backgroundColor: 'var(--primary)',
-              color: 'var(--text-inverse)',
-              boxShadow: '0 4px 14px 0 var(--shadow-medium)',
-            }}
-            variants={fadeInScale}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.0 }}
-          >
-            View Work
-          </motion.button>
-
+        {/* CTA Button */}
+        <div className="flex justify-center">
           <motion.div
             variants={fadeInScale}
             initial="hidden"
             animate="visible"
-            transition={{ delay: 1.2 }}
+            transition={{ delay: 1.0 }}
           >
             <HeroResumeButton />
           </motion.div>
