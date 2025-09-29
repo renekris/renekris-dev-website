@@ -1,40 +1,107 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import {
+  fadeInUp,
+  fadeInScale
+} from '../animations/motionUtils';
+import { HeroResumeButton } from '../resume/ResumeDownloader';
 
 const Hero = () => {
+  const name = "Rene Kristofer Pohlak";
+
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-6 py-12">
+    <section 
+      id="hero" 
+      className="min-h-screen flex items-center justify-center px-6 py-12 transition-all duration-200"
+      style={{
+        background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%)'
+      }}
+    >
       <div className="text-center max-w-2xl">
-        {/* Name - Mobile optimized typography */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
-          Rene Kristofer Pohlak
-        </h1>
+        {/* Name - Simple fade in animation */}
+        <motion.h1 
+          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight transition-colors duration-200"
+          style={{ color: 'var(--text-primary)' }}
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+        >
+          {name}
+        </motion.h1>
         
         {/* Role */}
-        <p className="text-xl md:text-2xl text-gray-700 font-medium mb-2">
+        <motion.p 
+          className="text-xl md:text-2xl font-medium mb-2 transition-colors duration-200"
+          style={{ color: 'var(--primary)' }}
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.8 }}
+        >
           Full-Stack Developer
-        </p>
+        </motion.p>
         
         {/* Location */}
-        <p className="text-base text-gray-500 mb-8">
+        <motion.p 
+          className="text-base mb-8 transition-colors duration-200"
+          style={{ color: 'var(--text-tertiary)' }}
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 1.0 }}
+        >
           Tallinn, Estonia
-        </p>
+        </motion.p>
         
         {/* Tagline */}
-        <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed max-w-xl mx-auto">
-          Building scalable web solutions and infrastructure
-        </p>
-        
-        {/* CTA Button - Thumb-friendly size */}
-        <button 
-          onClick={() => {
-            document.getElementById('projects').scrollIntoView({ 
-              behavior: 'smooth' 
-            });
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-10 rounded-lg text-lg transition-all duration-200 min-h-[52px] shadow-lg hover:shadow-xl hover:scale-105"
+        <motion.p 
+          className="text-lg md:text-xl mb-10 leading-relaxed max-w-xl mx-auto transition-colors duration-200"
+          style={{ color: 'var(--text-secondary)' }}
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 1.2 }}
         >
-          View Work
-        </button>
+          Building scalable web solutions and infrastructure
+        </motion.p>
+        
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <motion.button
+            onClick={() => {
+              const element = document.getElementById('projects');
+              if (element) {
+                const navHeight = 80;
+                const elementPosition = element.offsetTop - navHeight;
+                window.scrollTo({
+                  top: elementPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }}
+            className="font-semibold py-4 px-10 rounded-lg text-lg min-h-[52px] shadow-lg focus:ring-4 focus:ring-offset-2 hover:shadow-xl transition-all duration-200"
+            style={{
+              backgroundColor: 'var(--primary)',
+              color: 'var(--text-inverse)',
+              boxShadow: '0 4px 14px 0 var(--shadow-medium)',
+            }}
+            variants={fadeInScale}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 1.0 }}
+          >
+            View Work
+          </motion.button>
+
+          <motion.div
+            variants={fadeInScale}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 1.2 }}
+          >
+            <HeroResumeButton />
+          </motion.div>
+        </div>
       </div>
     </section>
   );

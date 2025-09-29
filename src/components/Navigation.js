@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaUser, FaBriefcase } from 'react-icons/fa';
 import SlidingTabIndicator from './SlidingTabIndicator';
+import { NavResumeButton } from './resume/ResumeDownloader';
 
 const Navigation = () => {
   const location = useLocation();
@@ -102,6 +103,7 @@ const Navigation = () => {
       top: 0,
       zIndex: 100
     }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div 
         ref={navContainerRef}
         style={{
@@ -210,6 +212,12 @@ const Navigation = () => {
           activeTab={activeTab} 
           tabPositions={tabPositions} 
         />
+      </div>
+      
+      {/* Resume Download Button */}
+      <div style={{ padding: '0 20px' }}>
+        <NavResumeButton />
+      </div>
       </div>
     </nav>
   );

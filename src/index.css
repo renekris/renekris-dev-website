@@ -5,14 +5,46 @@
 /* Custom base styles */
 @layer base {
   :root {
-    /* 2025 Gaming Professional Color Palette */
+    /* Light Theme Variables */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-accent: #eff6ff;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
+    --text-inverse: #ffffff;
+    --border-primary: #e2e8f0;
+    --border-secondary: #cbd5e1;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+    --shadow-heavy: rgba(0, 0, 0, 0.25);
+    
+    /* Brand Colors */
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #dbeafe;
+    --secondary: #64748b;
+    --accent: #06b6d4;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    
+    /* Interactive States */
+    --hover-bg: #f1f5f9;
+    --focus-ring: #3b82f6;
+    --focus-ring-offset: #ffffff;
+    
+    /* Typography */
+    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+
+    /* Legacy Gaming Variables (for compatibility) */
     --minecraft-green: #4CAF50;
     --success-green: #10B981;
     --accent-blue: #3B82F6;
     --warning-amber: #F59E0B;
     --error-red: #EF4444;
-
-    /* Subtle Neon Color Palette */
     --neon-blue: #0EA5E9;
     --neon-purple: #7C3AED;
     --neon-pink: #DB2777;
@@ -21,40 +53,101 @@
     --neon-orange: #EA580C;
     --electric-violet: #7C2D12;
     --cyber-yellow: #CA8A04;
+  }
 
-    /* Dark Theme Base */
-    --bg-primary: #0F172A;
-    --bg-secondary: #1E293B;
-    --bg-card: #334155;
-    --text-primary: #F8FAFC;
-    --text-secondary: #CBD5E1;
-    --border: #475569;
-
-    /* Interactive States */
-    --hover-bg: #475569;
-    --focus-ring: #3B82F6;
-    --shadow-card: rgba(0, 0, 0, 0.25);
-
-    /* Typography System */
-    --font-primary: 'Inter', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  /* Dark Theme Variables */
+  .dark {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-accent: #1e3a8a;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-inverse: #1e293b;
+    --border-primary: #334155;
+    --border-secondary: #475569;
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-medium: rgba(0, 0, 0, 0.4);
+    --shadow-heavy: rgba(0, 0, 0, 0.5);
+    
+    /* Brand Colors - Dark Theme */
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --primary-light: #1e3a8a;
+    --secondary: #94a3b8;
+    --accent: #22d3ee;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+    
+    /* Interactive States - Dark Theme */
+    --hover-bg: #374151;
+    --focus-ring: #60a5fa;
+    --focus-ring-offset: #0f172a;
   }
 
   * {
     box-sizing: border-box;
   }
   
+  /* Smooth theme transitions */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   body {
-    @apply bg-gray-900 text-white font-sans leading-relaxed;
-    background: radial-gradient(ellipse at center, #050505 0%, #0a0a0a 30%, #000000 70%, #000000 100%);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: var(--font-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
   
   code {
     font-family: var(--font-mono);
+  }
+
+  /* Prevent flash of unstyled content during theme loading */
+  .theme-transition {
+    transition: none !important;
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Selection styles */
+  ::selection {
+    background-color: var(--primary-light);
+    color: var(--text-primary);
+  }
+
+  /* Scrollbar styling for dark mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
   }
 }
 
@@ -1003,8 +1096,62 @@
     }
   }
 
+  /* 2025 Modern Portfolio Animations */
+  @keyframes float {
+    0%, 100% { 
+      transform: translate(0, 0) rotate(0deg); 
+    }
+    33% { 
+      transform: translate(30px, -30px) rotate(120deg); 
+    }
+    66% { 
+      transform: translate(-20px, 20px) rotate(240deg); 
+    }
+  }
+  
+  @keyframes scanline {
+    0% { 
+      transform: translateX(-100%); 
+      opacity: 0; 
+    }
+    50% { 
+      opacity: 1; 
+    }
+    100% { 
+      transform: translateX(100%); 
+      opacity: 0; 
+    }
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+    }
+    50% {
+      box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+    }
+  }
+
   .neon-pulse {
     animation: neonPulse 2s infinite;
+  }
+  
+  .gradient-shift {
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  .glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite alternate;
   }
 }
 
@@ -1171,19 +1318,22 @@
   
   /* Performance Optimizations */
   
-  /* Reduce motion for users who prefer it */
+  /* Enhanced reduced motion support for accessibility */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+      transition-duration: 0.15s !important;
+      transition-timing-function: ease-out !important;
     }
     
+    /* Disable complex animations */
     .glitch-text::before,
     .glitch-text::after {
       animation: none !important;
+      transform: none !important;
     }
     
     .cyber-panel::before {
@@ -1192,6 +1342,25 @@
     
     .neon-pulse {
       animation: none !important;
+    }
+    
+    /* Simplify hover effects */
+    .cyber-card:hover,
+    .cyber-panel:hover {
+      transform: none !important;
+    }
+    
+    /* Remove parallax and scroll-triggered animations */
+    .fade-in-on-scroll {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    
+    /* Keep only essential focus indicators */
+    :focus-visible {
+      outline: 2px solid var(--focus-ring) !important;
+      outline-offset: 2px !important;
+      transition: outline 0.15s ease-out !important;
     }
   }
   
@@ -1267,9 +1436,17 @@
     perspective: 1000px;
   }
   
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
+  /* Conditional smooth scrolling - respects reduced motion */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
   
   /* Better focus handling */
