@@ -16,7 +16,6 @@ module.exports = {
         'text-tertiary': '#666666',
         'accent-green': '#059669',
         'accent-purple': '#7C3AED',
-        // New subtle neon colors
         'neon-blue': '#0EA5E9',
         'neon-purple': '#7C3AED',
         'neon-pink': '#DB2777',
