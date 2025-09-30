@@ -44,6 +44,3 @@ pids
 # Backup files
 *.backup
 *.bak
-
-# CV file
-*.pdf
