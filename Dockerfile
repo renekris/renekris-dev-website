@@ -13,14 +13,8 @@ LABEL org.opencontainers.image.title="Renekris Dev Website" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/renekris/renekris-dev-website"
 
-# Create application directories with proper ownership
-USER 0
-RUN mkdir -p /app /tmp/app-cache && \
-    chown -R 65532:65532 /app /tmp/app-cache && \
-    chmod 755 /app && \
-    chmod 750 /tmp/app-cache
-USER 65532
-
+# Set nonroot user and working directory
+USER 65532:65532
 WORKDIR /app
 
 # Copy pre-built application from GitHub Actions workflow
@@ -41,29 +35,19 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
 
 EXPOSE 8080
 
-# Use distroless nonroot user with explicit UID
-USER 65532:65532
-
-# Start application with security constraints
+# Start application
 CMD ["node", "server.js"]
 
 # Alternative runtime with debugging capabilities (for development only)
 FROM node:20-alpine AS runtime-debug
 
 # Install minimal debugging tools
-RUN apk add --no-cache \
-    curl \
-    tini \
-    ca-certificates \
+RUN apk add --no-cache curl tini ca-certificates \
     && apk upgrade --no-cache \
     && rm -rf /var/cache/apk/*
 
-# Create consistent nonroot user (65532:65532 for compatibility)
-RUN mkdir -p /app /tmp/app-cache && \
-    chown -R 65532:65532 /app /tmp/app-cache && \
-    chmod 755 /app && \
-    chmod 750 /tmp/app-cache
-
+# Set nonroot user and working directory
+USER 65532:65532
 WORKDIR /app
 
 # Copy pre-built application from GitHub Actions workflow
@@ -83,9 +67,6 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 EXPOSE 8080
-
-# Use standardized nonroot user
-USER 65532:65532
 
 ENTRYPOINT ["tini", "--"]
 CMD ["node", "server.js"]
