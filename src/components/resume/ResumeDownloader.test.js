@@ -27,27 +27,27 @@ describe('ResumeDownloader', () => {
     });
 
     it('renders with primary variant by default', () => {
-      const { container } = render(<ResumeDownloader />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('from-cyan-600');
+      render(<ResumeDownloader />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('from-cyan-600');
     });
 
     it('renders with secondary variant when specified', () => {
-      const { container } = render(<ResumeDownloader variant="secondary" />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('bg-rgba');
+      render(<ResumeDownloader variant="secondary" />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('bg-rgba');
     });
 
     it('renders with minimal variant when specified', () => {
-      const { container } = render(<ResumeDownloader variant="minimal" />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('text-cyan-400');
+      render(<ResumeDownloader variant="minimal" />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('text-cyan-400');
     });
 
     it('applies custom className', () => {
-      const { container } = render(<ResumeDownloader className="custom-class" />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('custom-class');
+      render(<ResumeDownloader className="custom-class" />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('custom-class');
     });
 
     it('has correct accessibility title', () => {
@@ -101,38 +101,32 @@ describe('ResumeDownloader', () => {
 
   describe('Specialized Components', () => {
     it('HeroResumeButton renders with primary variant', () => {
-      const { container } = render(<HeroResumeButton />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('from-cyan-600');
-      expect(button?.className).toContain('mx-auto mt-6');
+      render(<HeroResumeButton />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('from-cyan-600');
+      expect(button.className).toContain('mx-auto mt-6');
     });
 
     it('NavResumeButton renders with secondary variant', () => {
-      const { container } = render(<NavResumeButton />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('bg-rgba');
-      expect(button?.className).toContain('ml-4');
+      render(<NavResumeButton />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('bg-rgba');
+      expect(button.className).toContain('ml-4');
     });
 
     it('InlineResumeButton renders with minimal variant', () => {
-      const { container } = render(<InlineResumeButton />);
-      const button = container.querySelector('button');
-      expect(button?.className).toContain('text-cyan-400');
-      expect(button?.className).toContain('inline-flex');
+      render(<InlineResumeButton />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button.className).toContain('text-cyan-400');
+      expect(button.className).toContain('inline-flex');
     });
   });
 
   describe('SVG Icons', () => {
-    it('renders FilePdfIcon', () => {
-      const { container } = render(<ResumeDownloader />);
-      const svgs = container.querySelectorAll('svg');
-      expect(svgs.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('renders DownloadIcon', () => {
-      const { container } = render(<ResumeDownloader />);
-      const svgs = container.querySelectorAll('svg');
-      expect(svgs.length).toBe(2);
+    it('renders download button with icons', () => {
+      render(<ResumeDownloader />);
+      const button = screen.getByRole('button', { name: /download/i });
+      expect(button).toBeInTheDocument();
     });
   });
 

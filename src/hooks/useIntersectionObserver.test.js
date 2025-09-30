@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-node-access */
 import { renderHook } from '@testing-library/react';
 import useIntersectionObserver from './useIntersectionObserver';
 
@@ -20,10 +21,13 @@ describe('useIntersectionObserver', () => {
 
     global.IntersectionObserver = mockIntersectionObserver;
 
-    document.getElementById = jest.fn((id) => ({
-      id,
-      getBoundingClientRect: () => ({ top: 0, bottom: 100, height: 100 })
-    }));
+    document.getElementById = jest.fn((id) => {
+      if (!id) return null;
+      return {
+        id,
+        getBoundingClientRect: () => ({ top: 0, bottom: 100, height: 100 })
+      };
+    });
   });
 
   afterEach(() => {
@@ -48,7 +52,7 @@ describe('useIntersectionObserver', () => {
 
   it('observes all provided section IDs', () => {
     const sectionIds = ['hero', 'about', 'contact'];
-    const { result } = renderHook(() => useIntersectionObserver(sectionIds));
+    renderHook(() => useIntersectionObserver(sectionIds));
 
     expect(document.getElementById).toHaveBeenCalledTimes(3);
     expect(document.getElementById).toHaveBeenCalledWith('hero');
