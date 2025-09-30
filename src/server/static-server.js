@@ -4,7 +4,7 @@ const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 const HOST = process.env.HOST || '0.0.0.0';
-const BUILD_DIR = path.join(__dirname, '../../build');
+const BUILD_DIR = path.join(__dirname, 'build');
 
 const MIME_TYPES = {
   '.html': 'text/html',
