@@ -31,12 +31,12 @@ ENV NODE_ENV=production \
 
 # Health check with optimized parameters
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-    CMD ["node", "-e", "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+    CMD ["/nodejs/bin/node", "-e", "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
 
 EXPOSE 8080
 
-# Start application
-CMD ["node", "server.js"]
+# Start application (distroless has node in ENTRYPOINT)
+CMD ["server.js"]
 
 # Alternative runtime with debugging capabilities (for development only)
 FROM node:20-alpine AS runtime-debug

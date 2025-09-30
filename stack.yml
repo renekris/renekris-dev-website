@@ -26,14 +26,11 @@ services:
       - NODE_OPTIONS=--max-old-space-size=${MAX_MEMORY:-512} --max-http-header-size=8192
       - UV_THREADPOOL_SIZE=${THREAD_POOL:-4}
 
-    volumes:
-      - /opt/renekris-infrastructure/minecraft-server-status.json:/app/public/minecraft-server-status.json:ro,Z
-
     networks:
       - proxy
 
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      test: ["CMD", "/nodejs/bin/node", "-e", "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: ${HEALTH_INTERVAL:-30s}
       timeout: ${HEALTH_TIMEOUT:-10s}
       retries: ${HEALTH_RETRIES:-2}
