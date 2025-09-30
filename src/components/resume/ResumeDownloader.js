@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaDownload, FaFilePdf } from 'react-icons/fa';
+import { DownloadIcon, FilePdfIcon } from '../icons';
 
 const ResumeDownloader = ({ variant = 'button', className = '' }) => {
   const downloadPDF = () => {
@@ -49,9 +49,9 @@ const ResumeDownloader = ({ variant = 'button', className = '' }) => {
       className={`${currentStyle} ${className}`}
       title="Download professional resume as PDF"
     >
-      <FaFilePdf />
+      <FilePdfIcon className="w-5 h-5" />
       <span>Download Resume</span>
-      <FaDownload className="ml-1" />
+      <DownloadIcon className="ml-1 w-4 h-4" />
     </button>
   );
 };

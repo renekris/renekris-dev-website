@@ -1,14 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
-const AnimatedSection = ({ 
-  children, 
-  variant = 'fadeInUp', 
-  delay = 0, 
+const AnimatedSection = ({
+  children,
+  variant = 'fadeInUp',
+  delay = 0,
   duration = 0.6,
   className = '',
-  ...props 
+  ...props
 }) => {
+  const prefersReducedMotion = useReducedMotion();
+
   // Animation variants
   const variants = {
     fadeInUp: {
@@ -116,11 +119,6 @@ const AnimatedSection = ({
       }
     }
   };
-
-  // Accessibility-aware motion preferences with dynamic detection
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
-    : false;
 
   // Enhanced reduced motion variants
   const reducedMotionVariants = {

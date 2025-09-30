@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiMail, FiLinkedin, FiGithub } from 'react-icons/fi';
+import { MailIcon, LinkedInIcon, GitHubIcon } from '../icons';
 import AnimatedSection from '../animations/AnimatedSection';
 import {
   staggerContainer,
@@ -50,7 +50,7 @@ const Contact = () => {
             }}
             variants={staggerItem}
           >
-            <FiMail className="w-6 h-6" />
+            <MailIcon className="w-6 h-6" />
             <span className="text-lg">renekrispohlak@gmail.com</span>
           </motion.a>
 
@@ -67,7 +67,7 @@ const Contact = () => {
             }}
             variants={staggerItem}
           >
-            <FiLinkedin className="w-6 h-6" />
+            <LinkedInIcon className="w-6 h-6" />
             <span className="text-lg">LinkedIn Profile</span>
           </motion.a>
 
@@ -84,7 +84,7 @@ const Contact = () => {
             }}
             variants={staggerItem}
           >
-            <FiGithub className="w-6 h-6" />
+            <GitHubIcon className="w-6 h-6" />
             <span className="text-lg">GitHub Portfolio</span>
           </motion.a>
         </motion.div>
@@ -95,9 +95,20 @@ const Contact = () => {
           <p className="text-base mb-2" style={{ color: 'var(--text-secondary)' }}>
             Built with React, Framer Motion & Tailwind CSS
           </p>
-          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-            © 2025 renekris.dev
-          </p>
+          <div className="flex items-center justify-center gap-2 text-sm mb-2" style={{ color: 'var(--text-tertiary)' }}>
+            <a
+              href="https://github.com/renekris/renekris-dev-website"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:opacity-70 transition-opacity"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
+              <GitHubIcon className="w-4 h-4" />
+              <span>Source</span>
+            </a>
+            <span>•</span>
+            <span>© 2025 renekris.dev</span>
+          </div>
         </div>
       </div>
     </section>

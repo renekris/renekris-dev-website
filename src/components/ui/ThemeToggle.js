@@ -1,8 +1,8 @@
-import React from 'react';
-import { FiSun, FiMoon } from 'react-icons/fi';
+import React, { memo } from 'react';
+import { SunIcon, MoonIcon } from '../icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const ThemeToggle = ({ size = 'default', className = '' }) => {
+const ThemeToggle = memo(({ size = 'default', className = '' }) => {
   const { theme, toggleTheme } = useTheme();
 
   const baseClasses = `
@@ -40,16 +40,16 @@ const ThemeToggle = ({ size = 'default', className = '' }) => {
       />
       
       {/* Sun icon */}
-      <FiSun 
+      <SunIcon
         className={`
           ${iconClasses}
           w-4 h-4 text-yellow-500 absolute left-1
           ${theme === 'dark' ? 'opacity-50 scale-90' : 'opacity-100 scale-100'}
         `}
       />
-      
+
       {/* Moon icon */}
-      <FiMoon 
+      <MoonIcon
         className={`
           ${iconClasses}
           w-4 h-4 text-blue-400 absolute right-1
@@ -58,7 +58,9 @@ const ThemeToggle = ({ size = 'default', className = '' }) => {
       />
     </button>
   );
-};
+});
+
+ThemeToggle.displayName = 'ThemeToggle';
 
 // Size variants
 const getSizeClasses = (size) => {
@@ -73,7 +75,7 @@ const getSizeClasses = (size) => {
 };
 
 // Alternative minimal version for tight spaces
-export const ThemeToggleMinimal = ({ className = '' }) => {
+export const ThemeToggleMinimal = memo(({ className = '' }) => {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -93,12 +95,14 @@ export const ThemeToggleMinimal = ({ className = '' }) => {
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       {theme === 'light' ? (
-        <FiMoon className="w-4 h-4" />
+        <MoonIcon className="w-4 h-4" />
       ) : (
-        <FiSun className="w-4 h-4" />
+        <SunIcon className="w-4 h-4" />
       )}
     </button>
   );
-};
+});
+
+ThemeToggleMinimal.displayName = 'ThemeToggleMinimal';
 
 export default ThemeToggle;
