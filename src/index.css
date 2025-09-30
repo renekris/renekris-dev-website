@@ -91,13 +91,20 @@
     box-sizing: border-box;
   }
   
-  /* Smooth theme transitions */
-  *,
-  *::before,
-  *::after {
-    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  /* Selective theme transitions - removed global * selector for mobile performance */
+  .theme-transition {
+    transition-property: background-color, border-color, color, fill, stroke;
     transition-duration: 200ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Animated elements get transform transitions with GPU acceleration */
+  .animated-transform {
+    transition-property: transform, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
   }
 
   body {
@@ -114,8 +121,13 @@
     font-family: var(--font-mono);
   }
 
-  /* Prevent flash of unstyled content during theme loading */
-  .theme-transition {
+  /* Smooth color transitions during theme toggle */
+  body {
+    transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Prevent flash on initial load */
+  body:not(.theme-loaded) {
     transition: none !important;
   }
 
@@ -1152,6 +1164,46 @@
   
   .glow-pulse {
     animation: glowPulse 2s ease-in-out infinite alternate;
+  }
+
+  /* Navigation Component Styles */
+  .nav-brand {
+    transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translate3d(0, 0, 0);
+  }
+
+  .nav-brand:hover {
+    transform: translate3d(0, 0, 0) scale(1.05);
+    filter: brightness(1.2);
+  }
+
+  .nav-item {
+    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translate3d(0, 0, 0);
+  }
+
+  .nav-item:not(.nav-item-active):hover {
+    color: var(--primary);
+    border-color: var(--border-primary);
+    transform: translate3d(0, -1px, 0);
+  }
+
+  .nav-item-mobile {
+    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nav-item-mobile:not(.nav-item-active):hover {
+    color: var(--primary);
+    background-color: var(--hover-bg);
+  }
+
+  .nav-menu-toggle {
+    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nav-menu-toggle:hover {
+    color: var(--primary);
+    background-color: var(--hover-bg);
   }
 }
 

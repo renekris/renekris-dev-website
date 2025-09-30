@@ -43,13 +43,16 @@ const SmoothScrollNavigation = () => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 border-b ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
       style={{
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-primary)',
-        opacity: 0.95
+        opacity: 0.95,
+        transform: isVisible ? 'translate3d(0, 0, 0)' : 'translate3d(0, -100%, 0)',
+        transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+        willChange: 'transform'
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,7 +60,7 @@ const SmoothScrollNavigation = () => {
           {/* Logo/Brand */}
           <button
             onClick={() => scrollToSection('hero')}
-            className="text-2xl font-bold transition-all duration-300 tracking-tight"
+            className="text-2xl font-bold tracking-tight nav-brand"
             style={{
               background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
               WebkitBackgroundClip: 'text',
@@ -66,14 +69,6 @@ const SmoothScrollNavigation = () => {
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               letterSpacing: '-0.02em',
               textShadow: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'scale(1.05)';
-              e.target.style.filter = 'brightness(1.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.filter = 'brightness(1)';
             }}
           >
             renekris.dev
@@ -85,28 +80,13 @@ const SmoothScrollNavigation = () => {
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  activeSection === item.id ? '' : ''
+                className={`px-4 py-2 rounded-lg text-sm font-semibold nav-item ${
+                  activeSection === item.id ? 'nav-item-active' : ''
                 }`}
                 style={{
                   color: activeSection === item.id ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   backgroundColor: activeSection === item.id ? 'var(--primary)' : 'transparent',
-                  border: activeSection === item.id ? 'none' : '1px solid transparent',
-                  transform: activeSection === item.id ? 'scale(1)' : 'scale(1)'
-                }}
-                onMouseEnter={(e) => {
-                  if (activeSection !== item.id) {
-                    e.target.style.color = 'var(--primary)';
-                    e.target.style.borderColor = 'var(--border-primary)';
-                    e.target.style.transform = 'translateY(-1px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeSection !== item.id) {
-                    e.target.style.color = 'var(--text-secondary)';
-                    e.target.style.borderColor = 'transparent';
-                    e.target.style.transform = 'translateY(0)';
-                  }
+                  border: activeSection === item.id ? 'none' : '1px solid transparent'
                 }}
               >
                 {item.label}
@@ -124,18 +104,10 @@ const SmoothScrollNavigation = () => {
             <ThemeToggleMinimal />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg transition-colors duration-200"
+              className="p-2 rounded-lg nav-menu-toggle"
               style={{ 
                 color: 'var(--text-secondary)',
                 backgroundColor: 'transparent'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.color = 'var(--primary)';
-                e.target.style.backgroundColor = 'var(--hover-bg)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.color = 'var(--text-secondary)';
-                e.target.style.backgroundColor = 'transparent';
               }}
               aria-label="Toggle navigation menu"
             >
@@ -179,26 +151,12 @@ const SmoothScrollNavigation = () => {
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`block w-full text-left px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                    activeSection === item.id
-                      ? 'text-white dark:text-gray-900'
-                      : ''
+                  className={`block w-full text-left px-3 py-3 rounded-lg text-base font-medium nav-item-mobile ${
+                    activeSection === item.id ? 'nav-item-active' : ''
                   }`}
                   style={{
                     color: activeSection === item.id ? 'var(--text-inverse)' : 'var(--text-secondary)',
                     backgroundColor: activeSection === item.id ? 'var(--primary)' : 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (activeSection !== item.id) {
-                      e.target.style.color = 'var(--primary)';
-                      e.target.style.backgroundColor = 'var(--hover-bg)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (activeSection !== item.id) {
-                      e.target.style.color = 'var(--text-secondary)';
-                      e.target.style.backgroundColor = 'transparent';
-                    }
                   }}
                 >
                   {item.label}

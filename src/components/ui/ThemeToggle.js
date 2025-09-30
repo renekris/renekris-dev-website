@@ -3,14 +3,7 @@ import { FiSun, FiMoon } from 'react-icons/fi';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const ThemeToggle = ({ size = 'default', className = '' }) => {
-  const { theme, toggleTheme, isLoaded } = useTheme();
-
-  // Don't render until theme is loaded to prevent hydration mismatch
-  if (!isLoaded) {
-    return (
-      <div className={`${getSizeClasses(size)} bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse ${className}`} />
-    );
-  }
+  const { theme, toggleTheme } = useTheme();
 
   const baseClasses = `
     relative inline-flex items-center justify-center
@@ -81,13 +74,7 @@ const getSizeClasses = (size) => {
 
 // Alternative minimal version for tight spaces
 export const ThemeToggleMinimal = ({ className = '' }) => {
-  const { theme, toggleTheme, isLoaded } = useTheme();
-
-  if (!isLoaded) {
-    return (
-      <div className={`w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse ${className}`} />
-    );
-  }
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <button

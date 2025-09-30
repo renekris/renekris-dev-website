@@ -6,14 +6,15 @@ const ScrollProgressIndicator = () => {
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 z-[60] h-1 transition-colors duration-200"
+      className="fixed top-0 left-0 right-0 z-[60] h-1"
       style={{ backgroundColor: 'var(--border-secondary)' }}
     >
       <div 
-        className="h-full transition-all duration-100 ease-out"
+        className="h-full"
         style={{ 
           width: `${scrollProgress}%`,
-          transformOrigin: 'left center',
+          transform: 'translate3d(0, 0, 0)',
+          willChange: 'width',
           background: 'linear-gradient(90deg, var(--primary), var(--accent))'
         }}
       />

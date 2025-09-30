@@ -18,10 +18,10 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const initializeTheme = () => {
       const savedTheme = localStorage.getItem('theme');
-
       const initialTheme = savedTheme || 'dark';
       setTheme(initialTheme);
       updateDocumentTheme(initialTheme);
+      document.body.classList.add('theme-loaded');
       setIsLoaded(true);
     };
 
