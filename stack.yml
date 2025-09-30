@@ -1,0 +1,120 @@
+version: "3.8"
+
+services:
+  web:
+    image: renekris-website:${ENVIRONMENT}-latest
+
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=${TMP_SIZE:-128m}
+      - /tmp/app-cache:noexec,nosuid,size=${CACHE_SIZE:-64m}
+    cap_drop:
+      - ALL
+    cap_add: []
+    user: "65532:65532"
+
+    environment:
+      - NODE_ENV=${ENVIRONMENT}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - BUILD_TIMESTAMP=${BUILD_TIMESTAMP:-}
+      - HOST_URL=${DOMAIN}
+      - HEALTH_CHECK_ENABLED=true
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - ENABLE_METRICS=${ENABLE_METRICS:-true}
+      - NODE_OPTIONS=--max-old-space-size=${MAX_MEMORY:-512} --max-http-header-size=8192
+      - UV_THREADPOOL_SIZE=${THREAD_POOL:-4}
+
+    volumes:
+      - /opt/renekris-infrastructure/minecraft-server-status.json:/app/public/minecraft-server-status.json:ro,Z
+
+    networks:
+      - proxy
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: ${HEALTH_INTERVAL:-30s}
+      timeout: ${HEALTH_TIMEOUT:-10s}
+      retries: ${HEALTH_RETRIES:-2}
+      start_period: ${HEALTH_START:-30s}
+
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS:-1}
+
+      update_config:
+        parallelism: 1
+        delay: ${UPDATE_DELAY:-30s}
+        failure_action: rollback
+        monitor: ${UPDATE_MONITOR:-60s}
+        max_failure_ratio: 0.1
+        order: start-first
+
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: pause
+        monitor: 30s
+        max_failure_ratio: 0.1
+        order: stop-first
+
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: ${RESTART_ATTEMPTS:-3}
+        window: ${RESTART_WINDOW:-300s}
+
+      placement:
+        max_replicas_per_node: ${MAX_PER_NODE:-2}
+        constraints:
+          - node.hostname == renekris-web-server
+
+      resources:
+        limits:
+          cpus: '${CPU_LIMIT:-0.5}'
+          memory: ${MEMORY_LIMIT:-256M}
+        reservations:
+          cpus: '${CPU_RESERVE:-0.1}'
+          memory: ${MEMORY_RESERVE:-128M}
+
+      labels:
+        # Enable Traefik
+        - "traefik.enable=true"
+
+        # HTTPS Router
+        - "traefik.http.routers.web-${ENVIRONMENT}.rule=Host(`${DOMAIN}`)${EXTRA_HOSTS:-}"
+        - "traefik.http.routers.web-${ENVIRONMENT}.entrypoints=websecure"
+        - "traefik.http.routers.web-${ENVIRONMENT}.tls=true"
+        - "traefik.http.routers.web-${ENVIRONMENT}.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.web-${ENVIRONMENT}.middlewares=${MIDDLEWARES:-}"
+        - "traefik.http.routers.web-${ENVIRONMENT}.priority=${PRIORITY:-10}"
+
+        # Service Configuration
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.server.port=8080"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.sticky=${STICKY_SESSIONS:-false}"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.sticky.cookie=${STICKY_SESSIONS:-false}"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.sticky.cookie.name=web-${ENVIRONMENT}"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.sticky.cookie.secure=true"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.sticky.cookie.httpOnly=true"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.sticky.cookie.sameSite=strict"
+
+        # Health Check
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.healthcheck.path=/health"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.healthcheck.interval=30s"
+        - "traefik.http.services.web-${ENVIRONMENT}.loadbalancer.healthcheck.timeout=10s"
+
+        # HTTP to HTTPS Redirect
+        - "traefik.http.routers.web-${ENVIRONMENT}-http.rule=Host(`${DOMAIN}`)${EXTRA_HOSTS:-}"
+        - "traefik.http.routers.web-${ENVIRONMENT}-http.entrypoints=web"
+        - "traefik.http.routers.web-${ENVIRONMENT}-http.middlewares=redirect-to-https"
+
+        # Metadata
+        - "com.renekris.app=website"
+        - "com.renekris.environment=${ENVIRONMENT}"
+        - "com.renekris.managed-by=docker-swarm"
+
+networks:
+  proxy:
+    external: true
+    name: proxy

@@ -25,7 +25,7 @@ WORKDIR /app
 
 # Copy pre-built application from GitHub Actions workflow
 COPY --chown=65532:65532 --chmod=755 ./build ./build
-COPY --chown=65532:65532 --chmod=644 ./src/server/api-server.js ./server.js
+COPY --chown=65532:65532 --chmod=644 ./src/server/static-server.js ./server.js
 
 # Runtime environment configuration with security hardening
 ENV NODE_ENV=production \
