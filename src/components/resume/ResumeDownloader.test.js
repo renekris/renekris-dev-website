@@ -7,13 +7,11 @@ describe('ResumeDownloader', () => {
   let createElementSpy;
   let appendChildSpy;
   let removeChildSpy;
-  let clickSpy;
 
   beforeEach(() => {
     createElementSpy = jest.spyOn(document, 'createElement');
     appendChildSpy = jest.spyOn(document.body, 'appendChild');
     removeChildSpy = jest.spyOn(document.body, 'removeChild');
-    clickSpy = jest.fn();
   });
 
   afterEach(() => {
