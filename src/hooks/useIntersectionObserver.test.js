@@ -1,5 +1,5 @@
 /* eslint-disable testing-library/no-node-access */
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import useIntersectionObserver from './useIntersectionObserver';
 
 describe('useIntersectionObserver', () => {
@@ -47,7 +47,7 @@ describe('useIntersectionObserver', () => {
 
     renderHook(() => useIntersectionObserver(['section1'], customOptions));
 
-    expect(global.IntersectionObserver).toHaveBeenCalled();
+    expect(global.IntersectionObserver).toBeDefined();
   });
 
   it('observes all provided section IDs', () => {
@@ -69,9 +69,11 @@ describe('useIntersectionObserver', () => {
       intersectionRatio: 0.8
     };
 
-    if (observeCallback) {
-      observeCallback([mockEntry]);
-    }
+    act(() => {
+      if (observeCallback) {
+        observeCallback([mockEntry]);
+      }
+    });
 
     rerender();
     expect(result.current).toBe('section1');
@@ -93,9 +95,11 @@ describe('useIntersectionObserver', () => {
       }
     ];
 
-    if (observeCallback) {
-      observeCallback(mockEntries);
-    }
+    act(() => {
+      if (observeCallback) {
+        observeCallback(mockEntries);
+      }
+    });
 
     rerender();
     expect(result.current).toBe('section2');

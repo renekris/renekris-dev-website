@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useReducedMotion } from './useReducedMotion';
 
 describe('useReducedMotion', () => {
@@ -45,7 +45,9 @@ describe('useReducedMotion', () => {
     expect(result.current).toBe(false);
 
     const changeHandler = mockMatchMedia.addEventListener.mock.calls[0][1];
-    changeHandler({ matches: true });
+    act(() => {
+      changeHandler({ matches: true });
+    });
 
     rerender();
     expect(result.current).toBe(true);

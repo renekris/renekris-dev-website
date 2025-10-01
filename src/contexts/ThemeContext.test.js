@@ -44,7 +44,7 @@ describe('ThemeContext', () => {
   });
 
   describe('Initial Theme', () => {
-    it('defaults to light theme when no preference is set', () => {
+    it('defaults to dark theme when no preference is set', () => {
       localStorageMock.getItem.mockReturnValue(null);
 
       render(
@@ -53,7 +53,7 @@ describe('ThemeContext', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByTestId('theme')).toHaveTextContent('light');
+      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
     });
 
     it('uses stored theme from localStorage', () => {
