@@ -2,6 +2,10 @@
 /build
 /dist
 
+# Git worktrees
+.worktrees/
+worktrees/
+
 # Dependencies
 node_modules/
 
