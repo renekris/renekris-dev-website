@@ -7,7 +7,7 @@ on:
 # Prevent concurrent deployments to same environment
 concurrency:
   group: deploy-${{ github.ref_name }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
