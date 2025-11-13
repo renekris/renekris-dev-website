@@ -1,5 +1,5 @@
-name = "renekris-dev-website"
-compatibility_date = "2025-01-01"
+name = "portfolio-page"
+compatibility_date = "2025-09-15"
 
 [env.production]
 name = "renekris-dev-website-production"
