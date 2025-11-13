@@ -1,0 +1,22 @@
+name = "renekris-dev-website"
+compatibility_date = "2025-01-01"
+
+[env.production]
+name = "renekris-dev-website-production"
+
+[env.staging]
+name = "renekris-dev-website-staging"
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+
+# Production environment variables
+[env.production.vars]
+NODE_ENV = "production"
+REACT_APP_API_URL = "https://api.renekris.dev"
+
+# Staging environment variables  
+[env.staging.vars]
+NODE_ENV = "staging"
+REACT_APP_API_URL = "https://api-staging.renekris.dev"
