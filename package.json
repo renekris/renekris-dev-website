@@ -24,7 +24,7 @@
 		"test:performance": "node scripts/smart-test-runner.js --grep performance",
 		"test:visual": "node scripts/smart-test-runner.js --grep visual",
 		"test:update-snapshots": "node scripts/smart-test-runner.js --update-snapshots",
-		"deploy": "wrangler pages deploy build --env=\"\""
+		"deploy": "wrangler pages deploy build --commit-dirty=true --env=\"\""
 	},
 	"dependencies": {
 		"framer-motion": "^12.23.24",
