@@ -1,12 +1,12 @@
 import React, { useEffect, lazy, Suspense } from 'react';
-import { ThemeProvider } from './contexts/ThemeContext';
-import SmoothScrollNavigation from './components/SmoothScrollNavigation';
-import ScrollProgressIndicator from './components/ScrollProgressIndicator';
-import Hero from './components/sections/Hero';
-import SEOHead from './components/SEO/SEOHead';
-import StructuredData from './components/SEO/StructuredData';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import SmoothScrollNavigation from './components/SmoothScrollNavigation.jsx';
+import ScrollProgressIndicator from './components/ScrollProgressIndicator.jsx';
+import Hero from './components/sections/Hero.jsx';
+import SEOHead from './components/SEO/SEOHead.jsx';
+import StructuredData from './components/SEO/StructuredData.jsx';
 
-const Contact = lazy(() => import('./components/sections/Contact'));
+const Contact = lazy(() => import('./components/sections/Contact.jsx'));
 
 function App() {
   useEffect(() => {

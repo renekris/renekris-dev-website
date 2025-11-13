@@ -1,78 +1,67 @@
 {
-  "name": "renekris-dev-website",
-  "version": "1.5.1",
-  "description": "Renekris.dev React website - lite production version",
-  "private": true,
-  "dependencies": {
-    "framer-motion": "^12.23.12",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-helmet-async": "^2.0.5",
-    "react-icons": "^5.5.0",
-    "react-scripts": "^5.0.1",
-    "web-vitals": "^3.5.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "dev": "concurrently \"PORT=3001 react-scripts start\" \"node src/server/dev-proxy-server.js\"",
-    "build": "react-scripts build",
-    "test": "react-scripts test --passWithNoTests",
-    "test:e2e": "node scripts/smart-test-runner.js",
-    "test:e2e:quick": "node scripts/smart-test-runner.js --quick",
-    "test:e2e:full": "node scripts/smart-test-runner.js --full",
-    "test:e2e:changed": "node scripts/smart-test-runner.js --changed-only",
-    "test:e2e:local": "PLAYWRIGHT_BASE_URL=http://localhost:3000 node scripts/smart-test-runner.js",
-    "test:e2e:headed": "node scripts/smart-test-runner.js --headed",
-    "test:e2e:debug": "node scripts/smart-test-runner.js --debug",
-    "test:e2e:mobile": "node scripts/smart-test-runner.js --mobile-only",
-    "test:e2e:desktop": "node scripts/smart-test-runner.js --desktop-only",
-    "test:e2e:browsers": "node scripts/smart-test-runner.js --all-browsers",
-    "test:playwright:raw": "playwright test",
-    "test:install": "playwright install",
-    "test:performance": "node scripts/smart-test-runner.js --grep performance",
-    "test:visual": "node scripts/smart-test-runner.js --grep visual",
-    "test:update-snapshots": "node scripts/smart-test-runner.js --update-snapshots",
-    "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix",
-    "eject": "react-scripts eject"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.47.0",
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^14.5.2",
-    "autoprefixer": "^10.4.21",
-    "concurrently": "^9.2.1",
-    "dotenv": "^17.2.2",
-    "eslint": "^8.57.1",
-    "http-proxy-middleware": "^3.0.5",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.4.17"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "overrides": {
-    "nth-check": "^2.0.1",
-    "webpack-dev-server": "^4.15.1",
-    "resolve-url-loader": "^5.0.0"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+	"name": "renekris-dev-website",
+	"version": "1.5.1",
+	"description": "Renekris.dev React website - modern Vite version",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+		"preview": "vite preview",
+		"test": "jest",
+		"test:e2e": "playwright test",
+		"test:e2e:quick": "node scripts/smart-test-runner.js --quick",
+		"test:e2e:full": "node scripts/smart-test-runner.js --full",
+		"test:e2e:changed": "node scripts/smart-test-runner.js --changed-only",
+		"test:e2e:local": "PLAYWRIGHT_BASE_URL=http://localhost:5173 node scripts/smart-test-runner.js",
+		"test:e2e:headed": "node scripts/smart-test-runner.js --headed",
+		"test:e2e:debug": "node scripts/smart-test-runner.js --debug",
+		"test:e2e:mobile": "node scripts/smart-test-runner.js --mobile-only",
+		"test:e2e:desktop": "node scripts/smart-test-runner.js --desktop-only",
+		"test:e2e:browsers": "node scripts/smart-test-runner.js --all-browsers",
+		"test:playwright:raw": "playwright test",
+		"test:install": "playwright install",
+		"test:performance": "node scripts/smart-test-runner.js --grep performance",
+		"test:visual": "node scripts/smart-test-runner.js --grep visual",
+		"test:update-snapshots": "node scripts/smart-test-runner.js --update-snapshots"
+	},
+	"dependencies": {
+		"framer-motion": "^12.23.24",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-helmet-async": "^2.0.5",
+		"react-icons": "^5.5.0",
+		"web-vitals": "^3.5.2"
+	},
+	"devDependencies": {
+		"@babel/plugin-transform-react-jsx": "^7.27.1",
+		"@babel/preset-react": "^7.28.5",
+		"@playwright/test": "^1.47.0",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.1.0",
+		"@testing-library/user-event": "^14.5.2",
+		"@types/react": "^18.3.12",
+		"@types/react-dom": "^18.3.1",
+		"@vitejs/plugin-react": "^4.3.3",
+		"autoprefixer": "^10.4.22",
+		"eslint": "^9.39.1",
+		"eslint-plugin-react": "^7.37.2",
+		"eslint-plugin-react-hooks": "^5.0.0",
+		"eslint-plugin-react-refresh": "^0.4.14",
+		"postcss": "^8.4.49",
+		"tailwindcss": "^3.4.18",
+		"vite": "^6.0.7"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
 }
