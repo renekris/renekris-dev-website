@@ -9,11 +9,10 @@ name = "renekris-dev-website-staging"
 
 # Environment variables
 [vars]
-NODE_ENV = "production"
+# NODE_ENV is managed by Cloudflare Pages build process
 
 # Production environment variables
 [env.production.vars]
-NODE_ENV = "production"
 REACT_APP_API_URL = "https://api.renekris.dev"
 
 # Staging environment variables  
