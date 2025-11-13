@@ -1,6 +1,6 @@
 {
 	"name": "renekris-dev-website",
-	"version": "1.5.1",
+	"version": "1.6.0",
 	"description": "Renekris.dev React website - modern Vite version",
 	"type": "module",
 	"scripts": {
