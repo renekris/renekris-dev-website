@@ -5,18 +5,10 @@ compatibility_date = "2025-09-15"
 [env.production]
 name = "renekris-dev-website-production"
 
-[env.staging]
-name = "renekris-dev-website-staging"
+[env.preview]
+name = "renekris-dev-website-preview"
 
-# Environment variables
-[vars]
-# NODE_ENV is managed by Cloudflare Pages build process
-
-# Production environment variables
-[env.production.vars]
-REACT_APP_API_URL = "https://api.renekris.dev"
-
-# Staging environment variables  
-[env.staging.vars]
+# Preview environment variables  
+[env.preview.vars]
 NODE_ENV = "staging"
 REACT_APP_API_URL = "https://api-staging.renekris.dev"
