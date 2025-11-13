@@ -1,4 +1,5 @@
-name = "portfolio-page"
+name = "renekris-dev-website"
+pages_build_output_dir = "./build"
 compatibility_date = "2025-09-15"
 
 [env.production]
