@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
@@ -30,5 +30,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy ./build --project-name=portfolio-page${{ github.ref == 'refs/heads/main' && '-production' || '-preview' } --commit-dirty=true
+          command: pages deploy ./build --project-name=portfolio-page-production --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        if: github.ref == 'refs/heads/main'
+      - name: Deploy to Cloudflare Pages (Preview)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./build --project-name=portfolio-page-preview --commit-dirty=true
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        if: github.ref == 'refs/heads/dev'
