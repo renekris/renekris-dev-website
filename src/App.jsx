@@ -21,7 +21,10 @@ function App() {
     <ThemeProvider>
       <SEOHead />
       <StructuredData />
-      <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div
+        className="min-h-screen transition-colors duration-200"
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
         <SmoothScrollNavigation />
         <ScrollProgressIndicator />
 

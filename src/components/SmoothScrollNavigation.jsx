@@ -22,15 +22,15 @@ const SmoothScrollNavigation = () => {
     setLastScrollY(scrollY);
   }, [scrollY, scrollDirection, lastScrollY]);
 
-  const scrollToSection = (sectionId) => {
+  const scrollToSection = sectionId => {
     const element = document.getElementById(sectionId);
     if (element) {
       const navHeight = 80; // Height of the fixed nav
       const elementPosition = element.offsetTop - navHeight;
-      
+
       window.scrollTo({
         top: elementPosition,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
     setIsMenuOpen(false);
@@ -38,11 +38,11 @@ const SmoothScrollNavigation = () => {
 
   const navigationItems = [
     { id: 'hero', label: 'Home' },
-    { id: 'contact', label: 'Contact' }
+    { id: 'contact', label: 'Contact' },
   ];
 
   return (
-    <nav 
+    <nav
       className={`fixed top-0 left-0 right-0 z-50 border-b ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
@@ -50,9 +50,11 @@ const SmoothScrollNavigation = () => {
         backgroundColor: 'var(--bg-primary)',
         borderColor: 'var(--border-primary)',
         opacity: 0.95,
-        transform: isVisible ? 'translate3d(0, 0, 0)' : 'translate3d(0, -100%, 0)',
+        transform: isVisible
+          ? 'translate3d(0, 0, 0)'
+          : 'translate3d(0, -100%, 0)',
         transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-        willChange: 'transform'
+        willChange: 'transform',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,13 +64,15 @@ const SmoothScrollNavigation = () => {
             onClick={() => scrollToSection('hero')}
             className="text-2xl font-bold tracking-tight nav-brand"
             style={{
-              background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+              background:
+                'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               letterSpacing: '-0.02em',
-              textShadow: 'none'
+              textShadow: 'none',
             }}
           >
             renekris.dev
@@ -76,7 +80,7 @@ const SmoothScrollNavigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3">
-            {navigationItems.map((item) => (
+            {navigationItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
@@ -84,9 +88,18 @@ const SmoothScrollNavigation = () => {
                   activeSection === item.id ? 'nav-item-active' : ''
                 }`}
                 style={{
-                  color: activeSection === item.id ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                  backgroundColor: activeSection === item.id ? 'var(--primary)' : 'transparent',
-                  border: activeSection === item.id ? 'none' : '1px solid transparent'
+                  color:
+                    activeSection === item.id
+                      ? 'var(--text-inverse)'
+                      : 'var(--text-secondary)',
+                  backgroundColor:
+                    activeSection === item.id
+                      ? 'var(--primary)'
+                      : 'transparent',
+                  border:
+                    activeSection === item.id
+                      ? 'none'
+                      : '1px solid transparent',
                 }}
               >
                 {item.label}
@@ -105,34 +118,34 @@ const SmoothScrollNavigation = () => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 rounded-lg nav-menu-toggle"
-              style={{ 
+              style={{
                 color: 'var(--text-secondary)',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
               }}
               aria-label="Toggle navigation menu"
             >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
             </button>
           </div>
         </div>
@@ -140,14 +153,14 @@ const SmoothScrollNavigation = () => {
         {/* Mobile Navigation Menu */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div 
+            <div
               className="px-2 pt-2 pb-3 space-y-1 border-t"
               style={{
                 backgroundColor: 'var(--bg-primary)',
-                borderColor: 'var(--border-primary)'
+                borderColor: 'var(--border-primary)',
               }}
             >
-              {navigationItems.map((item) => (
+              {navigationItems.map(item => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
@@ -155,8 +168,14 @@ const SmoothScrollNavigation = () => {
                     activeSection === item.id ? 'nav-item-active' : ''
                   }`}
                   style={{
-                    color: activeSection === item.id ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                    backgroundColor: activeSection === item.id ? 'var(--primary)' : 'transparent'
+                    color:
+                      activeSection === item.id
+                        ? 'var(--text-inverse)'
+                        : 'var(--text-secondary)',
+                    backgroundColor:
+                      activeSection === item.id
+                        ? 'var(--primary)'
+                        : 'transparent',
                   }}
                 >
                   {item.label}

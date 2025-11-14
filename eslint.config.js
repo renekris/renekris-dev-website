@@ -1,12 +1,16 @@
 import js from "@eslint/js";
 import react from "eslint-plugin-react";
 import globals from "globals";
+import prettier from "eslint-config-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 
 export default [
 	js.configs.recommended,
+	prettier,
 	{
 		plugins: {
 			react: react,
+			prettier: prettierPlugin,
 		},
 		languageOptions: {
 			ecmaVersion: 2022,
@@ -50,11 +54,14 @@ export default [
 			// React rules
 			...react.configs.recommended.rules,
 			...react.configs["jsx-runtime"].rules,
+			// Prettier rules
+			...prettier.rules,
 			// Custom rules
 			"no-unused-vars": "off", // Allow unused imports for now
 			"no-console": "off", // Allow console logs for debugging
 			"react/prop-types": "off", // Disable prop-types requirement for modern React
 			"react/react-in-jsx-scope": "off", // Not needed with React 17+ JSX transform
+			"prettier/prettier": "error", // Show Prettier errors as ESLint errors
 		},
 	},
 	{

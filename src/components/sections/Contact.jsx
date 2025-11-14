@@ -2,15 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MailIcon, LinkedInIcon, GitHubIcon } from '../icons';
 import AnimatedSection from '../animations/AnimatedSection';
-import {
-  staggerContainer,
-  staggerItem
-} from '../animations/motionUtils';
+import { staggerContainer, staggerItem } from '../animations/motionUtils';
 
 const Contact = () => {
   return (
-    <section 
-      id="contact" 
+    <section
+      id="contact"
       className="py-20 px-6 transition-colors duration-200"
       style={{ backgroundColor: 'var(--bg-secondary)' }}
     >
@@ -32,21 +29,21 @@ const Contact = () => {
         </AnimatedSection>
 
         {/* Contact Options */}
-        <motion.div 
+        <motion.div
           className="space-y-5 mb-12"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px 0px", amount: 0.3 }}
+          viewport={{ once: true, margin: '-50px 0px', amount: 0.3 }}
         >
           {/* Email Button */}
-          <motion.a 
+          <motion.a
             href="mailto:renekrispohlak@gmail.com"
             className="w-full py-5 px-8 rounded-xl font-semibold flex items-center justify-center space-x-3 min-h-[56px] shadow-lg hover:shadow-xl transition-shadow duration-200"
             style={{
               backgroundColor: 'var(--primary)',
               color: 'var(--text-inverse)',
-              boxShadow: '0 4px 6px -1px var(--shadow-medium)'
+              boxShadow: '0 4px 6px -1px var(--shadow-medium)',
             }}
             variants={staggerItem}
           >
@@ -55,7 +52,7 @@ const Contact = () => {
           </motion.a>
 
           {/* LinkedIn Button */}
-          <motion.a 
+          <motion.a
             href="https://www.linkedin.com/in/rene-kristofer-pohlak-668832114/"
             target="_blank"
             rel="noopener noreferrer"
@@ -63,7 +60,7 @@ const Contact = () => {
             style={{
               backgroundColor: 'var(--accent)',
               color: 'var(--text-inverse)',
-              boxShadow: '0 4px 6px -1px var(--shadow-medium)'
+              boxShadow: '0 4px 6px -1px var(--shadow-medium)',
             }}
             variants={staggerItem}
           >
@@ -72,7 +69,7 @@ const Contact = () => {
           </motion.a>
 
           {/* GitHub Button */}
-          <motion.a 
+          <motion.a
             href="https://github.com/renekris"
             target="_blank"
             rel="noopener noreferrer"
@@ -80,7 +77,7 @@ const Contact = () => {
             style={{
               backgroundColor: 'var(--text-primary)',
               color: 'var(--bg-primary)',
-              boxShadow: '0 4px 6px -1px var(--shadow-medium)'
+              boxShadow: '0 4px 6px -1px var(--shadow-medium)',
             }}
             variants={staggerItem}
           >
@@ -89,13 +86,21 @@ const Contact = () => {
           </motion.a>
         </motion.div>
 
-
         {/* Footer */}
-        <div className="mt-20 pt-8 border-t text-center" style={{ borderColor: 'var(--border-primary)' }}>
-          <p className="text-base mb-2" style={{ color: 'var(--text-secondary)' }}>
+        <div
+          className="mt-20 pt-8 border-t text-center"
+          style={{ borderColor: 'var(--border-primary)' }}
+        >
+          <p
+            className="text-base mb-2"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             Built with React, Framer Motion & Tailwind CSS
           </p>
-          <div className="flex items-center justify-center gap-2 text-sm mb-2" style={{ color: 'var(--text-tertiary)' }}>
+          <div
+            className="flex items-center justify-center gap-2 text-sm mb-2"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
             <a
               href="https://github.com/renekris/renekris-dev-website"
               target="_blank"

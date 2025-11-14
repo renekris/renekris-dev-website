@@ -31,14 +31,14 @@ const ThemeToggle = memo(({ size = 'default', className = '' }) => {
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       {/* Background circle that slides */}
-      <div 
+      <div
         className={`
           absolute w-6 h-6 bg-white dark:bg-gray-800 rounded-full shadow-md
           transition-transform duration-300 ease-in-out
           ${theme === 'dark' ? 'transform translate-x-6' : 'transform translate-x-0'}
         `}
       />
-      
+
       {/* Sun icon */}
       <SunIcon
         className={`
@@ -63,7 +63,7 @@ const ThemeToggle = memo(({ size = 'default', className = '' }) => {
 ThemeToggle.displayName = 'ThemeToggle';
 
 // Size variants
-const getSizeClasses = (size) => {
+const getSizeClasses = size => {
   switch (size) {
     case 'small':
       return 'w-10 h-6 p-0.5';

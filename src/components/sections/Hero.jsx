@@ -3,14 +3,15 @@ import { motion } from 'framer-motion';
 import { HeroResumeButton } from '../resume/ResumeDownloader';
 
 const Hero = () => {
-  const name = "Rene Kristofer Pohlak";
+  const name = 'Rene Kristofer Pohlak';
 
   return (
     <section
       id="hero"
       className="min-h-screen flex items-center justify-center px-6 py-20 transition-all duration-200"
       style={{
-        background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%)'
+        background:
+          'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%)',
       }}
     >
       <div className="text-center max-w-4xl w-full">
@@ -43,22 +44,24 @@ const Hero = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          {['JavaScript', 'Python', 'C#', 'React', 'Node.js'].map((tech, index) => (
-            <motion.span
-              key={tech}
-              className="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-primary)'
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.5 + index * 0.05 }}
-            >
-              {tech}
-            </motion.span>
-          ))}
+          {['JavaScript', 'Python', 'C#', 'React', 'Node.js'].map(
+            (tech, index) => (
+              <motion.span
+                key={tech}
+                className="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-primary)',
+                }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.5 + index * 0.05 }}
+              >
+                {tech}
+              </motion.span>
+            )
+          )}
         </motion.div>
 
         {/* Tagline */}

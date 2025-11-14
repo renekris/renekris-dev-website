@@ -31,8 +31,8 @@ export const ThemeProvider = ({ children }) => {
   // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const handleSystemThemeChange = (e) => {
+
+    const handleSystemThemeChange = e => {
       // Only update if user hasn't set a manual preference
       if (!localStorage.getItem('theme')) {
         const newTheme = e.matches ? 'dark' : 'light';
@@ -42,12 +42,13 @@ export const ThemeProvider = ({ children }) => {
     };
 
     mediaQuery.addEventListener('change', handleSystemThemeChange);
-    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    return () =>
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
   }, []);
 
-  const updateDocumentTheme = (newTheme) => {
+  const updateDocumentTheme = newTheme => {
     const root = document.documentElement;
-    
+
     if (newTheme === 'dark') {
       root.classList.add('dark');
       root.setAttribute('data-theme', 'dark');
@@ -64,11 +65,11 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem('theme', newTheme);
   };
 
-  const setSpecificTheme = (newTheme) => {
+  const setSpecificTheme = newTheme => {
     if (newTheme !== 'light' && newTheme !== 'dark') {
       throw new Error('Theme must be either "light" or "dark"');
     }
-    
+
     setTheme(newTheme);
     updateDocumentTheme(newTheme);
     localStorage.setItem('theme', newTheme);
@@ -80,12 +81,10 @@ export const ThemeProvider = ({ children }) => {
     setTheme: setSpecificTheme,
     isDark: theme === 'dark',
     isLight: theme === 'light',
-    isLoaded
+    isLoaded,
   };
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 };

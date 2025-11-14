@@ -37,11 +37,10 @@ const ResumeDownloader = ({ variant = 'button', className = '' }) => {
       transition-colors duration-200
       flex items-center gap-2
       hover:bg-white/10
-    `
+    `,
   };
 
   const currentStyle = buttonStyles[variant] || buttonStyles.primary;
-
 
   return (
     <button
@@ -58,24 +57,15 @@ const ResumeDownloader = ({ variant = 'button', className = '' }) => {
 
 // Specialized components for different use cases
 export const HeroResumeButton = () => (
-  <ResumeDownloader 
-    variant="primary" 
-    className="mx-auto mt-6"
-  />
+  <ResumeDownloader variant="primary" className="mx-auto mt-6" />
 );
 
 export const NavResumeButton = () => (
-  <ResumeDownloader 
-    variant="secondary" 
-    className="ml-4"
-  />
+  <ResumeDownloader variant="secondary" className="ml-4" />
 );
 
 export const InlineResumeButton = () => (
-  <ResumeDownloader 
-    variant="minimal" 
-    className="inline-flex"
-  />
+  <ResumeDownloader variant="minimal" className="inline-flex" />
 );
 
 export default ResumeDownloader;

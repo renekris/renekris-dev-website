@@ -19,7 +19,7 @@
     --shadow-light: rgba(0, 0, 0, 0.1);
     --shadow-medium: rgba(0, 0, 0, 0.15);
     --shadow-heavy: rgba(0, 0, 0, 0.25);
-    
+
     /* Brand Colors */
     --primary: #3b82f6;
     --primary-hover: #2563eb;
@@ -29,16 +29,16 @@
     --success: #10b981;
     --warning: #f59e0b;
     --error: #ef4444;
-    
+
     /* Interactive States */
     --hover-bg: #f1f5f9;
     --focus-ring: #3b82f6;
     --focus-ring-offset: #ffffff;
-    
-    /* Typography */
-    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
 
+    /* Typography */
+    --font-primary:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
   }
 
   /* Dark Theme Variables */
@@ -56,7 +56,7 @@
     --shadow-light: rgba(0, 0, 0, 0.3);
     --shadow-medium: rgba(0, 0, 0, 0.4);
     --shadow-heavy: rgba(0, 0, 0, 0.5);
-    
+
     /* Brand Colors - Dark Theme */
     --primary: #60a5fa;
     --primary-hover: #3b82f6;
@@ -66,7 +66,7 @@
     --success: #34d399;
     --warning: #fbbf24;
     --error: #f87171;
-    
+
     /* Interactive States - Dark Theme */
     --hover-bg: #374151;
     --focus-ring: #60a5fa;
@@ -76,7 +76,7 @@
   * {
     box-sizing: border-box;
   }
-  
+
   /* Selective theme transitions - removed global * selector for mobile performance */
   .theme-transition {
     transition-property: background-color, border-color, color, fill, stroke;
@@ -101,14 +101,16 @@
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
   }
-  
+
   code {
     font-family: var(--font-mono);
   }
 
   /* Smooth color transitions during theme toggle */
   body {
-    transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      color 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Prevent flash on initial load */
@@ -157,7 +159,9 @@
 
   /* Navigation Component Styles */
   .nav-brand {
-    transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
     transform: translate3d(0, 0, 0);
   }
 
@@ -167,7 +171,10 @@
   }
 
   .nav-item {
-    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
     transform: translate3d(0, 0, 0);
   }
 
@@ -178,7 +185,9 @@
   }
 
   .nav-item-mobile {
-    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .nav-item-mobile:not(.nav-item-active):hover {
@@ -187,7 +196,9 @@
   }
 
   .nav-menu-toggle {
-    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .nav-menu-toggle:hover {
@@ -212,9 +223,9 @@
       font-size: 1.25rem !important;
     }
   }
-  
+
   /* Performance Optimizations */
-  
+
   /* Enhanced reduced motion support for accessibility */
   @media (prefers-reduced-motion: reduce) {
     *,

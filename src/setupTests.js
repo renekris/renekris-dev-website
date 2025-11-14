@@ -1,5 +1,5 @@
 // Setup Jest globals for browser environment
-import "@testing-library/jest-dom";
+import '@testing-library/jest-dom';
 
 // Define browser globals that Jest needs
 global.TextEncoder = TextEncoder;

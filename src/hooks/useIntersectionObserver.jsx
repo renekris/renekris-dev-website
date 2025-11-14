@@ -7,12 +7,12 @@ const useIntersectionObserver = (sectionIds, options = {}) => {
     const defaultOptions = {
       root: null,
       rootMargin: '-20% 0px -80% 0px', // Trigger when section is 20% from top
-      threshold: 0
+      threshold: 0,
     };
 
     const observerOptions = { ...defaultOptions, ...options };
 
-    const observer = new IntersectionObserver((entries) => {
+    const observer = new IntersectionObserver(entries => {
       // Find the entry with the largest intersection ratio
       const visibleEntry = entries
         .filter(entry => entry.isIntersecting)

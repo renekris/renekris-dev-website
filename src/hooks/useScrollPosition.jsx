@@ -4,7 +4,7 @@ const useScrollPosition = () => {
   const [scrollPosition, setScrollPosition] = useState({
     scrollY: 0,
     scrollProgress: 0,
-    scrollDirection: null
+    scrollDirection: null,
   });
 
   useEffect(() => {
@@ -13,15 +13,18 @@ const useScrollPosition = () => {
 
     const updateScrollPosition = () => {
       const currentScrollY = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = documentHeight > 0 ? (currentScrollY / documentHeight) * 100 : 0;
-      
+      const documentHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const scrollProgress =
+        documentHeight > 0 ? (currentScrollY / documentHeight) * 100 : 0;
+
       const scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
 
       setScrollPosition({
         scrollY: currentScrollY,
         scrollProgress: Math.min(100, Math.max(0, scrollProgress)),
-        scrollDirection: currentScrollY !== lastScrollY ? scrollDirection : null
+        scrollDirection:
+          currentScrollY !== lastScrollY ? scrollDirection : null,
       });
 
       lastScrollY = currentScrollY;
