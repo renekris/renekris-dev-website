@@ -25,7 +25,7 @@ jobs:
         run: npm test -- --watchAll=false
       - name: Build
         run: npm run build
-- name: Create Cloudflare Pages Project (Production)
+      - name: Create Cloudflare Pages Project (Production)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -33,7 +33,6 @@ jobs:
           command: pages project create portfolio-page-production --production-branch=main --compatibility-date=2025-11-14
         continue-on-error: true
         if: github.ref == 'refs/heads/main'
-        
       - name: Create Cloudflare Pages Project (Preview)
         uses: cloudflare/wrangler-action@v3
         with:
