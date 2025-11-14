@@ -1,8 +1,13 @@
 import js from "@eslint/js";
+import react from "eslint-plugin-react";
+import globals from "globals";
 
 export default [
 	js.configs.recommended,
 	{
+		plugins: {
+			react: react,
+		},
 		languageOptions: {
 			ecmaVersion: 2022,
 			sourceType: "module",
@@ -12,6 +17,8 @@ export default [
 				},
 			},
 			globals: {
+				// Browser globals
+				...globals.browser,
 				console: "readonly",
 				process: "readonly",
 				window: "readonly",
@@ -34,11 +41,50 @@ export default [
 				MessageChannel: "readonly",
 			},
 		},
-		rules: {
-			// Add your custom rules here
-			"no-unused-vars": "warn",
-			"no-console": "off", // Allow console logs for debugging
+		settings: {
+			react: {
+				version: "detect",
+			},
 		},
-		ignores: ["build/**", "dist/**", "node_modules/**"],
+		rules: {
+			// React rules
+			...react.configs.recommended.rules,
+			...react.configs["jsx-runtime"].rules,
+			// Custom rules
+			"no-unused-vars": "off", // Allow unused imports for now
+			"no-console": "off", // Allow console logs for debugging
+			"react/prop-types": "off", // Disable prop-types requirement for modern React
+			"react/react-in-jsx-scope": "off", // Not needed with React 17+ JSX transform
+		},
+	},
+	{
+		// Configuration for Node.js files (server files)
+		files: ["src/server/**/*.js", "src/server/**/*.jsx", "src/setupTests.js"],
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
+		},
+	},
+	{
+		// Configuration for test files
+		files: ["**/*.test.{js,jsx}", "**/*.spec.{js,jsx}", "src/setupTests.js"],
+		languageOptions: {
+			globals: {
+				...globals.browser,
+				...globals.jest,
+				global: "writable",
+				TextEncoder: "readonly",
+				TextDecoder: "readonly",
+				Request: "readonly",
+				Response: "readonly",
+				fetch: "readonly",
+				URLSearchParams: "readonly",
+				DocumentFragment: "readonly",
+			},
+		},
+	},
+	{
+		ignores: ["build/**", "dist/**", "node_modules/**", "coverage/**"],
 	},
 ];

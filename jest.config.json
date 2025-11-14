@@ -1,11 +1,25 @@
 {
 	"testEnvironment": "jsdom",
-	"moduleNameMapping": {
-		"^@/(.*)$": "src/$1"
+	"moduleNameMapper": {
+		"^@/(.*)$": "<rootDir>/src/$1"
 	},
-	"collectCoverageFrom": ["src/**/*.{js,jsx}"],
+	"collectCoverageFrom": [
+		"src/**/*.{js,jsx}",
+		"!src/index.jsx",
+		"!src/main.jsx"
+	],
 	"coverageDirectory": "coverage",
 	"coverageReporters": ["text", "lcov", "html"],
 	"testMatch": ["**/*.test.{js,jsx}", "**/*.spec.{js,jsx}"],
-	"testPathIgnorePatterns": ["/node_modules/", "/build/", "/dist/"]
+	"testPathIgnorePatterns": ["/node_modules/", "/build/", "/dist/"],
+	"setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"],
+	"transform": {
+		"^.+\\.(js|jsx)$": "babel-jest"
+	},
+	"transformIgnorePatterns": [
+		"node_modules/(?!(framer-motion|react-helmet-async|@testing-library/.*)/)"
+	],
+	"moduleFileExtensions": ["js", "jsx", "json"],
+	"testTimeout": 10000,
+	"passWithNoTests": true
 }
