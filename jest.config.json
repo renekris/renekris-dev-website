@@ -1,0 +1,11 @@
+{
+	"testEnvironment": "jsdom",
+	"moduleNameMapping": {
+		"^@/(.*)$": "src/$1"
+	},
+	"collectCoverageFrom": ["src/**/*.{js,jsx}"],
+	"coverageDirectory": "coverage",
+	"coverageReporters": ["text", "lcov", "html"],
+	"testMatch": ["**/*.test.{js,jsx}", "**/*.spec.{js,jsx}"],
+	"testPathIgnorePatterns": ["/node_modules/", "/build/", "/dist/"]
+}
