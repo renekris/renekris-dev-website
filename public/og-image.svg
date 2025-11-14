@@ -1,0 +1,47 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Content Container -->
+  <g transform="translate(100, 150)">
+    <!-- Name -->
+    <text x="0" y="50" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ffffff">
+      Rene Kristofer Pohlak
+    </text>
+    
+    <!-- Title -->
+    <text x="0" y="100" font-family="Arial, sans-serif" font-size="32" fill="#94a3b8">
+      Full Stack Developer | IT Professional
+    </text>
+    
+    <!-- Skills -->
+    <text x="0" y="150" font-family="Arial, sans-serif" font-size="20" fill="#cbd5e1">
+      JavaScript • React • Node.js • Python • C# • Cloud Architecture
+    </text>
+    
+    <!-- Location -->
+    <text x="0" y="200" font-family="Arial, sans-serif" font-size="18" fill="#94a3b8">
+      Based in Tallinn, Estonia
+    </text>
+    
+    <!-- Website -->
+    <text x="0" y="250" font-family="Arial, sans-serif" font-size="24" fill="#3b82f6">
+      renekris.dev
+    </text>
+  </g>
+  
+  <!-- Decorative Elements -->
+  <circle cx="1050" cy="100" r="30" fill="#3b82f6" opacity="0.3"/>
+  <circle cx="1100" cy="150" r="20" fill="#8b5cf6" opacity="0.3"/>
+  <circle cx="1000" cy="180" r="25" fill="#06b6d4" opacity="0.3"/>
+  
+  <!-- Bottom accent line -->
+  <rect x="100" y="550" width="400" height="4" fill="#3b82f6"/>
+</svg>
