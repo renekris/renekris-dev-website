@@ -43,7 +43,7 @@ jobs:
           command: pages project create portfolio-page-preview --production-branch=dev --compatibility-date=2025-11-14
         continue-on-error: true
         if: github.ref == 'refs/heads/dev'
-- name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -51,7 +51,6 @@ jobs:
           command: pages deploy ./build --project-name=portfolio-page-production --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
         if: github.ref == 'refs/heads/main'
-        
       - name: Deploy to Cloudflare Pages (Preview)
         uses: cloudflare/wrangler-action@v3
         with:
