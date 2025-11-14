@@ -1,22 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+
+// Helper to check if we're in browser environment
+const isBrowser = () => typeof window !== "undefined";
 
 export function useReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+	const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+	const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 
-    const handleChange = event => {
-      setPrefersReducedMotion(event.matches);
-    };
+	useEffect(() => {
+		// Only run in browser environment
+		if (!isClient || !isBrowser()) return;
 
-    mediaQuery.addEventListener('change', handleChange);
+		try {
+			const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+			setPrefersReducedMotion(mediaQuery.matches);
 
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
+			const handleChange = (event) => {
+				setPrefersReducedMotion(event.matches);
+			};
 
-  return prefersReducedMotion;
+			mediaQuery.addEventListener("change", handleChange);
+
+			return () => {
+				try {
+					mediaQuery.removeEventListener("change", handleChange);
+				} catch {
+					// Silently fail on cleanup
+				}
+			};
+		} catch (error) {
+			// If matchMedia is not supported, assume no reduced motion preference
+			console.warn("matchMedia not supported for reduced motion detection");
+			setPrefersReducedMotion(false);
+		}
+	}, [isClient]);
+
+	return prefersReducedMotion;
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
@@ -10,112 +10,136 @@ export const useTheme = () => {
 	return context;
 };
 
+// Helper to check if we're in browser environment
+const isBrowser = () =>
+	typeof window !== "undefined" && typeof document !== "undefined";
+
+// Helper to safely get cookie value
+const getCookie = (name) => {
+	if (!isBrowser()) return null;
+	try {
+		const cookie = document.cookie
+			.split("; ")
+			.find((row) => row.startsWith(`${name}=`))
+			?.split("=")[1];
+		return cookie || null;
+	} catch {
+		return null;
+	}
+};
+
+// Helper to safely set cookie
+const setCookie = (name, value, maxAge = 31536000) => {
+	if (!isBrowser()) return;
+	try {
+		document.cookie = `${name}=${value}; max-age=${maxAge}; path=/; SameSite=Lax`;
+	} catch {
+		// Silently fail if cookies are disabled
+	}
+};
+
+// Helper to get system theme preference
+const getSystemTheme = () => {
+	if (!isBrowser()) return "light";
+	try {
+		return window.matchMedia("(prefers-color-scheme: dark)").matches
+			? "dark"
+			: "light";
+	} catch {
+		return "light";
+	}
+};
+
 export const ThemeProvider = ({ children }) => {
-	const [theme, setTheme] = useState("dark");
-	const [isLoaded, setIsLoaded] = useState(false);
+	// Initialize with safe defaults to prevent hydration mismatches
+	const [theme, setTheme] = useState("system");
+	const [isClient, setIsClient] = useState(false);
+	const [resolvedTheme, setResolvedTheme] = useState("light");
 
-	// Initialize theme from localStorage, defaulting to dark
+	// Apply immediate fallback theme for better UX
 	useEffect(() => {
-		const initializeTheme = () => {
-			try {
-				const savedTheme =
-					typeof window !== "undefined" && window.localStorage
-						? localStorage.getItem("theme")
-						: null;
-				const initialTheme = savedTheme || "dark";
-				setTheme(initialTheme);
-				updateDocumentTheme(initialTheme);
-				if (typeof document !== "undefined") {
-					document.body.classList.add("theme-loaded");
-				}
-				setIsLoaded(true);
-			} catch (error) {
-				console.warn("Theme initialization failed:", error);
-				const fallbackTheme = "dark";
-				setTheme(fallbackTheme);
-				updateDocumentTheme(fallbackTheme);
-				if (typeof document !== "undefined") {
-					document.body.classList.add("theme-loaded");
-				}
-				setIsLoaded(true);
-			}
-		};
-
-		initializeTheme();
+		if (isBrowser()) {
+			const fallbackTheme = getSystemTheme();
+			document.documentElement.setAttribute("data-theme", fallbackTheme);
+			setResolvedTheme(fallbackTheme);
+		}
 	}, []);
 
-	// Listen for system theme changes
+	// Handle client-side hydration
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		setIsClient(true);
 
-		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-		const handleSystemThemeChange = (e) => {
-			try {
-				// Only update if user hasn't set a manual preference
-				if (!localStorage.getItem("theme")) {
-					const newTheme = e.matches ? "dark" : "light";
-					setTheme(newTheme);
-					updateDocumentTheme(newTheme);
-				}
-			} catch (error) {
-				console.warn("System theme change handler failed:", error);
-			}
-		};
-
-		mediaQuery.addEventListener("change", handleSystemThemeChange);
-		return () =>
-			mediaQuery.removeEventListener("change", handleSystemThemeChange);
+		// Get initial theme from cookie or default to system
+		const savedTheme = getCookie("theme") || "system";
+		console.log("ThemeContext: Initializing with theme:", savedTheme);
+		setTheme(savedTheme);
 	}, []);
 
-	const updateDocumentTheme = (newTheme) => {
-		const root = document.documentElement;
+	// Apply theme changes and handle system preference
+	useEffect(() => {
+		if (!isClient) return;
 
-		if (newTheme === "dark") {
-			root.classList.add("dark");
-			root.setAttribute("data-theme", "dark");
-		} else {
-			root.classList.remove("dark");
-			root.setAttribute("data-theme", "light");
-		}
-	};
+		console.log("ThemeContext: Applying theme:", theme, "isClient:", isClient);
 
-	const toggleTheme = () => {
-		const newTheme = theme === "light" ? "dark" : "light";
-		setTheme(newTheme);
-		updateDocumentTheme(newTheme);
-		try {
-			if (typeof window !== "undefined" && window.localStorage) {
-				localStorage.setItem("theme", newTheme);
+		const applyTheme = (newTheme) => {
+			if (!isBrowser()) return;
+
+			const root = document.documentElement;
+
+			// Remove existing theme attribute
+			root.removeAttribute("data-theme");
+
+			let actualTheme;
+			if (newTheme === "system") {
+				actualTheme = getSystemTheme();
+			} else {
+				actualTheme = newTheme;
 			}
-		} catch (error) {
-			console.warn("Failed to save theme preference:", error);
-		}
-	};
 
-	const setSpecificTheme = (newTheme) => {
-		if (newTheme !== "light" && newTheme !== "dark") {
-			throw new Error('Theme must be either "light" or "dark"');
-		}
+			// Apply the theme
+			root.setAttribute("data-theme", actualTheme);
+			setResolvedTheme(actualTheme);
 
-		setTheme(newTheme);
-		updateDocumentTheme(newTheme);
-		try {
-			if (typeof window !== "undefined" && window.localStorage) {
-				localStorage.setItem("theme", newTheme);
+			// Persist to cookie
+			setCookie("theme", newTheme);
+		};
+
+		applyTheme(theme);
+
+		// Listen for system preference changes only if using system theme
+		if (theme === "system" && isBrowser()) {
+			try {
+				const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+				const handleChange = () => applyTheme("system");
+
+				mediaQuery.addEventListener("change", handleChange);
+				return () => mediaQuery.removeEventListener("change", handleChange);
+			} catch {
+				// Silently fail if matchMedia is not supported
 			}
-		} catch (error) {
-			console.warn("Failed to save theme preference:", error);
 		}
+	}, [theme, isClient]);
+
+	const toggleTheme = (newTheme) => {
+		setTheme(newTheme);
 	};
+
+	// Computed values that are safe for SSR
+	const isDark = isClient
+		? theme === "dark" || (theme === "system" && resolvedTheme === "dark")
+		: false;
+
+	const isLight = isClient
+		? theme === "light" || (theme === "system" && resolvedTheme === "light")
+		: true;
 
 	const value = {
 		theme,
 		toggleTheme,
-		setTheme: setSpecificTheme,
-		isDark: theme === "dark",
-		isLight: theme === "light",
-		isLoaded,
+		isDark,
+		isLight,
+		resolvedTheme,
+		isClient,
 	};
 
 	return (

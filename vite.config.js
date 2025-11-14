@@ -23,7 +23,7 @@ export default defineConfig({
 			},
 		},
 	},
-	base: "./", // Use relative paths for Cloudflare Pages compatibility
+	base: "/", // Use absolute paths for dev server
 	server: {
 		port: 5173,
 		host: true,
