@@ -1,6 +1,6 @@
 name = 'portfolio-page'
 pages_build_output_dir = "./build"
-compatibility_date = "2025-09-15"
+compatibility_date = "2025-11-14"
 compatibility_flags = ["nodejs_compat"]
 
 # Production environment
