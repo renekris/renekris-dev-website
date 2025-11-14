@@ -1,14 +1,22 @@
 name = "renekris-dev-website"
 pages_build_output_dir = "./build"
 compatibility_date = "2025-09-15"
+compatibility_flags = ["nodejs_compat"]
 
+# Production environment
 [env.production]
 name = "renekris-dev-website-production"
 
+# Preview environment  
 [env.preview]
 name = "renekris-dev-website-preview"
 
-# Preview environment variables  
+# Preview environment variables
 [env.preview.vars]
 NODE_ENV = "staging"
-REACT_APP_API_URL = "https://api-staging.renekris.dev"
+VITE_API_URL = "https://api-staging.renekris.dev"
+
+# Production environment variables
+[env.production.vars]
+NODE_ENV = "production"
+VITE_API_URL = "https://api.renekris.dev"

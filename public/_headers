@@ -1,0 +1,21 @@
+# Security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Cache static assets
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML files - no cache for dynamic content
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# API endpoints (if any)
+/api/*
+  Cache-Control: no-cache, must-revalidate
