@@ -3,3 +3,6 @@
 
 # Health check endpoint
 /health /index.html 200
+
+# Ensure assets are served correctly
+/assets/*  /assets/:splat 200
