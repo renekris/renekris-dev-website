@@ -13,6 +13,7 @@ export default defineConfig({
 	build: {
 		outDir: "build",
 		sourcemap: true,
+		copyPublicDir: true, // Ensure public directory is copied
 		rollupOptions: {
 			output: {
 				manualChunks: {
@@ -22,7 +23,7 @@ export default defineConfig({
 			},
 		},
 	},
-	base: "./", // Ensure relative paths for Cloudflare Pages
+	base: "./", // Use relative paths for Cloudflare Pages compatibility
 	server: {
 		port: 5173,
 		host: true,
@@ -34,6 +35,10 @@ export default defineConfig({
 	define: {
 		"process.env.NODE_ENV": JSON.stringify(
 			process.env.NODE_ENV || "development",
+		),
+		// Ensure VITE_ prefixed variables are available
+		"process.env.REACT_APP_API_URL": JSON.stringify(
+			process.env.REACT_APP_API_URL || "",
 		),
 	},
 });
