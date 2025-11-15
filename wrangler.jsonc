@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "portfolio-page",
+  "pages_build_output_dir": "./build",
+  "compatibility_date": "2025-11-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "env": {
+    "production": {
+      "name": "portfolio-page-production",
+      "vars": {
+        "NODE_ENV": "production",
+        "VITE_API_URL": "https://api.renekris.dev"
+      }
+    },
+    "preview": {
+      "name": "portfolio-page-preview",
+      "vars": {
+        "NODE_ENV": "staging",
+        "VITE_API_URL": "https://api-staging.renekris.dev"
+      }
+    }
+  }
+}
