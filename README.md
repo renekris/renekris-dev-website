@@ -16,7 +16,7 @@ A modern React-based landing page deployed on Cloudflare Pages with automatic CI
 ## Tech Stack
 
 - **Frontend**: React 18, JavaScript (ES6+), Tailwind CSS
-- **Build**: Create React App, npm
+- **Build**: Vite, pnpm
 - **Testing**: Jest (unit tests), Playwright (E2E tests)
 - **Deployment**: Cloudflare Pages with GitHub integration
 - **CI/CD**: Automatic deployments on push to main/dev branches
@@ -24,41 +24,51 @@ A modern React-based landing page deployed on Cloudflare Pages with automatic CI
 ## Development
 
 ### Prerequisites
+
 - Node.js 20+
-- npm or yarn
+- pnpm (recommended) or npm/yarn
 - Git
 
 ### Local Setup
+
 ```bash
-# Install dependencies
-npm install
+# Install dependencies (recommended)
+pnpm install
 
 # Start development server
+pnpm dev
+
+# Alternative with npm
+npm install
 npm start
 ```
+
 Visit http://localhost:3000 to view the application.
 
 ### Available Scripts
 
 ```bash
-npm start              # Start development server
-npm test               # Run unit tests
-npm run build          # Build for production
-npm run test:e2e       # Run Playwright E2E tests
-npm run lint           # Run ESLint
-npm run lint:fix       # Fix ESLint issues
+pnpm dev               # Start development server
+pnpm test              # Run unit tests
+pnpm run build         # Build for production
+pnpm run test:e2e      # Run Playwright E2E tests
+pnpm run lint          # Run ESLint
+pnpm run lint:fix      # Fix ESLint issues
 ```
 
+_(npm equivalents also work if you prefer npm)_
+
 ### Testing
+
 ```bash
 # Unit tests with Jest
-npm test
+pnpm test
 
 # E2E tests with Playwright
-npm run test:e2e
+pnpm run test:e2e
 
 # Run tests with coverage
-npm test -- --coverage
+pnpm test -- --coverage
 ```
 
 ## Cloudflare Pages Deployment
@@ -66,6 +76,7 @@ npm test -- --coverage
 ### Automatic Deployment Workflow
 
 **Production (main branch):**
+
 ```bash
 git checkout main
 git add .
@@ -75,6 +86,7 @@ git push origin main
 ```
 
 **Staging (dev branch):**
+
 ```bash
 git checkout dev
 git add .
@@ -90,6 +102,8 @@ Every PR gets automatic preview URL: `https://random-chars.renekris-dev-website.
 
 ```bash
 # Install Wrangler CLI
+pnpm add -g wrangler
+# or with npm
 npm install -g wrangler
 
 # Deploy to production
@@ -102,11 +116,13 @@ wrangler pages deploy build --branch=dev --message="Update staging"
 ### Environment Variables
 
 Production (main branch):
+
 - `NODE_ENV=production`
 - `REACT_APP_API_URL=https://api.renekris.dev`
 
 Staging (dev branch):
-- `NODE_ENV=staging`  
+
+- `NODE_ENV=staging`
 - `REACT_APP_API_URL=https://api-staging.renekris.dev`
 
 ## Project Structure
@@ -146,7 +162,7 @@ package.json            # Dependencies and scripts
 
 1. Create a feature branch from `main` or `dev`
 2. Make your changes with appropriate tests
-3. Ensure all tests pass: `npm test && npm run test:e2e`
+3. Ensure all tests pass: `pnpm test && pnpm run test:e2e`
 4. Submit a pull request
 
 ### Code Quality
@@ -164,7 +180,7 @@ package.json            # Dependencies and scripts
 ✅ **Instant rollbacks** - One-click revert in dashboard  
 ✅ **Preview deployments** - Every PR gets live URL  
 ✅ **Branch isolation** - Staging completely separate from production  
-✅ **Free hosting** - No server costs for main site  
+✅ **Free hosting** - No server costs for main site
 
 ## Setup Instructions
 
@@ -176,9 +192,10 @@ package.json            # Dependencies and scripts
    - Select this repository
 
 2. **Configure Build Settings:**
+
    ```
    Production branch: main
-   Build command: npm run build
+    Build command: pnpm run build
    Build directory: build
    Root directory: / (leave blank)
    ```
@@ -212,16 +229,19 @@ git push origin main
 ## Troubleshooting
 
 ### Build Issues
-- Ensure `npm run build` works locally
+
+- Ensure `pnpm run build` works locally
 - Check that all dependencies are in package.json
 - Verify Node.js version is 20+
 
 ### Deployment Issues
+
 - Check Cloudflare Pages build logs
 - Verify environment variables are set correctly
 - Ensure custom domains are properly configured
 
 ### Performance
+
 - Build creates optimized bundles (~96KB gzipped)
 - Cloudflare CDN provides global caching
 - Automatic image optimization available

@@ -20,6 +20,5 @@
 		"node_modules/(?!(framer-motion|react-helmet-async|@testing-library/.*)/)"
 	],
 	"moduleFileExtensions": ["js", "jsx", "json"],
-	"testTimeout": 10000,
-	"passWithNoTests": true
+	"testTimeout": 10000
 }
