@@ -63,23 +63,18 @@ The dev server runs at `http://localhost:4321`.
 
 ## Deployment
 
-### Primary: GitHub Actions → Cloudflare Pages
+### Primary: Cloudflare Deploy Interface (Workers static assets)
 
-The repository CI now handles automatic deployments to Cloudflare Pages after checks pass.
+The repository is configured to work with the Cloudflare dashboard deploy interface using a build command plus `wrangler deploy`.
 
-Required GitHub repository secrets:
+Recommended Cloudflare settings:
 
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
+- **Project name**: `renekris-dev-website`
+- **Build command**: `bun run build`
+- **Deploy command**: `npx wrangler deploy`
+- **Root directory**: `/`
 
-Deployment behavior:
-
-- Push to `main` → production deploy
-- Push to `dev` → preview deploy
-
-### Optional: Cloudflare Pages Git Integration
-
-You can still use native Cloudflare Git Integration if you want Cloudflare to build directly from the repository, but it is no longer required for automatic deploys.
+`wrangler.jsonc` points Wrangler at the built `dist/` directory via the Workers static-assets configuration.
 
 ### Manual fallback: Wrangler CLI
 
@@ -92,11 +87,12 @@ bun add -g wrangler
 # Login to Cloudflare
 wrangler login
 
-# Deploy manually
-wrangler pages deploy dist --project-name=renekris-v2-website --branch=main
-```
+# Build first
+bun run build
 
-Do not use `wrangler deploy` with the current config. This repo is configured for Cloudflare Pages deploys, not direct Workers static-asset deploys.
+# Deploy manually
+wrangler deploy
+```
 
 ## CI/CD
 
@@ -107,7 +103,7 @@ GitHub Actions runs on every push and pull request:
 3. Run type checking
 4. Build the project
 5. Run Playwright E2E tests
-6. Deploy to Cloudflare Pages on pushes to `main` and `dev`
+6. Verify the same build artifact the Cloudflare dashboard deploys
 
 See `.github/workflows/ci.yml` for the full configuration.
 

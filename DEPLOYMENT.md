@@ -1,35 +1,37 @@
-# Cloudflare Pages Deployment Runbook
+# Cloudflare Deployment Runbook
 
-A complete guide for deploying the V2 website to production using GitHub Actions and Cloudflare Pages Direct Upload.
+A complete guide for deploying the V2 website to production using the Cloudflare deploy interface with Workers static assets.
 
 ---
 
 ## Overview
 
-This runbook documents the exact steps to deploy `renekris-v2-website` to Cloudflare Pages. The primary deployment method is GitHub Actions running `wrangler pages deploy` against the built `dist/` artifact.
+This runbook documents the exact steps to deploy the site through the Cloudflare dashboard. Cloudflare builds the repository with `bun run build` and then runs `wrangler deploy`, which serves the static Astro output from `dist/` using Workers static assets.
 
 ---
 
 ## Configuration Values
 
-Use these exact values when configuring the Cloudflare Pages project:
+Use these exact values when configuring the Cloudflare project:
 
-| Setting                | Value                  |
-| ---------------------- | ---------------------- |
-| **Pages project name** | `renekris-v2-website`  |
-| **Deploy artifact**    | `dist`                 |
-| **Production branch**  | `main`                 |
-| **Preview branch**     | `dev`                  |
-| **Production domain**  | `renekris.dev`         |
-| **Preview domain**     | `staging.renekris.dev` |
+| Setting               | Value                  |
+| --------------------- | ---------------------- |
+| **Project name**      | `renekris-dev-website` |
+| **Build command**     | `bun run build`        |
+| **Deploy command**    | `npx wrangler deploy`  |
+| **Asset directory**   | `dist`                 |
+| **Production branch** | `main`                 |
+| **Preview branch**    | `dev`                  |
+| **Production domain** | `renekris.dev`         |
+| **Preview domain**    | `staging.renekris.dev` |
 
 ### Branch Strategy
 
-| Branch      | Deployment Type | URL Pattern                                           |
-| ----------- | --------------- | ----------------------------------------------------- |
-| `main`      | Production      | `https://renekris.dev`                                |
-| `dev`       | Preview         | `https://dev.renekris-v2-website.pages.dev`           |
-| PR branches | Preview         | `https://<branch-name>.renekris-v2-website.pages.dev` |
+| Branch      | Deployment Type | URL Pattern                                       |
+| ----------- | --------------- | ------------------------------------------------- |
+| `main`      | Production      | `https://renekris.dev`                            |
+| `dev`       | Preview         | Cloudflare preview URL for `renekris-dev-website` |
+| PR branches | Preview         | Cloudflare preview URL for the branch deployment  |
 
 ---
 
@@ -49,38 +51,38 @@ Before initiating the first deployment, verify:
 
 ## Deployment Steps
 
-### Step 1: Create the Pages Project
+### Step 1: Create the Cloudflare Project
 
 1. Navigate to [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Select your account and go to **Workers & Pages**
-3. Click **Create application** > **Pages**
-4. Create a Pages project named `renekris-v2-website`
+3. Click **Create application** and choose the deploy interface that supports repository builds
+4. Create or reuse the project named `renekris-dev-website`
 
-### Step 2: Add GitHub Secrets
+### Step 2: Configure Build and Deploy Commands
 
-In GitHub repository settings, add:
+Use these values in the dashboard build settings:
 
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
+- **Build command**: `bun run build`
+- **Deploy command**: `npx wrangler deploy`
+- **Root directory**: `/`
 
-The API token must have **Cloudflare Pages: Edit** permission for the target account.
+`wrangler.jsonc` supplies the rest of the deployment configuration:
 
-### Step 3: Deploy from CI
+- `name: renekris-dev-website`
+- `compatibility_date: 2026-03-26`
+- `assets.directory: ./dist`
+
+### Step 3: Deploy from the Dashboard
 
 1. Push to `main` or `dev`
-2. GitHub Actions will run lint, typecheck, build, dist validation, and E2E tests
-3. The `deploy-pages` job will upload the verified `dist/` artifact with `wrangler pages deploy`
+2. Cloudflare will build the repository with `bun run build`
+3. Cloudflare will deploy the built site with `npx wrangler deploy`
 4. `main` deploys production and `dev` deploys preview
 5. Run `bun run validate:dist` locally before shipping changes to `_headers`, `robots.txt`, or inline schemas
 
-### Step 4: Do Not Use Workers Build Deploy for This Config
+### Step 4: GitHub Actions Remains a Quality Gate
 
-This repository is configured for Cloudflare Pages deploys.
-
-- `wrangler pages deploy dist ...` ✅ supported
-- `wrangler deploy` ❌ wrong for the current `wrangler.jsonc`
-
-If Cloudflare is running `npx wrangler deploy`, it is treating this as a Workers project instead of a Pages project and will fail with "Missing entry-point to Worker script or to assets directory".
+GitHub Actions still runs lint, typecheck, build, dist validation, and E2E tests, but it no longer deploys. The Cloudflare dashboard is the deployment source of truth.
 
 ---
 
@@ -181,7 +183,7 @@ Test on actual devices or browser dev tools:
 
 ### Step 1: Add Custom Domain
 
-1. In Cloudflare Dashboard, go to your Pages project
+1. In Cloudflare Dashboard, go to your `renekris-dev-website` project
 2. Click **Custom domains** > **Set up a custom domain**
 3. Enter: `renekris.dev`
 4. Click **Continue**
@@ -190,7 +192,7 @@ Test on actual devices or browser dev tools:
 
 Cloudflare will automatically configure DNS if the domain is already in your account:
 
-- A record or CNAME will be created pointing to the Pages deployment
+- A record or CNAME will be created pointing to the Worker deployment
 - SSL certificate will be provisioned automatically
 
 ### Step 3: Verify
@@ -209,7 +211,7 @@ Cloudflare will automatically configure DNS if the domain is already in your acc
 If a deployment causes issues, roll back immediately:
 
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) > Workers & Pages
-2. Select the `renekris-v2-website` project
+2. Select the `renekris-dev-website` project
 3. Go to the **Deployments** tab
 4. Find the last known good deployment
 5. Click the three-dot menu (…) > **Rollback to this deployment**
@@ -229,7 +231,7 @@ To resume: Click **Resume deployments** or reconnect the repository.
 
 ### DNS Fallback
 
-If Pages becomes unavailable, redirect DNS to a static host:
+If the Cloudflare deployment becomes unavailable, redirect DNS to a static host:
 
 1. Go to Cloudflare DNS settings for `renekris.dev`
 2. Change the A/AAAA or CNAME record to point to your backup host
@@ -254,7 +256,7 @@ Configure build notifications in Cloudflare Dashboard:
 
 Monitor site performance:
 
-1. Go to **Analytics** tab in Pages project
+1. Go to **Analytics** tab in the project dashboard
 2. Review:
    - Request volume
    - Bandwidth usage
@@ -270,7 +272,7 @@ Monitor site performance:
 If the build fails, check:
 
 1. **Node version**: Cloudflare uses Node 22+ (matches our `engines` field)
-2. **Bun availability**: Cloudflare Pages supports Bun natively
+2. **Bun availability**: the Cloudflare build environment must detect Bun and run `bun run build`
 3. **Lockfile**: Ensure `bun.lock` is committed to the repository
 4. **Dependencies**: Run `bun install --frozen-lockfile` locally to verify
 5. **Built output validation**: Run `bun run validate:dist` to confirm CSP and sitemap alignment
@@ -310,20 +312,23 @@ If headers are missing:
 
 ## Final Manual Action
 
-The remaining manual setup is to create the Cloudflare Pages project once and add the GitHub repository secrets used by CI-driven deployments:
+The remaining manual setup is entirely in Cloudflare Dashboard:
 
-- `CLOUDFLARE_API_TOKEN` — API token with **Cloudflare Pages: Edit** permission for the target account
-- `CLOUDFLARE_ACCOUNT_ID` — target Cloudflare account ID
+1. Open the `renekris-dev-website` project
+2. Set **Build command** to `bun run build`
+3. Set **Deploy command** to `npx wrangler deploy`
+4. Keep the root directory at `/`
+5. Retry the build on `main`
 
-After that, pushes to `main` and `dev` will deploy automatically from GitHub Actions using `wrangler pages deploy`.
+After that, pushes to `main` and `dev` will deploy automatically from the Cloudflare interface using the repo's `wrangler.jsonc`.
 
 ---
 
 ## Appendix: Wrangler CLI Fallback
 
-**Status: Primary CI deployment path / Admin fallback**
+**Status: Same deployment path as Cloudflare dashboard / Admin fallback**
 
-Wrangler Pages deploy is the primary automated deployment path for this repository. It can also be used manually for emergency overrides.
+The Cloudflare dashboard and the manual CLI path now use the same deployment model: `wrangler deploy` serving the static `dist/` directory via Workers static assets.
 
 ### Prerequisites
 
@@ -341,53 +346,40 @@ wrangler login
 # Build the project first
 bun run build
 
-# Deploy to Pages
-cd renekris-v2-website
-wrangler pages deploy dist --project-name=renekris-v2-website --branch=main
+# Deploy with Workers static assets
+wrangler deploy
 ```
-
-### GitHub Actions Deployment
-
-The CI workflow in `.github/workflows/ci.yml` now deploys automatically after lint, typecheck, build, dist validation, and E2E tests pass.
-
-- `main` branch → production deployment
-- `dev` branch → preview deployment
-
-Required GitHub repository secrets:
-
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
 
 ### When to Use Wrangler
 
-- Git Integration is temporarily unavailable
-- Deploying a hotfix branch directly to production
-- Bulk asset uploads that exceed Git limits
-- CI/CD pipeline integration for automated deployments from GitHub Actions
-- Emergency rollbacks when Dashboard is inaccessible
+- Deploying locally without using the Cloudflare dashboard
+- Validating the same deployment path before changing dashboard settings
+- Emergency redeploys when the dashboard UI is inaccessible
 
 ### Wrangler Configuration
 
-Create `wrangler.toml` if needed for advanced configuration:
+The committed `wrangler.jsonc` is the source of truth:
 
-```toml
-name = "renekris-v2-website"
-compatibility_date = "2025-03-24"
-
-[build]
-command = "bun run build"
+```jsonc
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "renekris-dev-website",
+  "compatibility_date": "2026-03-26",
+  "assets": {
+    "directory": "./dist",
+  },
+}
 ```
 
-**Warning**: If Cloudflare Pages Git Integration is still enabled for the same project, it can race with or overwrite CI-driven Wrangler deployments. Use one primary deployment path per Pages project.
+**Warning**: Do not switch the dashboard back to a Pages/Git-integration deployment flow unless you also migrate the repo config back from Workers static assets.
 
 ---
 
 ## References
 
-- [Cloudflare Pages Git Integration](https://developers.cloudflare.com/pages/configuration/git-integration/)
-- [Cloudflare Custom Domains](https://developers.cloudflare.com/pages/configuration/custom-domains/)
-- [Cloudflare Preview Deployments](https://developers.cloudflare.com/pages/configuration/preview-deployments/)
-- [Cloudflare Pages Headers](https://developers.cloudflare.com/pages/configuration/headers/)
+- [Cloudflare Workers static assets](https://developers.cloudflare.com/workers/static-assets/)
+- [Migrate from Pages to Workers static assets](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages)
+- [Cloudflare custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)
 
 ---
 
