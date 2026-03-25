@@ -1,8 +1,0 @@
-# Handle SPA routing - redirect all non-file requests to index.html
-/*    /index.html   200
-
-# Health check endpoint
-/health /index.html 200
-
-# Ensure assets are served correctly
-/assets/*  /assets/:splat 200

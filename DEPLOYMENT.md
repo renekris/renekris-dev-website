@@ -1,244 +1,388 @@
-# Deployment Guide
+# Cloudflare Pages Deployment Runbook
 
-## Unified Stack Structure
-
-This project uses a **single stack template** (`stack.yml`) with **environment-specific configuration files** (`.env.production`, `.env.staging`).
-
-### Why This Approach?
-
-**Before**: Separate `production/stack.yml` and `staging/stack.yml` with 90% duplication
-**Now**: Single template + environment variables = DRY principle
-
-### Files Structure
-
-```
-renekris-dev-website/
-├── stack.yml              # Unified stack template
-├── .env.production        # Production configuration
-├── .env.staging          # Staging configuration
-└── deploy-stack.sh       # Helper script
-```
+A complete guide for deploying the V2 website to production using Cloudflare Pages Git Integration.
 
 ---
 
-## Deploying via Portainer
+## Overview
 
-### Production Deployment
-
-1. Go to **Stacks** → **Add stack**
-2. **Name**: `production-website`
-3. **Build method**: Select **"Upload"** or **"Web editor"**
-4. Paste contents of `stack.yml`
-5. Click **"Load variables from .env file"**
-6. Upload `.env.production` file
-7. **Deploy the stack**
-
-### Staging Deployment
-
-Same steps but:
-- **Name**: `staging-website`
-- **Load**: `.env.staging` file
+This runbook documents the exact steps to deploy `renekris-v2-website` to Cloudflare Pages. The primary deployment method is Git Integration, which provides automatic builds on every push with preview deployments for pull requests.
 
 ---
 
-## Deploying via CLI
+## Configuration Values
 
-### Prerequisites
-```bash
-# Ensure .env files are on the server
-scp .env.production root@192.168.1.236:/opt/stacks/website/
-scp .env.staging root@192.168.1.236:/opt/stacks/website/
-scp stack.yml root@192.168.1.236:/opt/stacks/website/
-```
+Use these exact values when configuring the Cloudflare Pages project:
 
-### Deploy Production
-```bash
-cd /opt/stacks/website
-docker stack deploy -c stack.yml --env-file .env.production production-website
-```
+| Setting                    | Value                  |
+| -------------------------- | ---------------------- |
+| **Repository**             | `renekris/kodu-server` |
+| **Root directory**         | `renekris-v2-website`  |
+| **Build command**          | `bun run build`        |
+| **Build output directory** | `dist`                 |
+| **Framework preset**       | Astro                  |
+| **Production branch**      | `main`                 |
+| **Production domain**      | `renekris.dev`         |
+| **Preview domain**         | `staging.renekris.dev` |
 
-### Deploy Staging
-```bash
-cd /opt/stacks/website
-docker stack deploy -c stack.yml --env-file .env.staging staging-website
-```
+### Branch Strategy
 
----
-
-## Key Differences Between Environments
-
-| Setting | Production | Staging | Reason |
-|---------|-----------|---------|--------|
-| **Replicas** | 2 | 1 | High availability vs cost |
-| **CPU Limit** | 0.8 cores | 0.4 cores | Resource efficiency |
-| **Memory Limit** | 512M | 256M | Production needs more |
-| **Log Level** | `info` | `debug` | Testing verbosity |
-| **Update Delay** | 60s | 10s | Production = cautious |
-| **Sticky Sessions** | `true` | `false` | Production consistency |
-| **Metrics** | Enabled | Disabled | Production monitoring |
-| **Traefik Middleware** | Security headers | None | Production hardening |
+| Branch      | Deployment Type | URL Pattern                                           |
+| ----------- | --------------- | ----------------------------------------------------- |
+| `main`      | Production      | `https://renekris.dev`                                |
+| `dev`       | Preview         | `https://dev.renekris-v2-website.pages.dev`           |
+| PR branches | Preview         | `https://<branch-name>.renekris-v2-website.pages.dev` |
 
 ---
 
-## Updating Configuration
+## Pre-Deployment Checklist
 
-### To change a setting:
+Before initiating the first deployment, verify:
 
-1. **Edit the `.env` file**:
-   ```bash
-   # Example: Increase production replicas to 3
-   vim .env.production
-   # Change: REPLICAS=3
-   ```
-
-2. **Redeploy the stack**:
-   - **Portainer**: Stacks → Click stack → **Editor** → **Update stack**
-   - **CLI**: Re-run deploy command above
-
-3. **Docker Swarm automatically**:
-   - Rolling update with zero downtime
-   - Respects your update strategy
-   - Rollback on failure
+1. All implementation tasks (1-11) are complete
+2. CI pipeline passes on `main` branch
+3. Resume PDF exists at `public/resume/rene-kristofer-pohlak-cv.pdf`
+4. OG image exists at `public/og/og-image.png`
+5. Security headers are configured in `public/_headers`
+6. `astro.config.mjs` has `site: 'https://renekris.dev'`
+7. Domain `renekris.dev` is configured in Cloudflare DNS
 
 ---
 
-## CI/CD Integration
+## Deployment Steps
 
-Your GitHub Actions workflow automatically:
+### Step 1: Connect Repository
 
-1. **Builds** the image with correct tag:
-   - `renekris-website:production-latest`
-   - `renekris-website:staging-latest`
+1. Navigate to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. Select your account and go to **Workers & Pages**
+3. Click **Create application** > **Pages** > **Connect to Git**
+4. Select **GitHub** as the Git provider
+5. Authorize Cloudflare to access the `renekris/kodu-server` repository
+6. Select the repository from the list
 
-2. **Updates** the service:
-   ```bash
-   docker service update --image renekris-website:production-latest production-website_web
-   ```
+### Step 2: Configure Build Settings
 
-3. **Swarm handles**:
-   - Zero-downtime rolling update
-   - Health check verification
-   - Automatic rollback on failure
+In the build configuration screen, enter:
 
-**No manual deployment needed** - just push code!
+- **Project name**: `renekris-v2-website`
+- **Production branch**: `main`
+- **Framework preset**: Astro
+- **Build command**: `bun run build`
+- **Build output directory**: `dist`
+- **Root directory**: `renekris-v2-website` (leave blank if repo root is the project root)
 
----
+### Step 3: Environment Variables
 
-## Common Operations
+No environment variables are required for this static Astro build. The site uses:
 
-### View Service Status
-```bash
-# List all stacks
-docker stack ls
+- Build-time constants from `src/content/site.ts`
+- Static assets from `public/`
+- No runtime secrets or API keys
 
-# List services in stack
-docker stack services production-website
+### Step 4: Deploy
 
-# View service details
-docker service ps production-website_web
-
-# View logs
-docker service logs production-website_web --follow
-```
-
-### Scale Replicas
-```bash
-docker service scale production-website_web=3
-```
-
-### Update Single Setting
-```bash
-# Example: Change memory limit
-docker service update --limit-memory 1G production-website_web
-```
-
-### Rollback
-```bash
-docker service rollback production-website_web
-```
+1. Click **Save and Deploy**
+2. Cloudflare will trigger the first build automatically
+3. Monitor the build logs for any errors
+4. Once complete, the site will be available at the preview URL
+5. Run `bun run validate:dist` locally before shipping changes to `_headers`, `robots.txt`, or inline schemas
 
 ---
 
-## Environment Variables Reference
+## Preview Validation Checklist
 
-### Required Variables
-- `ENVIRONMENT` - Environment name (production/staging)
-- `DOMAIN` - Primary domain
-- `REPLICAS` - Number of containers
+After the first deployment, verify each item before proceeding to production:
 
-### Resource Variables
-- `CPU_LIMIT` - Maximum CPU cores
-- `CPU_RESERVE` - Guaranteed CPU cores
-- `MEMORY_LIMIT` - Maximum memory
-- `MEMORY_RESERVE` - Guaranteed memory
-- `MAX_PER_NODE` - Max replicas per Swarm node
+### Core Functionality
 
-### Node.js Variables
-- `MAX_MEMORY` - Node.js heap size (MB)
-- `THREAD_POOL` - UV thread pool size
-- `LOG_LEVEL` - Logging verbosity
+- [ ] Homepage loads without console errors
+- [ ] No 404 errors in network tab for critical assets
+- [ ] Page loads in under 3 seconds on fast connection
 
-### Health Check Variables
-- `HEALTH_INTERVAL` - Time between checks
-- `HEALTH_TIMEOUT` - Check timeout
-- `HEALTH_RETRIES` - Failures before unhealthy
-- `HEALTH_START` - Grace period on startup
+### Theme System
 
-### Traefik Variables
-- `MIDDLEWARES` - Applied middleware chain
-- `PRIORITY` - Router priority
-- `STICKY_SESSIONS` - Enable session affinity
-- `EXTRA_HOSTS` - Additional domains
+- [ ] Theme toggle button is visible and clickable
+- [ ] Light/dark mode switches correctly
+- [ ] Theme preference persists after page reload
+- [ ] Theme matches system preference on first visit (if no saved preference)
+- [ ] Smooth transition between themes (200ms)
+
+### Hero Section
+
+- [ ] Name displays: "Rene Kristofer Pohlak"
+- [ ] Role displays: "Developer & Infrastructure Engineer"
+- [ ] Tagline displays correctly
+- [ ] Location shows: "Tallinn, Estonia"
+- [ ] Tech stack badges visible: JavaScript, Python, C#, React, Node.js
+- [ ] Gradient background renders correctly
+
+### Resume Download
+
+- [ ] Resume button is visible in hero section
+- [ ] Button text reads: "View Resume"
+- [ ] Clicking button initiates download of `/resume/rene-kristofer-pohlak-cv.pdf`
+- [ ] PDF file is accessible and not corrupted
+- [ ] Download works in both light and dark themes
+
+### Contact Section
+
+- [ ] Email displays: `renekrispohlak@gmail.com`
+- [ ] Email link uses `mailto:` protocol
+- [ ] LinkedIn link points to: `https://www.linkedin.com/in/rene-kristofer-pohlak-668832114/`
+- [ ] GitHub link points to: `https://github.com/renekris`
+- [ ] Phone number is not displayed directly in the page source
+- [ ] Availability text shows: "Open to remote & hybrid opportunities"
+- [ ] All contact links are clickable
+
+### SEO Metadata
+
+- [ ] Page title is: "Rene Kristofer Pohlak - IT Professional | JavaScript, Python, C# Developer"
+- [ ] Meta description contains: "Self-motivated IT professional with experience in web development"
+- [ ] Canonical URL is: `https://renekris.dev`
+- [ ] OG image URL is: `/og/og-image.png`
+- [ ] Twitter card type is: `summary_large_image`
+- [ ] Author meta tag is: "Rene Kristofer Pohlak"
+- [ ] Keywords meta includes: "Rene Kristofer Pohlak, IT professional, JavaScript developer"
+- [ ] JSON-LD structured data is present in page source
+- [ ] Sitemap index is accessible at `/sitemap-index.xml`
+- [ ] Robots.txt is accessible at `/robots.txt`
+
+### Security Headers
+
+Verify all headers are present using browser DevTools or `curl -I`:
+
+- [ ] `X-Frame-Options: DENY`
+- [ ] `X-Content-Type-Options: nosniff`
+- [ ] `Referrer-Policy: strict-origin-when-cross-origin`
+- [ ] `Permissions-Policy` restricts camera, microphone, geolocation
+- [ ] `Content-Security-Policy` is present and valid
+- [ ] `Strict-Transport-Security` (HSTS) with 1-year max-age
+- [ ] `/robots.txt` and `/sitemap*.xml` have 1-hour cache
+- [ ] `/_astro/*`, `/resume/*`, `/og/*` have 1-year immutable cache
+
+### Mobile Responsiveness
+
+Test on actual devices or browser dev tools:
+
+- [ ] Layout adapts to 320px width (small phones)
+- [ ] Layout adapts to 768px width (tablets)
+- [ ] Layout adapts to 1440px width (desktops)
+- [ ] No horizontal scrolling on mobile
+- [ ] Text remains readable at all sizes
+- [ ] Touch targets are at least 44x44px
+- [ ] Theme toggle is accessible on mobile
+
+### Accessibility
+
+- [ ] All images have alt text
+- [ ] Color contrast meets WCAG AA standards
+- [ ] Focus indicators are visible
+- [ ] Keyboard navigation works (Tab, Enter, Space)
+- [ ] No reduced motion issues (test with `prefers-reduced-motion`)
+
+---
+
+## Custom Domain Setup
+
+### Step 1: Add Custom Domain
+
+1. In Cloudflare Dashboard, go to your Pages project
+2. Click **Custom domains** > **Set up a custom domain**
+3. Enter: `renekris.dev`
+4. Click **Continue**
+
+### Step 2: DNS Configuration
+
+Cloudflare will automatically configure DNS if the domain is already in your account:
+
+- A record or CNAME will be created pointing to the Pages deployment
+- SSL certificate will be provisioned automatically
+
+### Step 3: Verify
+
+- [ ] `https://renekris.dev` loads the site
+- [ ] SSL certificate is valid
+- [ ] HTTP redirects to HTTPS
+- [ ] `www.renekris.dev` redirects to apex domain (if configured)
+
+---
+
+## Rollback Procedures
+
+### Rollback to Previous Deployment
+
+If a deployment causes issues, roll back immediately:
+
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) > Workers & Pages
+2. Select the `renekris-v2-website` project
+3. Go to the **Deployments** tab
+4. Find the last known good deployment
+5. Click the three-dot menu (…) > **Rollback to this deployment**
+6. Confirm the rollback
+
+The rollback is instantaneous. The previous version will be live within seconds.
+
+### Pause Deployments
+
+To temporarily stop automatic deployments:
+
+1. Go to project settings in Cloudflare Dashboard
+2. Under **Build** settings, click **Pause deployments**
+3. Or disconnect the Git repository temporarily
+
+To resume: Click **Resume deployments** or reconnect the repository.
+
+### DNS Fallback
+
+If Pages becomes unavailable, redirect DNS to a static host:
+
+1. Go to Cloudflare DNS settings for `renekris.dev`
+2. Change the A/AAAA or CNAME record to point to your backup host
+3. Set TTL to 300 seconds (5 minutes) for quick changes
+4. Purge Cloudflare cache if needed
+
+---
+
+## Monitoring
+
+### Build Notifications
+
+Configure build notifications in Cloudflare Dashboard:
+
+1. Go to project settings > **Notifications**
+2. Enable notifications for:
+   - Build failures
+   - Successful deployments
+   - Rollback events
+
+### Analytics
+
+Monitor site performance:
+
+1. Go to **Analytics** tab in Pages project
+2. Review:
+   - Request volume
+   - Bandwidth usage
+   - Error rates
+   - Cache hit ratios
 
 ---
 
 ## Troubleshooting
 
-### Stack won't deploy
-```bash
-# Check syntax
-docker stack config -c stack.yml --env-file .env.production
+### Build Failures
 
-# View error logs
-docker service ps production-website_web --no-trunc
+If the build fails, check:
+
+1. **Node version**: Cloudflare uses Node 22+ (matches our `engines` field)
+2. **Bun availability**: Cloudflare Pages supports Bun natively
+3. **Lockfile**: Ensure `bun.lock` is committed to the repository
+4. **Dependencies**: Run `bun install --frozen-lockfile` locally to verify
+5. **Built output validation**: Run `bun run validate:dist` to confirm CSP and sitemap alignment
+
+Common fixes:
+
+```bash
+# Update lockfile locally
+bun install
+
+# Test build locally
+bun run build
+
+# Verify dist output
+ls -la dist/
 ```
 
-### Service keeps restarting
-```bash
-# Check health
-docker service inspect production-website_web --format '{{.UpdateStatus.State}}'
+### Missing Assets
 
-# View container logs
-docker service logs production-website_web --tail 100
-```
+If assets return 404:
 
-### Can't access via domain
-```bash
-# Verify Traefik sees the service
-docker service logs traefik | grep production
+1. Verify files exist in `public/` directory
+2. Check build output includes them in `dist/`
+3. Review `_headers` file for incorrect path patterns
+4. Check Cloudflare cache (purge if needed)
 
-# Check routing
-curl -H "Host: renekris.dev" http://192.168.1.236
-```
+### Security Header Issues
+
+If headers are missing:
+
+1. Verify `public/_headers` file exists
+2. Check syntax (no trailing spaces, proper indentation)
+3. Test locally with `bun run preview` and check response headers
+4. Note: `_headers` only works on Cloudflare, not in local dev
 
 ---
 
-## Migration from Old Structure
+## Final Manual Action
 
-If you have existing `environments/production/stack.yml`:
+The only remaining manual step is to connect the repository in Cloudflare Dashboard and trigger the first deployment.
 
-1. **Backup current deployment**:
-   ```bash
-   docker service inspect production-website_web > backup.json
-   ```
+Once this is complete, all future deployments to `main` will be automatic.
 
-2. **Remove old stacks** in Portainer
+---
 
-3. **Deploy new unified stacks** using steps above
+## Appendix: Wrangler CLI Fallback
 
-4. **Verify** both environments work
+**Status: Non-primary / Admin-only fallback**
 
-5. **Delete old files**:
-   ```bash
-   rm -rf environments/
-   ```
+Use Wrangler CLI only when Git Integration is unavailable or for manual overrides.
+
+### Prerequisites
+
+```bash
+# Install Wrangler globally
+bun add -g wrangler
+
+# Authenticate with Cloudflare
+wrangler login
+```
+
+### Manual Deployment
+
+```bash
+# Build the project first
+bun run build
+
+# Deploy to Pages
+cd renekris-v2-website
+wrangler pages deploy dist --project-name=renekris-v2-website --branch=main
+```
+
+### When to Use Wrangler
+
+- Git Integration is temporarily unavailable
+- Deploying a hotfix branch directly to production
+- Bulk asset uploads that exceed Git limits
+- CI/CD pipeline integration (if not using native Git Integration)
+- Emergency rollbacks when Dashboard is inaccessible
+
+### Wrangler Configuration
+
+Create `wrangler.toml` if needed for advanced configuration:
+
+```toml
+name = "renekris-v2-website"
+compatibility_date = "2025-03-24"
+
+[build]
+command = "bun run build"
+```
+
+**Warning**: Wrangler deployments bypass the Git Integration workflow. Changes deployed via Wrangler will be overwritten by the next Git push unless the Git Integration is paused.
+
+---
+
+## References
+
+- [Cloudflare Pages Git Integration](https://developers.cloudflare.com/pages/configuration/git-integration/)
+- [Cloudflare Custom Domains](https://developers.cloudflare.com/pages/configuration/custom-domains/)
+- [Cloudflare Preview Deployments](https://developers.cloudflare.com/pages/configuration/preview-deployments/)
+- [Cloudflare Pages Headers](https://developers.cloudflare.com/pages/configuration/headers/)
+
+---
+
+## Change Log
+
+| Date       | Version | Changes                  |
+| ---------- | ------- | ------------------------ |
+| 2026-03-24 | 1.0     | Initial runbook creation |

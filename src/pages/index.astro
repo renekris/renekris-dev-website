@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import Contact from '../components/sections/Contact.astro';
+import { site } from '../content/site';
+---
+
+<BaseLayout title={site.seo.title}>
+  <main>
+    <Hero />
+
+    <Contact />
+  </main>
+</BaseLayout>

@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+import Navigation from '../components/Navigation.astro';
+import ScrollProgress from '../components/ScrollProgress.astro';
+import SEO from '../components/SEO.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Component - Title, Meta Tags, Open Graph, Twitter Cards, JSON-LD -->
+    <SEO title={title} description={description} />
+
+    <!-- Slot for page-specific head content (additional meta tags, etc.) -->
+    <slot name="head" />
+
+    <script is:inline src="/scripts/theme-init.js"></script>
+  </head>
+  <body>
+    <!-- Scroll progress indicator -->
+    <ScrollProgress />
+
+    <!-- Navigation header -->
+    <Navigation />
+
+    <!-- Spacer for fixed navigation -->
+    <div class="nav-spacer" aria-hidden="true"></div>
+
+    <!-- Main content -->
+    <slot />
+
+    <script is:inline src="/scripts/reveal-sections.js" defer></script>
+    <script is:inline src="/scripts/theme-toggle.js" defer></script>
+    <script is:inline src="/scripts/mobile-menu.js" defer></script>
+    <script is:inline src="/scripts/scroll-progress.js" defer></script>
+  </body>
+</html>

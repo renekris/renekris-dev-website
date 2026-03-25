@@ -1,0 +1,95 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  navItems?: Array<{ id: string; label: string }>;
+}
+
+const { navItems = [
+  { id: 'hero', label: 'Home' },
+  { id: 'contact', label: 'Contact' },
+] } = Astro.props;
+---
+
+<nav data-testid="site-nav" class="nav-shell fixed top-0 left-0 right-0 z-50 border-b">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      <!-- Logo/Brand -->
+      <a href="#hero" class="text-2xl font-bold tracking-tight nav-brand text-gradient">
+        renekris.dev
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-3">
+        {navItems.map((item) => (
+          <a
+            href={`#${item.id}`}
+            class="nav-item px-4 py-2 rounded-lg text-sm font-semibold"
+          >
+            {item.label}
+          </a>
+        ))}
+
+        <!-- Theme Toggle -->
+        <div class="ml-1">
+          <ThemeToggle />
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button and Theme Toggle -->
+      <div class="md:hidden flex items-center space-x-2">
+        <ThemeToggle />
+        <button
+          type="button"
+          id="mobile-menu-toggle"
+          class="nav-menu-toggle p-2 rounded-lg"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+        >
+          <svg
+            id="menu-icon-open"
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+          <svg
+            id="menu-icon-close"
+            class="w-6 h-6 hidden"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="nav-mobile-menu md:hidden hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        {navItems.map((item) => (
+          <a
+            href={`#${item.id}`}
+            class="nav-item-mobile block w-full text-left px-3 py-3 rounded-lg text-base font-medium"
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</nav>

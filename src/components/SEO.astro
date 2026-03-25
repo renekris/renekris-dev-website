@@ -1,0 +1,122 @@
+---
+import { site } from '../content/site';
+
+interface Props {
+  /** Page-specific title override */
+  title?: string;
+  /** Page-specific description override */
+  description?: string;
+  /** Page-specific canonical URL override */
+  canonical?: string;
+  /** Page type for Open Graph */
+  type?: 'website' | 'article' | 'profile';
+}
+
+const {
+  title,
+  description,
+  canonical,
+  type = 'website',
+} = Astro.props;
+
+// Use provided values or fall back to site defaults
+const pageTitle = title || site.seo.title;
+const pageDescription = description || site.seo.description;
+const pageCanonical = canonical || site.seo.canonical;
+
+// Build absolute URLs
+const siteUrl = site.seo.canonical;
+const ogImageUrl = site.seo.ogImage.startsWith('http')
+  ? site.seo.ogImage
+  : `${siteUrl}${site.seo.ogImage}`;
+
+// Generate JSON-LD structured data
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.hero.name,
+  jobTitle: site.structuredData.jobTitles[0],
+  url: siteUrl,
+  email: site.contact.email,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: site.hero.location.split(',')[0],
+    addressCountry: 'EE',
+  },
+  sameAs: [site.contact.linkedin, site.contact.github],
+  knowsAbout: site.structuredData.skills,
+  alumniOf: site.structuredData.education.map((edu) => ({
+    '@type': 'EducationalOrganization',
+    name: edu,
+  })),
+  worksFor: {
+    '@type': 'Organization',
+    name: site.structuredData.employer.name,
+  },
+  knowsLanguage: site.structuredData.languages.map((lang) => ({
+    '@type': 'Language',
+    name: lang.name,
+    alternateName: lang.code,
+  })),
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.hero.name,
+  url: siteUrl,
+  description: site.seo.description,
+  author: {
+    '@type': 'Person',
+    name: site.hero.name,
+  },
+  inLanguage: 'en-US',
+};
+
+const profilePageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: site.hero.name,
+    jobTitle: site.structuredData.jobTitles[1] || site.structuredData.jobTitles[0],
+    url: siteUrl,
+  },
+};
+---
+
+{/* Title */}
+<title>{pageTitle}</title>
+
+{/* Basic Meta Tags */}
+<meta name="description" content={pageDescription} />
+<meta name="keywords" content={site.seo.keywords} />
+<meta name="author" content={site.seo.author} />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href={pageCanonical} />
+
+{/* Language and Location */}
+<meta name="language" content="English" />
+<meta name="geo.region" content="EE-37" />
+<meta name="geo.placename" content="Tallinn" />
+<meta name="geo.position" content="59.437;24.7536" />
+
+{/* Open Graph / Facebook */}
+<meta property="og:type" content={type} />
+<meta property="og:url" content={pageCanonical} />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={pageDescription} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:site_name" content={site.hero.name} />
+
+{/* Twitter Card */}
+<meta name="twitter:card" content={site.seo.twitterCard} />
+<meta name="twitter:url" content={pageCanonical} />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={pageDescription} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+{/* JSON-LD Structured Data */}
+<script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(profilePageSchema)} />
