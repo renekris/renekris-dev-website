@@ -1,12 +1,12 @@
 # Cloudflare Pages Deployment Runbook
 
-A complete guide for deploying the V2 website to production using Cloudflare Pages Git Integration.
+A complete guide for deploying the V2 website to production using GitHub Actions and Cloudflare Pages Direct Upload.
 
 ---
 
 ## Overview
 
-This runbook documents the exact steps to deploy `renekris-v2-website` to Cloudflare Pages. The primary deployment method is Git Integration, which provides automatic builds on every push with preview deployments for pull requests.
+This runbook documents the exact steps to deploy `renekris-v2-website` to Cloudflare Pages. The primary deployment method is GitHub Actions running `wrangler pages deploy` against the built `dist/` artifact.
 
 ---
 
@@ -14,16 +14,14 @@ This runbook documents the exact steps to deploy `renekris-v2-website` to Cloudf
 
 Use these exact values when configuring the Cloudflare Pages project:
 
-| Setting                    | Value                  |
-| -------------------------- | ---------------------- |
-| **Repository**             | `renekris/kodu-server` |
-| **Root directory**         | `renekris-v2-website`  |
-| **Build command**          | `bun run build`        |
-| **Build output directory** | `dist`                 |
-| **Framework preset**       | Astro                  |
-| **Production branch**      | `main`                 |
-| **Production domain**      | `renekris.dev`         |
-| **Preview domain**         | `staging.renekris.dev` |
+| Setting                | Value                  |
+| ---------------------- | ---------------------- |
+| **Pages project name** | `renekris-v2-website`  |
+| **Deploy artifact**    | `dist`                 |
+| **Production branch**  | `main`                 |
+| **Preview branch**     | `dev`                  |
+| **Production domain**  | `renekris.dev`         |
+| **Preview domain**     | `staging.renekris.dev` |
 
 ### Branch Strategy
 
@@ -51,41 +49,38 @@ Before initiating the first deployment, verify:
 
 ## Deployment Steps
 
-### Step 1: Connect Repository
+### Step 1: Create the Pages Project
 
 1. Navigate to [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Select your account and go to **Workers & Pages**
-3. Click **Create application** > **Pages** > **Connect to Git**
-4. Select **GitHub** as the Git provider
-5. Authorize Cloudflare to access the `renekris/kodu-server` repository
-6. Select the repository from the list
+3. Click **Create application** > **Pages**
+4. Create a Pages project named `renekris-v2-website`
 
-### Step 2: Configure Build Settings
+### Step 2: Add GitHub Secrets
 
-In the build configuration screen, enter:
+In GitHub repository settings, add:
 
-- **Project name**: `renekris-v2-website`
-- **Production branch**: `main`
-- **Framework preset**: Astro
-- **Build command**: `bun run build`
-- **Build output directory**: `dist`
-- **Root directory**: `renekris-v2-website` (leave blank if repo root is the project root)
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
 
-### Step 3: Environment Variables
+The API token must have **Cloudflare Pages: Edit** permission for the target account.
 
-No environment variables are required for this static Astro build. The site uses:
+### Step 3: Deploy from CI
 
-- Build-time constants from `src/content/site.ts`
-- Static assets from `public/`
-- No runtime secrets or API keys
-
-### Step 4: Deploy
-
-1. Click **Save and Deploy**
-2. Cloudflare will trigger the first build automatically
-3. Monitor the build logs for any errors
-4. Once complete, the site will be available at the preview URL
+1. Push to `main` or `dev`
+2. GitHub Actions will run lint, typecheck, build, dist validation, and E2E tests
+3. The `deploy-pages` job will upload the verified `dist/` artifact with `wrangler pages deploy`
+4. `main` deploys production and `dev` deploys preview
 5. Run `bun run validate:dist` locally before shipping changes to `_headers`, `robots.txt`, or inline schemas
+
+### Step 4: Do Not Use Workers Build Deploy for This Config
+
+This repository is configured for Cloudflare Pages deploys.
+
+- `wrangler pages deploy dist ...` ✅ supported
+- `wrangler deploy` ❌ wrong for the current `wrangler.jsonc`
+
+If Cloudflare is running `npx wrangler deploy`, it is treating this as a Workers project instead of a Pages project and will fail with "Missing entry-point to Worker script or to assets directory".
 
 ---
 
@@ -315,17 +310,20 @@ If headers are missing:
 
 ## Final Manual Action
 
-The only remaining manual step is to connect the repository in Cloudflare Dashboard and trigger the first deployment.
+The remaining manual setup is to create the Cloudflare Pages project once and add the GitHub repository secrets used by CI-driven deployments:
 
-Once this is complete, all future deployments to `main` will be automatic.
+- `CLOUDFLARE_API_TOKEN` — API token with **Cloudflare Pages: Edit** permission for the target account
+- `CLOUDFLARE_ACCOUNT_ID` — target Cloudflare account ID
+
+After that, pushes to `main` and `dev` will deploy automatically from GitHub Actions using `wrangler pages deploy`.
 
 ---
 
 ## Appendix: Wrangler CLI Fallback
 
-**Status: Non-primary / Admin-only fallback**
+**Status: Primary CI deployment path / Admin fallback**
 
-Use Wrangler CLI only when Git Integration is unavailable or for manual overrides.
+Wrangler Pages deploy is the primary automated deployment path for this repository. It can also be used manually for emergency overrides.
 
 ### Prerequisites
 
@@ -348,12 +346,24 @@ cd renekris-v2-website
 wrangler pages deploy dist --project-name=renekris-v2-website --branch=main
 ```
 
+### GitHub Actions Deployment
+
+The CI workflow in `.github/workflows/ci.yml` now deploys automatically after lint, typecheck, build, dist validation, and E2E tests pass.
+
+- `main` branch → production deployment
+- `dev` branch → preview deployment
+
+Required GitHub repository secrets:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
 ### When to Use Wrangler
 
 - Git Integration is temporarily unavailable
 - Deploying a hotfix branch directly to production
 - Bulk asset uploads that exceed Git limits
-- CI/CD pipeline integration (if not using native Git Integration)
+- CI/CD pipeline integration for automated deployments from GitHub Actions
 - Emergency rollbacks when Dashboard is inaccessible
 
 ### Wrangler Configuration
@@ -368,7 +378,7 @@ compatibility_date = "2025-03-24"
 command = "bun run build"
 ```
 
-**Warning**: Wrangler deployments bypass the Git Integration workflow. Changes deployed via Wrangler will be overwritten by the next Git push unless the Git Integration is paused.
+**Warning**: If Cloudflare Pages Git Integration is still enabled for the same project, it can race with or overwrite CI-driven Wrangler deployments. Use one primary deployment path per Pages project.
 
 ---
 

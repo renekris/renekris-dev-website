@@ -6,7 +6,8 @@ A modern Astro-based personal website built with React, Tailwind CSS, and TypeSc
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) 1.2+ (Node.js runtime is not required)
+- [Bun](https://bun.sh/) 1.2+
+- Node.js 22.12+
 - Git
 
 ## Setup
@@ -62,25 +63,27 @@ The dev server runs at `http://localhost:4321`.
 
 ## Deployment
 
-### Primary: Cloudflare Pages Git Integration
+### Primary: GitHub Actions → Cloudflare Pages
 
-This is the recommended deployment method.
+The repository CI now handles automatic deployments to Cloudflare Pages after checks pass.
 
-1. Connect your GitHub repository to Cloudflare Pages:
-   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) > Workers & Pages
-   - Click "Create application" > "Pages" > "Connect to Git"
-   - Select this repository
+Required GitHub repository secrets:
 
-2. Configure build settings:
-   - **Framework preset**: Astro
-   - **Build command**: `bun run build`
-   - **Build output directory**: `dist`
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
 
-3. Push to `main` branch to deploy automatically
+Deployment behavior:
 
-### Fallback: Wrangler CLI
+- Push to `main` → production deploy
+- Push to `dev` → preview deploy
 
-Use this for manual deployments or custom workflows.
+### Optional: Cloudflare Pages Git Integration
+
+You can still use native Cloudflare Git Integration if you want Cloudflare to build directly from the repository, but it is no longer required for automatic deploys.
+
+### Manual fallback: Wrangler CLI
+
+Use this for manual deployments or emergency overrides.
 
 ```bash
 # Install Wrangler globally
@@ -90,8 +93,10 @@ bun add -g wrangler
 wrangler login
 
 # Deploy manually
-wrangler pages deploy dist
+wrangler pages deploy dist --project-name=renekris-v2-website --branch=main
 ```
+
+Do not use `wrangler deploy` with the current config. This repo is configured for Cloudflare Pages deploys, not direct Workers static-asset deploys.
 
 ## CI/CD
 
@@ -102,6 +107,7 @@ GitHub Actions runs on every push and pull request:
 3. Run type checking
 4. Build the project
 5. Run Playwright E2E tests
+6. Deploy to Cloudflare Pages on pushes to `main` and `dev`
 
 See `.github/workflows/ci.yml` for the full configuration.
 
