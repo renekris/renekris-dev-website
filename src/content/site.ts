@@ -41,7 +41,7 @@ export interface SEOContent {
   /** Canonical URL for this page */
   readonly canonical: string
   /** Open Graph image path (relative or absolute URL) */
-  readonly ogImage: string
+  readonly ogImage: string | null
   /** Twitter card type */
   readonly twitterCard: 'summary' | 'summary_large_image' | 'app' | 'player'
   /** Site author name */
@@ -141,8 +141,8 @@ export const site: SiteContent = {
     keywords:
       'Rene Kristofer Pohlak, IT professional, JavaScript developer, Python developer, C# developer, React developer, Node.js, web development, API development, server management, Tallinn, Estonia, The Odin Project, IT infrastructure, virtualization, SMIT',
     canonical: 'https://renekris.dev',
-    ogImage: '/og/og-image.png',
-    twitterCard: 'summary_large_image',
+    ogImage: null,
+    twitterCard: 'summary',
     author: 'Rene Kristofer Pohlak',
     language: 'en',
   },
@@ -154,7 +154,7 @@ export const site: SiteContent = {
   },
 
   footer: {
-    sourceUrl: 'https://github.com/renekris/kodu-server/tree/main/renekris-v2-website',
+    sourceUrl: 'https://github.com/renekris/renekris-dev-website',
     copyright: `© ${currentYear} renekris.dev`,
     builtWithText: 'Built with Astro, React & Tailwind CSS',
   },

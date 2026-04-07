@@ -26,9 +26,11 @@ const pageCanonical = canonical || site.seo.canonical;
 
 // Build absolute URLs
 const siteUrl = site.seo.canonical;
-const ogImageUrl = site.seo.ogImage.startsWith('http')
-  ? site.seo.ogImage
-  : `${siteUrl}${site.seo.ogImage}`;
+const ogImageUrl = site.seo.ogImage
+  ? site.seo.ogImage.startsWith('http')
+    ? site.seo.ogImage
+    : `${siteUrl}${site.seo.ogImage}`
+  : null;
 
 // Generate JSON-LD structured data
 const personSchema = {
@@ -106,7 +108,7 @@ const profilePageSchema = {
 <meta property="og:url" content={pageCanonical} />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={pageDescription} />
-<meta property="og:image" content={ogImageUrl} />
+{ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
 <meta property="og:site_name" content={site.hero.name} />
 
 {/* Twitter Card */}
@@ -114,7 +116,7 @@ const profilePageSchema = {
 <meta name="twitter:url" content={pageCanonical} />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={pageDescription} />
-<meta name="twitter:image" content={ogImageUrl} />
+{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
 
 {/* JSON-LD Structured Data */}
 <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
