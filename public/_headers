@@ -6,7 +6,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   # CSP with SHA-256 hashes for inline JSON-LD scripts only
   # Hashes must match dist/index.html after build validation
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-+PCa47LcyZhz4k68p0KVJ/zhCh1rjOElcFQjWAsEBpE=' 'sha256-pdNHk0PEofUCc+rW9E9FOgD+S06VT8xN21RyYTu1X5o=' 'sha256-iM0+L2j7VKzjWXQL7uwRQWG0WNEoQjrnq9pf6ia6OsU='; style-src 'self'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none'; upgrade-insecure-requests; object-src 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-CAVFY/fCDlyeCpHs6ZvBmehGUUweCjrWSwW8/aM09LM=' 'sha256-J7N1CxMdkg9X4G79v6fY/m9pHS0C6ZmFXmiOFJ2HjAA=' 'sha256-jVNCQU78lulr82+RYhTJOjKpUQALY83jX6dA+tHusbk='; style-src 'self'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none'; upgrade-insecure-requests; object-src 'none'; base-uri 'self'; form-action 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
 # Astro build output - immutable hashed assets
@@ -15,9 +15,6 @@
 
 # Static assets with content hashes
 /resume/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/og/*
   Cache-Control: public, max-age=31536000, immutable
 
 /favicon.svg

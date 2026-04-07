@@ -120,26 +120,26 @@ export interface SiteContent {
 export const site: SiteContent = {
   hero: {
     name: 'Rene Kristofer Pohlak',
-    role: 'Developer & Infrastructure Engineer',
+    role: 'AI-focused Full-stack Developer',
     tagline:
-      'Building modern web applications and managing IT infrastructure with a focus on reliability and performance.',
+      'Building production AI features across TypeScript and Python, from RAG pipelines and vector-database retrieval to backend systems, automation, and observability.',
     location: 'Tallinn, Estonia',
-    techStack: ['JavaScript', 'Python', 'C#', 'React', 'Node.js'],
+    techStack: ['TypeScript', 'Python', 'RAG', 'Vector DBs', 'n8n'],
   },
 
   contact: {
     email: 'renekrispohlak@gmail.com',
     linkedin: 'https://www.linkedin.com/in/rene-kristofer-pohlak-668832114/',
     github: 'https://github.com/renekris',
-    availabilityText: 'Open to remote & hybrid opportunities',
+    availabilityText: 'Open to AI-focused remote & hybrid opportunities',
   },
 
   seo: {
-    title: 'Rene Kristofer Pohlak - IT Professional | JavaScript, Python, C# Developer',
+    title: 'Rene Kristofer Pohlak - AI-focused Full-stack Developer',
     description:
-      'Self-motivated IT professional with experience in web development (JavaScript, React, Node.js), programming (C#, Python), API development, server management, and IT infrastructure. Completed The Odin Project. Based in Tallinn, Estonia.',
+      'AI-focused full-stack developer building production systems with TypeScript and Python, including RAG workflows, vector databases, automation, APIs, and observability.',
     keywords:
-      'Rene Kristofer Pohlak, IT professional, JavaScript developer, Python developer, C# developer, React developer, Node.js, web development, API development, server management, Tallinn, Estonia, The Odin Project, IT infrastructure, virtualization, SMIT',
+      'Rene Kristofer Pohlak, AI full-stack developer, TypeScript developer, Python developer, RAG, vector databases, LLM pipelines, workflow automation, API development, n8n, PostgreSQL, observability, Tallinn, Estonia, Amperly',
     canonical: 'https://renekris.dev',
     ogImage: null,
     twitterCard: 'summary',
@@ -173,9 +173,9 @@ export const site: SiteContent = {
   },
 
   structuredData: {
-    jobTitles: ['IT Professional', 'Full-Stack Developer & DevOps Engineer'],
+    jobTitles: ['AI-focused Full-Stack Developer', 'Full-Stack Developer', 'Python Developer'],
     employer: {
-      name: 'Siseministeeriumi infotehnoloogia- ja arenduskeskus (SMIT)',
+      name: 'Amperly',
     },
     education: ['Tallinna Tööstushariduskeskus', 'The Odin Project'],
     languages: [
@@ -184,20 +184,22 @@ export const site: SiteContent = {
       { name: 'Japanese', code: 'ja' },
     ],
     skills: [
-      'JavaScript',
+      'TypeScript',
       'Python',
-      'C#',
-      'React',
-      'Node.js',
-      'SQL',
-      'HTML',
-      'CSS',
-      'Web Development',
+      'RAG',
+      'Vector Databases',
+      'LLM Pipelines',
+      'Workflow Automation',
       'API Development',
-      'Server Management',
-      'IT Infrastructure',
-      'Virtualization',
-      'Networking',
+      'Backend Systems',
+      'n8n',
+      'Langfuse',
+      'PostgreSQL',
+      'Docker',
+      'Proxmox',
+      'CI/CD',
+      'Observability',
+      'SQL',
       'Jira',
     ],
   },
