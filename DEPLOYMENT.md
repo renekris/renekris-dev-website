@@ -42,10 +42,9 @@ Before initiating the first deployment, verify:
 1. All implementation tasks (1-11) are complete
 2. CI pipeline passes on `main` branch
 3. Resume PDF exists at `public/resume/rene-kristofer-pohlak-cv.pdf`
-4. OG image exists at `public/og/og-image.png`
-5. Security headers are configured in `public/_headers`
-6. `astro.config.mjs` has `site: 'https://renekris.dev'`
-7. Domain `renekris.dev` is configured in Cloudflare DNS
+4. Security headers are configured in `public/_headers`
+5. `astro.config.mjs` has `site: 'https://renekris.dev'`
+6. Domain `renekris.dev` is configured in Cloudflare DNS
 
 ---
 
@@ -136,8 +135,8 @@ After the first deployment, verify each item before proceeding to production:
 - [ ] Page title is: "Rene Kristofer Pohlak - IT Professional | JavaScript, Python, C# Developer"
 - [ ] Meta description contains: "Self-motivated IT professional with experience in web development"
 - [ ] Canonical URL is: `https://renekris.dev`
-- [ ] OG image URL is: `/og/og-image.png`
-- [ ] Twitter card type is: `summary_large_image`
+- [ ] No stale `og:image` metadata points at removed assets
+- [ ] Twitter card type is: `summary`
 - [ ] Author meta tag is: "Rene Kristofer Pohlak"
 - [ ] Keywords meta includes: "Rene Kristofer Pohlak, IT professional, JavaScript developer"
 - [ ] JSON-LD structured data is present in page source
@@ -155,7 +154,7 @@ Verify all headers are present using browser DevTools or `curl -I`:
 - [ ] `Content-Security-Policy` is present and valid
 - [ ] `Strict-Transport-Security` (HSTS) with 1-year max-age
 - [ ] `/robots.txt` and `/sitemap*.xml` have 1-hour cache
-- [ ] `/_astro/*`, `/resume/*`, `/og/*` have 1-year immutable cache
+- [ ] `/_astro/*` and `/resume/*` have 1-year immutable cache
 
 ### Mobile Responsiveness
 
