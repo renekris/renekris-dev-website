@@ -1,0 +1,110 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{fontawesome}
+\usepackage{tikz}
+
+% Setting page geometry
+\geometry{margin=0.75in}
+\renewcommand{\familydefault}{\sfdefault}
+\definecolor{headerblue}{RGB}{0, 102, 204}
+
+% Customizing section headers and bullets
+\titleformat{\section}{\large\bfseries\color{headerblue}}{}{0em}{}[\titlerule]
+\setlist[itemize]{leftmargin=*, itemsep=0pt, parsep=0pt,
+                 label=\textcolor{headerblue}{\textbullet}}
+
+% Removing page numbers
+\pagestyle{empty}
+
+\begin{document}
+
+% Header with framed photo and contact info
+\begin{minipage}[c]{0.2\textwidth}
+    \begin{center}
+        \begin{tikzpicture}
+            % Draw the frame
+            \draw[rounded corners=1.75cm, line width=3.5pt, headerblue!80!black] (0,0) rectangle (3.5cm, 3.5cm);
+            % Clip and draw the image
+            \begin{scope}
+                \clip[rounded corners=1.75cm] (0,0) rectangle (3.5cm, 3.5cm);
+                \node at (1.75cm, 1.75cm) {\includegraphics[width=3.5cm, height=3.5cm]{profile_picture.jpg}};
+            \end{scope}
+        \end{tikzpicture}
+    \end{center}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.75\textwidth}
+    \vspace*{0.3in}
+    \begin{center}
+        \textbf{\Large Rene Kristofer Pohlak} \\
+        \vspace{0.1in}
+        \small \textcolor{headerblue}{\faPhone} +372 5865 1019 \quad 
+               \textcolor{headerblue}{\faEnvelope} renekrispohlak@gmail.com \\
+        \small \textcolor{headerblue}{\faLinkedin} 
+               \href{https://www.linkedin.com/in/rene-kristofer-pohlak-668832114/}
+                    {linkedin.com/in/rene-kristofer-pohlak-668832114} \\
+        \small \textcolor{headerblue}{\faGithub} 
+               \href{https://github.com/renekris}{github.com/renekris} \quad
+               \textcolor{headerblue}{\faLink} 
+               \href{https://renekris.dev}{renekris.dev} \\
+        \small \textcolor{headerblue}{\faMapMarker} Tallinn, Estonia
+    \end{center}
+    \vspace*{0.1in}
+\end{minipage}
+
+\vspace{0.1in}
+
+% Summary section
+\section{\faFileText\quad Summary}
+AI-focused full-stack developer building production features across TypeScript and Python. Experience includes RAG workflows, vector databases, structured LLM pipelines, backend systems, automation, and API integrations, backed by hands-on infrastructure work with Proxmox, Docker, CI/CD, and service monitoring.
+
+% Work experience section
+\section{\faBriefcase\quad Work Experience}
+\textbf{Full-stack Developer}, Amperly, Estonia \hfill \textit{Jan 2026 -- Mar 2026}
+\begin{itemize}
+    \item Built and shipped AI-powered full-stack features across TypeScript and Python, including RAG workflows, vector-database retrieval, and structured LLM pipelines.
+    \item Developed backend services and automation that connected AI workflows with APIs, data processing, and production-facing application logic.
+    \item Improved reliability of LLM-powered systems by adding observability and evaluation around AI workflows and supporting backend services.
+\end{itemize}
+\textbf{Technician Intern}, Siseministeeriumi infotehnoloogia- ja arenduskeskus (SMIT), Estonia
+\begin{itemize}
+    \item Managed technical support tickets in Jira and gained experience with IT operations and organizational workflows.
+\end{itemize}
+
+% Education section
+\section{\faGraduationCap\quad Education}
+\textbf{Tallinna Tööstushariduskeskus}, Estonia
+\begin{itemize}
+    \item Industrial Informatics, EQF Level 4 (Junior IT Systems Specialist)
+\end{itemize}
+\textbf{The Odin Project}, Online
+\begin{itemize}
+    \item JavaScript curriculum with multiple full-stack projects
+\end{itemize}
+
+% Technical skills section
+\section{\faCode\quad Technical Skills}
+\begin{itemize}
+    \item \textbf{AI \& Retrieval:} RAG workflows, vector databases, structured LLM pipelines, prompt design, AI observability
+    \item \textbf{Full-stack:} TypeScript, React, Node.js, Python, API design, backend systems, workflow automation
+    \item \textbf{Infrastructure:} Docker, Proxmox, CI/CD, PostgreSQL, SQL, monitoring
+    \item \textbf{Tools:} Git, Jira, Langfuse, n8n, C\#
+\end{itemize}
+
+% Languages section
+\section{\faGlobe\quad Languages}
+\begin{itemize}
+    \item Estonian: Native
+    \item English: Proficient
+    \item Japanese: Upper-Intermediate
+\end{itemize}
+
+\end{document}

@@ -24,3 +24,12 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# LaTeX CV outputs
+cv/*.aux
+cv/*.fdb_latexmk
+cv/*.fls
+cv/*.log
+cv/*.out
+cv/*.pdf
+cv/*.synctex.gz
